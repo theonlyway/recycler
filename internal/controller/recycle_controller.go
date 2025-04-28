@@ -50,7 +50,7 @@ type RecycleReconciler struct {
 // +kubebuilder:rbac:groups=recycler.k8s.io,resources=recycles/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -76,7 +76,7 @@ func (r *RecycleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if recycle.Status.Conditions == nil || len(recycle.Status.Conditions) == 0 {
+	if len(recycle.Status.Conditions) == 0 {
 		meta.SetStatusCondition(&recycle.Status.Conditions, metav1.Condition{Type: typeHealthyCondition, Status: metav1.ConditionUnknown, Reason: "Reconciling", Message: "Starting reconciliation"})
 		if err = r.Status().Update(ctx, recycle); err != nil {
 			log.Error(err, "unable to update Recycle status")
