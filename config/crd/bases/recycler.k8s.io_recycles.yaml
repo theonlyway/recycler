@@ -1,0 +1,80 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.1
+  name: recycles.recycler.k8s.io
+spec:
+  group: recycler.k8s.io
+  names:
+    kind: Recycle
+    listKind: RecycleList
+    plural: recycles
+    singular: recycle
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Recycle is the Schema for the recycles API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RecycleSpec defines the desired state of Recycle
+            properties:
+              averageCpuUtilizationPercent:
+                description: Average CPU utilization percent of the target resource
+                format: int32
+                type: integer
+              durationThresholdSeconds:
+                description: Duration in seconds to wait before recycling
+                format: int32
+                type: integer
+              scaleTargetRef:
+                description: ScaleTargetRef from autoscalingv2 used by the horzontal
+                  pod autoscaler for consistency
+                properties:
+                  apiVersion:
+                    default: apps/v1
+                    description: apiVersion is the API version of the referent
+                    type: string
+                  kind:
+                    default: Deployment
+                    description: 'kind is the kind of the referent; More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                    type: string
+                  name:
+                    description: 'name is the name of the referent; More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - averageCpuUtilizationPercent
+            - durationThresholdSeconds
+            - scaleTargetRef
+            type: object
+          status:
+            description: RecycleStatus defines the observed state of Recycle
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

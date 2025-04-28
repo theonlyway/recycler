@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - recycler.k8s.io
+  resources:
+  - recycles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - recycler.k8s.io
+  resources:
+  - recycles/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - recycler.k8s.io
+  resources:
+  - recycles/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,27 @@
+# permissions for end users to edit recycles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: recycler
+    app.kubernetes.io/managed-by: kustomize
+  name: recycle-editor-role
+rules:
+- apiGroups:
+  - recycler.k8s.io
+  resources:
+  - recycles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - recycler.k8s.io
+  resources:
+  - recycles/status
+  verbs:
+  - get
