@@ -21,7 +21,7 @@ jobs:
     - name: Install Operator SDK
       uses: shivanshs9/setup-k8s-operator-sdk@v1
       with:
-        version: '^1.39.0'
+        version: '^v1.39.0'
 
     - name: Build Docker image
       run: docker build -t your-dockerhub-username/operator-sdk-image .
