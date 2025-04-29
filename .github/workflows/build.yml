@@ -19,15 +19,7 @@ jobs:
         go-version: '1.24'
 
     - name: Install Operator SDK
-      uses: shivanshs9/setup-k8s-operator-sdk@v1
-      with:
-        version: '^v1.39.0'
+      run: make operator-sdk
 
-    - name: Build Docker image
-      run: docker build -t your-dockerhub-username/operator-sdk-image .
-
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-    - name: Push Docker image
-      run: docker push your-dockerhub-username/operator-sdk-image
+    - name: Build Operator
+      run: make build-dockerx
