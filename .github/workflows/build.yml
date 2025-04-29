@@ -28,6 +28,7 @@ jobs:
       with:
         token: ${{ github.token }}
         branch: ${{ github.head_ref || github.ref_name }}
+        patchAll: true
 
     - name: Update CHANGELOG
       id: changelog
