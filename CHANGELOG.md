@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.0.7] - 2025-04-29
+### :bug: Bug Fixes
+- [`d3c9bd2`](https://github.com/theonlyway/recycler/commit/d3c9bd2af11498cf363d4e32fc372bee522bc08b) - Create dependabot.yml *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [v0.0.6] - 2025-04-29
 ### :bug: Bug Fixes
 - [`f008f1b`](https://github.com/theonlyway/recycler/commit/f008f1bc3ff5d614731ec4c701740b0976149e23) - fixed img name *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -35,3 +40,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.0.4]: https://github.com/theonlyway/recycler/compare/v0.0.3...v0.0.4
 [v0.0.5]: https://github.com/theonlyway/recycler/compare/v0.0.4...v0.0.5
 [v0.0.6]: https://github.com/theonlyway/recycler/compare/v0.0.5...v0.0.6
+[v0.0.7]: https://github.com/theonlyway/recycler/compare/v0.0.6...v0.0.7
