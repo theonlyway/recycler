@@ -106,6 +106,7 @@ func (r *RecycleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}
 
+	log.Info("Ending reconciliation")
 	return ctrl.Result{}, nil
 }
 
