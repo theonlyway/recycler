@@ -33,6 +33,7 @@ jobs:
       with:
         token: ${{ github.token }}
         branch: main
+        fallbackTag: 0.0.1
 
     - name: Build Operator
       run: make docker-build IMG=recycler/controller:${{ steps.semver.outputs.version }}
