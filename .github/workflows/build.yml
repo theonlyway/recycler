@@ -4,8 +4,10 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - v[0-9]+.[0-9]+.[0-9]+
-
+      - "v*"
+  release:
+    types: [published]
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +15,13 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Get Next Version
+      id: semver
+      uses: ietf-tools/semver-action@v1
+      with:
+        token: ${{ github.token }}
+        branch: main
 
     - name: Update CHANGELOG
       id: changelog
@@ -28,6 +37,16 @@ jobs:
         commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
         file_pattern: CHANGELOG.md
 
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        draft: false
+        makeLatest: true
+        name: ${{ steps.semver.outputs.next }}
+        body: Changelog Contents
+        token: ${{ github.token }}
+
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
@@ -42,23 +61,5 @@ jobs:
         username: ${{ vars.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Get Next Version
-      id: semver
-      uses: ietf-tools/semver-action@v1
-      with:
-        token: ${{ github.token }}
-        branch: main
-        fallbackTag: 0.0.1
-
     - name: Build Operator
       run: make docker-build IMG=recycler/controller:${{ steps.semver.outputs.version }} VERSION=${{ steps.semver.outputs.version }}
-
-    - name: Create Release
-      uses: ncipollo/release-action@v1
-      with:
-        allowUpdates: true
-        draft: false
-        makeLatest: true
-        name: ${{ steps.semver.outputs.next }}
-        body: Changelog Contents
-        token: ${{ github.token }}
