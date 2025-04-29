@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.0.5] - 2025-04-29
+### :bug: Bug Fixes
+- [`71bf517`](https://github.com/theonlyway/recycler/commit/71bf5177a158f4617d18641c3bada9b126f084c0) - added docker push *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.0.4] - 2025-04-29
 ### :bug: Bug Fixes
 - [`cce6234`](https://github.com/theonlyway/recycler/commit/cce6234f3d37f97a338a5e97b75e30901edca9af) - updated workflow *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -23,3 +28,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v0.0.3]: https://github.com/theonlyway/recycler/compare/v0.0.2...v0.0.3
 [v0.0.4]: https://github.com/theonlyway/recycler/compare/v0.0.3...v0.0.4
+[v0.0.5]: https://github.com/theonlyway/recycler/compare/v0.0.4...v0.0.5
