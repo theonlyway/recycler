@@ -1,4 +1,4 @@
-name: Build and Push Operator SDK Image
+name: Build and Push Recycler Operator image
 
 on:
   push:
