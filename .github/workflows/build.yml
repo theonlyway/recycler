@@ -14,6 +14,9 @@ jobs:
   tag:
     runs-on: ubuntu-latest
 
+    outputs:
+      next_version: ${{ steps.semver.outputs.nextStrict }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -30,7 +33,7 @@ jobs:
       uses: requarks/changelog-action@v1
       with:
         token: ${{ github.token }}
-        tag: ${{ github.ref_name }}
+        tag: ${{ steps.semver.outputs.current }}
 
     - name: Create Release
       uses: ncipollo/release-action@v1
