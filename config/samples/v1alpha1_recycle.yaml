@@ -1,4 +1,4 @@
-apiVersion: recycler.k8s.io/v1alpha1
+apiVersion: recycler.theonlywaye.com/v1alpha1
 kind: Recycle
 metadata:
   labels:

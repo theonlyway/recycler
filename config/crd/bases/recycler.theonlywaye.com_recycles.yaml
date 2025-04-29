@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.1
-  name: recycles.recycler.k8s.io
+  name: recycles.recycler.theonlywaye.com
 spec:
-  group: recycler.k8s.io
+  group: recycler.theonlywaye.com
   names:
     kind: Recycle
     listKind: RecycleList

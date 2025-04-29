@@ -8,7 +8,7 @@ metadata:
   name: recycle-viewer-role
 rules:
 - apiGroups:
-  - recycler.k8s.io
+  - recycler.theonlywaye.com
   resources:
   - recycles
   verbs:
@@ -16,7 +16,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - recycler.k8s.io
+  - recycler.theonlywaye.com
   resources:
   - recycles/status
   verbs:

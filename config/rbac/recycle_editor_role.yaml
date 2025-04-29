@@ -8,7 +8,7 @@ metadata:
   name: recycle-editor-role
 rules:
 - apiGroups:
-  - recycler.k8s.io
+  - recycler.theonlywaye.com
   resources:
   - recycles
   verbs:
@@ -20,7 +20,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - recycler.k8s.io
+  - recycler.theonlywaye.com
   resources:
   - recycles/status
   verbs:

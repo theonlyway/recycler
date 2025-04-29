@@ -1,6 +1,6 @@
 module github.com/theonlyway/recycler
 
-go 1.24.0
+go 1.22.0
 
 require (
 	github.com/onsi/ginkgo/v2 v2.19.0

@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	recyclerk8siov1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
+	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
 
 var _ = Describe("Recycle Controller", func() {
@@ -40,13 +40,13 @@ var _ = Describe("Recycle Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		recycle := &recyclerk8siov1alpha1.Recycle{}
+		recycle := &recyclertheonlywayecomv1alpha1.Recycle{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Recycle")
 			err := k8sClient.Get(ctx, typeNamespacedName, recycle)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &recyclerk8siov1alpha1.Recycle{
+				resource := &recyclertheonlywayecomv1alpha1.Recycle{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
@@ -59,7 +59,7 @@ var _ = Describe("Recycle Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &recyclerk8siov1alpha1.Recycle{}
+			resource := &recyclertheonlywayecomv1alpha1.Recycle{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
