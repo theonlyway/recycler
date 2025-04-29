@@ -77,4 +77,4 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Operator
-      run: make docker-build IMG=recycler/controller:${{ needs.tag.outputs.next_version }} VERSION=${{ needs.tag.outputs.next_version }}
+      run: make docker-build docker-push IMG=theonlywaye/recycler/controller:${{ needs.tag.outputs.next_version }} VERSION=${{ needs.tag.outputs.next_version }}
