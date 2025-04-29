@@ -57,6 +57,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
@@ -72,4 +75,4 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Operator
-      run: make docker-build IMG=recycler/controller:${{ steps.semver.outputs.version }} VERSION=${{ steps.semver.outputs.version }}
+      run: make docker-build IMG=recycler/controller:${{ needs.tag.outputs.next_version }} VERSION=${{ needs.tag.outputs.next_version }}
