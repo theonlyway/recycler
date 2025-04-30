@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.1] - 2025-04-30
+### :bug: Bug Fixes
+- [`941ed50`](https://github.com/theonlyway/recycler/commit/941ed50e36673c528b9729fd62195b16ee0dd420) - fixed mod deps *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`ed8a975`](https://github.com/theonlyway/recycler/commit/ed8a97548ae008334af5f64dd156fcaa4ab2a6f1) - working on monitor controller *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.1.0] - 2025-04-30
 ### :sparkles: New Features
 - [`8398c7e`](https://github.com/theonlyway/recycler/commit/8398c7e086aaa99b1246174864c4da873305e44d) - reworking controller *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -71,3 +77,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.0.9]: https://github.com/theonlyway/recycler/compare/v0.0.8...v0.0.9
 [v0.0.10]: https://github.com/theonlyway/recycler/compare/v0.0.9...v0.0.10
 [v0.1.0]: https://github.com/theonlyway/recycler/compare/v0.0.10...v0.1.0
+[v0.1.1]: https://github.com/theonlyway/recycler/compare/v0.1.0...v0.1.1
