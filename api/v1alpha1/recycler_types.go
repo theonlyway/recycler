@@ -48,10 +48,6 @@ type RecyclerSpec struct {
 	ScaleTargetRef CrossVersionObjectReference `json:"scaleTargetRef"`
 	// Average CPU utilization percent of the target resource
 	AverageCpuUtilizationPercent int32 `json:"averageCpuUtilizationPercent"`
-	// AverageCpuUtilizationLookbackSeconds specifies the window of time to look back for metrics to calculate the average CPU utilization. Defaults to 300 seconds.
-	//+default=300
-	//+optional
-	AverageCpuUtilizationLookbackSeconds int32 `json:"averageCpuUtilizationLookbackSeconds"`
 	// Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold
 	//+default=300
 	RecycleDelaySeconds int32 `json:"recycleDelaySeconds"`
