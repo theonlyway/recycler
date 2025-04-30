@@ -34,8 +34,8 @@ import (
 
 const recyclerFinalizer = "recycler.k8s.io/recycler"
 const (
-	typeHealthyCondition   = "Healthy"
-	typeUnhealthyCondition = "Unhealthy"
+	typeHealthyCondition   = "Available"
+	typeUnhealthyCondition = "Unavailable"
 )
 
 // RecycleReconciler reconciles a Recycle object
@@ -49,7 +49,7 @@ type RecycleReconciler struct {
 // +kubebuilder:rbac:groups=recycler.k8s.io,resources=recycles/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=recycler.k8s.io,resources=recycles/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
