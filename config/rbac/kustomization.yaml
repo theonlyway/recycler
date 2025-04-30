@@ -24,6 +24,3 @@ resources:
 # if you do not want those helpers be installed with your Project.
 - recycler_editor_role.yaml
 - recycler_viewer_role.yaml
-- recycle_editor_role.yaml
-- recycle_viewer_role.yaml
-
