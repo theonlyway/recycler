@@ -18,12 +18,20 @@ package controller
 
 import (
 	"context"
+	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
+	metricsv1beta1 "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
 
 // MonitorReconciler reconciles a Monitor object
@@ -33,9 +41,19 @@ type MonitorReconciler struct {
 	Recoder record.EventRecorder
 }
 
+// PodCPUUsage represents the CPU usage of a pod
+type PodCPUUsage struct {
+	PodName       string
+	CPUUsage      resource.Quantity // Raw CPU usage
+	CPULimit      resource.Quantity // CPU limit
+	CPUPercentage float64           // Percentage CPU utilization
+}
+
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors/finalizers,verbs=update
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -47,16 +65,115 @@ type MonitorReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
 func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// Fetch the Recycler instance
+	recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
+	if err := r.Get(ctx, req.NamespacedName, recycler); err != nil {
+		// Handle not found or other errors
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	return ctrl.Result{}, nil
+	// Fetch the resource type using ScaleTargetRef
+	switch kind := recycler.Spec.ScaleTargetRef.Kind; kind {
+	case "Deployment":
+		// Fetch the target deployment using ScaleTargetRef
+		deployment := &appsv1.Deployment{}
+		log.Info("Retrieving pods in target deployment", "deployment", deployment.Name)
+		deploymentKey := client.ObjectKey{
+			Namespace: recycler.Namespace,
+			Name:      recycler.Spec.ScaleTargetRef.Name,
+		}
+		if err := r.Get(ctx, deploymentKey, deployment); err != nil {
+			log.Error(err, "Failed to fetch target deployment", "deployment", deploymentKey)
+			return ctrl.Result{}, err
+		}
+		// Fetch the pods in the deployment
+		podList := &corev1.PodList{}
+		listOptions := []client.ListOption{
+			client.InNamespace(deployment.Namespace),
+			client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+		}
+		if err := r.List(ctx, podList, listOptions...); err != nil {
+			log.Error(err, "Failed to list pods in target deployment", "deployment", deploymentKey)
+			return ctrl.Result{}, err
+		}
+		// Fetch the metrics for the pods in the deployment
+		podMetricsList, err := fetchPodMetrics(ctx, r.Client, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template)
+		if err != nil {
+			log.Error(err, "Failed to fetch metrics for pods in target deployment", "deployment", deploymentKey)
+			return ctrl.Result{}, err
+		}
+
+		// Log the CPU utilization for each pod
+		for _, podCPU := range podMetricsList {
+			log.Info("Pod CPU utilization", "pod", podCPU.PodName, "cpu_utilization", podCPU.CPUUsage.String()+"%")
+		}
+		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+	default:
+		log.Info("Unsupported resource type", "kind", kind)
+	}
+
+	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+}
+
+func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec) ([]PodCPUUsage, error) {
+	// Create a label selector from the provided labels
+	selector := labels.SelectorFromSet(labelSelector)
+
+	// Fetch the pod metrics using the Kubernetes Metrics API
+	podMetricsList := &metricsv1beta1.PodMetricsList{}
+	listOptions := []client.ListOption{
+		client.InNamespace(namespace),
+		client.MatchingLabelsSelector{Selector: selector},
+	}
+	if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
+		return nil, err
+	}
+
+	// Process the metrics and calculate CPU utilization for each pod
+	var podCPUUsages []PodCPUUsage
+	for _, podMetrics := range podMetricsList.Items {
+		// Sum the CPU usage across all containers in the pod
+		totalCPUUsage := resource.Quantity{}
+		for _, container := range podMetrics.Containers {
+			totalCPUUsage.Add(container.Usage[corev1.ResourceCPU])
+		}
+
+		// Get the CPU limit from the pod template
+		totalCPULimit := resource.Quantity{}
+		for _, container := range podTemplate.Spec.Containers {
+			if container.Resources.Limits != nil {
+				totalCPULimit.Add(container.Resources.Limits[corev1.ResourceCPU])
+			}
+		}
+
+		// Calculate the percentage CPU utilization
+		var cpuUtilization float64
+		if totalCPULimit.MilliValue() > 0 {
+			cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
+		} else {
+
+			cpuUtilization = 0 // No CPU limit defined
+		}
+
+		// Append the pod's CPU utilization to the result list
+		podCPUUsages = append(podCPUUsages, PodCPUUsage{
+			PodName:       podMetrics.Name,
+			CPUUsage:      totalCPUUsage,
+			CPULimit:      totalCPULimit,
+			CPUPercentage: cpuUtilization,
+		})
+	}
+
+	return podCPUUsages, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
 	return ctrl.NewControllerManagedBy(mgr).
+		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
 		// Uncomment the following line adding a pointer to an instance of the controlled resource as an argument
 		// For().
 		Complete(r)
