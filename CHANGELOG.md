@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.3] - 2025-04-30
+### :bug: Bug Fixes
+- [`e7dc9c7`](https://github.com/theonlyway/recycler/commit/e7dc9c7aa5a3e5122e90ba17c6dace505543afe0) - fixed loggin for metrics function *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`750f79f`](https://github.com/theonlyway/recycler/commit/750f79f49ad84df773bba3ab08792f7ec4fd2cda) - updated package versions *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`cf380c5`](https://github.com/theonlyway/recycler/commit/cf380c5a142266a950459a49bc03f8840eac8a24) - removed the recycle entries *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`d0cbd73`](https://github.com/theonlyway/recycler/commit/d0cbd731101c60cda0dc7e9d5a8693e3389e5eb2) - removed recycle samples *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`0eeb979`](https://github.com/theonlyway/recycler/commit/0eeb9792feb0bc4546e3bde47cb250207ee95eed) - fixed image tag *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [v0.1.2] - 2025-04-30
 ### :bug: Bug Fixes
 - [`1de5e2c`](https://github.com/theonlyway/recycler/commit/1de5e2c9a31db2ad6473deb514adee67f3b76272) - removed type *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -84,3 +93,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.0]: https://github.com/theonlyway/recycler/compare/v0.0.10...v0.1.0
 [v0.1.1]: https://github.com/theonlyway/recycler/compare/v0.1.0...v0.1.1
 [v0.1.2]: https://github.com/theonlyway/recycler/compare/v0.1.1...v0.1.2
+[v0.1.3]: https://github.com/theonlyway/recycler/compare/v0.1.2...v0.1.3
