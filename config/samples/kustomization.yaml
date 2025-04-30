@@ -1,7 +1,5 @@
 ## Append samples of your project ##
 resources:
-- v1alpha1_recycle.yaml
-- _v1alpha1_recycle.yaml
 - _v1alpha1_monitor.yaml
 - v1alpha1_recycler.yaml
 - _v1alpha1_recycler.yaml
