@@ -1,35 +1,23 @@
----
+# permissions for end users to view recyclers.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: manager-role
+  labels:
+    app.kubernetes.io/name: recycler
+    app.kubernetes.io/managed-by: kustomize
+  name: recycler-viewer-role
 rules:
 - apiGroups:
   - recycler.theonlywaye.com
   resources:
-  - monitors
   - recyclers
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - recycler.theonlywaye.com
   resources:
-  - monitors/finalizers
-  - recyclers/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - recycler.theonlywaye.com
-  resources:
-  - monitors/status
   - recyclers/status
   verbs:
   - get
-  - patch
-  - update

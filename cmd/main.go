@@ -144,11 +144,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.RecycleReconciler{
+	if err = (&controller.RecyclerReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Recycle")
+		setupLog.Error(err, "unable to create controller", "controller", "Recycler")
+		os.Exit(1)
+	}
+	if err = (&controller.MonitorReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Monitor")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

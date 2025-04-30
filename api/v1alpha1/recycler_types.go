@@ -39,8 +39,8 @@ type CrossVersionObjectReference struct {
 	APIVersion string `json:"apiVersion,omitempty" protobuf:"bytes,3,opt,name=apiVersion"`
 }
 
-// RecycleSpec defines the desired state of Recycle
-type RecycleSpec struct {
+// RecyclerSpec defines the desired state of Recycler
+type RecyclerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -52,37 +52,35 @@ type RecycleSpec struct {
 	DurationThresholdSeconds int32 `json:"durationThresholdSeconds"`
 }
 
-// RecycleStatus defines the observed state of Recycle
-type RecycleStatus struct {
+// RecyclerStatus defines the observed state of Recycler
+type RecyclerStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Conditions store the status conditions of the Recycler instances
-	// +operator-sdk:csv:customresourcedefinitions:type=status
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Recycle is the Schema for the recycles API
-type Recycle struct {
+// Recycler is the Schema for the recyclers API
+type Recycler struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   RecycleSpec   `json:"spec,omitempty"`
-	Status RecycleStatus `json:"status,omitempty"`
+	Spec   RecyclerSpec   `json:"spec,omitempty"`
+	Status RecyclerStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// RecycleList contains a list of Recycle
-type RecycleList struct {
+// RecyclerList contains a list of Recycler
+type RecyclerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Recycle `json:"items"`
+	Items           []Recycler `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Recycle{}, &RecycleList{})
+	SchemeBuilder.Register(&Recycler{}, &RecyclerList{})
 }
