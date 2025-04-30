@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.0] - 2025-04-30
+### :sparkles: New Features
+- [`8398c7e`](https://github.com/theonlyway/recycler/commit/8398c7e086aaa99b1246174864c4da873305e44d) - reworking controller *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+### :bug: Bug Fixes
+- [`7500576`](https://github.com/theonlyway/recycler/commit/7500576b0cd737d0b578ba3b7d96ecbdc229f4bd) - reworking controller *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+### :wrench: Chores
+- [`6593d61`](https://github.com/theonlyway/recycler/commit/6593d612c3558da0afe1c5b3cd966d2e3005ea00) - updated controller *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.0.10] - 2025-04-30
 ### :bug: Bug Fixes
 - [`52135f8`](https://github.com/theonlyway/recycler/commit/52135f8c7b260b417c8ba4aa9f7825725dc7d6da) - reverted to speed up *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -59,3 +70,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.0.8]: https://github.com/theonlyway/recycler/compare/v0.0.7...v0.0.8
 [v0.0.9]: https://github.com/theonlyway/recycler/compare/v0.0.8...v0.0.9
 [v0.0.10]: https://github.com/theonlyway/recycler/compare/v0.0.9...v0.0.10
+[v0.1.0]: https://github.com/theonlyway/recycler/compare/v0.0.10...v0.1.0
