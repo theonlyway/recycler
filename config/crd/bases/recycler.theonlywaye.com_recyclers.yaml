@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.1
-  name: recycles.recycler.theonlywaye.com
+  name: recyclers.recycler.theonlywaye.com
 spec:
   group: recycler.theonlywaye.com
   names:
-    kind: Recycle
-    listKind: RecycleList
-    plural: recycles
-    singular: recycle
+    kind: Recycler
+    listKind: RecyclerList
+    plural: recyclers
+    singular: recycler
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Recycle is the Schema for the recycles API
+        description: Recycler is the Schema for the recyclers API
         properties:
           apiVersion:
             description: |-
@@ -37,7 +37,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: RecycleSpec defines the desired state of Recycle
+            description: RecyclerSpec defines the desired state of Recycler
             properties:
               averageCpuUtilizationPercent:
                 description: Average CPU utilization percent of the target resource
@@ -71,11 +71,9 @@ spec:
             - scaleTargetRef
             type: object
           status:
-            description: RecycleStatus defines the observed state of Recycle
+            description: RecyclerStatus defines the observed state of Recycler
             properties:
               conditions:
-                description: Conditions store the status conditions of the Recycler
-                  instances
                 items:
                   description: Condition contains details for one aspect of the current
                     state of this API Resource.

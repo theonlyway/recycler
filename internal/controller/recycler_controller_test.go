@@ -30,7 +30,7 @@ import (
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
 
-var _ = Describe("Recycle Controller", func() {
+var _ = Describe("Recycler Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "test-resource"
 
@@ -40,13 +40,13 @@ var _ = Describe("Recycle Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		recycle := &recyclertheonlywayecomv1alpha1.Recycle{}
+		recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 
 		BeforeEach(func() {
-			By("creating the custom resource for the Kind Recycle")
-			err := k8sClient.Get(ctx, typeNamespacedName, recycle)
+			By("creating the custom resource for the Kind Recycler")
+			err := k8sClient.Get(ctx, typeNamespacedName, recycler)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &recyclertheonlywayecomv1alpha1.Recycle{
+				resource := &recyclertheonlywayecomv1alpha1.Recycler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
@@ -59,16 +59,16 @@ var _ = Describe("Recycle Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &recyclertheonlywayecomv1alpha1.Recycle{}
+			resource := &recyclertheonlywayecomv1alpha1.Recycler{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Cleanup the specific resource instance Recycle")
+			By("Cleanup the specific resource instance Recycler")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
-			controllerReconciler := &RecycleReconciler{
+			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}

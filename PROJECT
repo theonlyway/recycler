@@ -19,4 +19,16 @@ resources:
   kind: Recycle
   path: github.com/theonlyway/recycler/api/v1alpha1
   version: v1alpha1
+- controller: true
+  domain: recycler.theonlywaye.com
+  kind: Monitor
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: recycler.theonlywaye.com
+  kind: Recycler
+  path: github.com/theonlyway/recycler/api/v1alpha1
+  version: v1alpha1
 version: "3"

@@ -22,6 +22,8 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the Project itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
+- recycler_editor_role.yaml
+- recycler_viewer_role.yaml
 - recycle_editor_role.yaml
 - recycle_viewer_role.yaml
 
