@@ -39,13 +39,6 @@ spec:
           spec:
             description: RecyclerSpec defines the desired state of Recycler
             properties:
-              averageCpuUtilizationLookbackSeconds:
-                default: 300
-                description: AverageCpuUtilizationLookbackSeconds specifies the window
-                  of time to look back for metrics to calculate the average CPU utilization.
-                  Defaults to 300 seconds.
-                format: int32
-                type: integer
               averageCpuUtilizationPercent:
                 description: Average CPU utilization percent of the target resource
                 format: int32

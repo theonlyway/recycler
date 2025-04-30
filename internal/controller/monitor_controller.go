@@ -119,58 +119,58 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 }
 
 func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) {
-    // Create a label selector from the provided labels
-    selector := labels.SelectorFromSet(labelSelector)
+	// Create a label selector from the provided labels
+	selector := labels.SelectorFromSet(labelSelector)
 
-    // Fetch the pod metrics using the Kubernetes Metrics API
-    podMetricsList := &metricsv1beta1.PodMetricsList{}
-    listOptions := []client.ListOption{
-        client.InNamespace(namespace),
-        client.MatchingLabelsSelector{Selector: selector},
-    }
-    if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
-        log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
-        return nil, err
-    }
+	// Fetch the pod metrics using the Kubernetes Metrics API
+	podMetricsList := &metricsv1beta1.PodMetricsList{}
+	listOptions := []client.ListOption{
+		client.InNamespace(namespace),
+		client.MatchingLabelsSelector{Selector: selector},
+	}
+	if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
+		log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
+		return nil, err
+	}
 
-    log.Info("Successfully fetched pod metrics", "namespace", namespace, "podCount", len(podMetricsList.Items))
+	log.Info("Successfully fetched pod metrics", "namespace", namespace, "podCount", len(podMetricsList.Items))
 
-    // Process the metrics and calculate CPU utilization for each pod
-    var podCPUUsages []PodCPUUsage
-    for _, podMetrics := range podMetricsList.Items {
-        // Sum the CPU usage across all containers in the pod
-        totalCPUUsage := resource.Quantity{}
-        for _, container := range podMetrics.Containers {
-            totalCPUUsage.Add(container.Usage[corev1.ResourceCPU])
-        }
+	// Process the metrics and calculate CPU utilization for each pod
+	var podCPUUsages []PodCPUUsage
+	for _, podMetrics := range podMetricsList.Items {
+		// Sum the CPU usage across all containers in the pod
+		totalCPUUsage := resource.Quantity{}
+		for _, container := range podMetrics.Containers {
+			totalCPUUsage.Add(container.Usage[corev1.ResourceCPU])
+		}
 
-        // Get the CPU limit from the pod template
-        totalCPULimit := resource.Quantity{}
-        for _, container := range podTemplate.Spec.Containers {
-            if container.Resources.Limits != nil {
-                totalCPULimit.Add(container.Resources.Limits[corev1.ResourceCPU])
-            }
-        }
+		// Get the CPU limit from the pod template
+		totalCPULimit := resource.Quantity{}
+		for _, container := range podTemplate.Spec.Containers {
+			if container.Resources.Limits != nil {
+				totalCPULimit.Add(container.Resources.Limits[corev1.ResourceCPU])
+			}
+		}
 
-        // Calculate the percentage CPU utilization
-        var cpuUtilization float64
-        if totalCPULimit.MilliValue() > 0 {
-            cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
-        } else {
+		// Calculate the percentage CPU utilization
+		var cpuUtilization float64
+		if totalCPULimit.MilliValue() > 0 {
+			cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
+		} else {
 			log.Info("Pod CPU limit is 0, no CPU utilization will be calculated", "pod", podMetrics.Name)
-            cpuUtilization = 0 // No CPU limit defined
-        }
+			cpuUtilization = 0 // No CPU limit defined
+		}
 
-        // Append the pod's CPU utilization to the result list
-        podCPUUsages = append(podCPUUsages, PodCPUUsage{
-            PodName:       podMetrics.Name,
-            CPUUsage:      totalCPUUsage,
-            CPULimit:      totalCPULimit,
-            CPUPercentage: cpuUtilization,
-        })
-    }
+		// Append the pod's CPU utilization to the result list
+		podCPUUsages = append(podCPUUsages, PodCPUUsage{
+			PodName:       podMetrics.Name,
+			CPUUsage:      totalCPUUsage,
+			CPULimit:      totalCPULimit,
+			CPUPercentage: cpuUtilization,
+		})
+	}
 
-    return podCPUUsages, nil
+	return podCPUUsages, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
