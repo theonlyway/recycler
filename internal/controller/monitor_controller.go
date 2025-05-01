@@ -31,10 +31,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
+	resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
 
 	"github.com/go-logr/logr"
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
@@ -110,7 +110,8 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 		// Fetch the metrics for the pods in the deployment
-		metricsClient := resourceclient.NewForConfigOrDie(ctrl.GetConfigOrDie()).PodMetricses()
+		config := ctrl.GetConfigOrDie() // Get the Kubernetes configuration
+		metricsClient := resourceclient.NewForConfigOrDie(config).PodMetricses(deployment.Namespace)
 		podMetricsList, err := fetchPodMetrics(ctx, metricsClient, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
 		if err != nil {
 			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
