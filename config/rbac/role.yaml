@@ -29,6 +29,7 @@ rules:
   - list
   - patch
   - update
+  - watch
 - apiGroups:
   - metrics.k8s.io
   resources:

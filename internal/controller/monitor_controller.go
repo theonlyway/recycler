@@ -58,7 +58,7 @@ type PodCPUUsage struct {
 }
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;watch
 // +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
