@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.23] - 2025-05-01
+### :bug: Bug Fixes
+- [`dfedf42`](https://github.com/theonlyway/recycler/commit/dfedf42f71b4b8fb8a85fc3f8177221cf5b92b09) - testing different method *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.1.22] - 2025-05-01
 ### :bug: Bug Fixes
 - [`37785d2`](https://github.com/theonlyway/recycler/commit/37785d27d1706af1f9e2325b54d6e8ce16c1e09a) - has to be something in the function *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -208,3 +213,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.20]: https://github.com/theonlyway/recycler/compare/v0.1.19...v0.1.20
 [v0.1.21]: https://github.com/theonlyway/recycler/compare/v0.1.20...v0.1.21
 [v0.1.22]: https://github.com/theonlyway/recycler/compare/v0.1.21...v0.1.22
+[v0.1.23]: https://github.com/theonlyway/recycler/compare/v0.1.22...v0.1.23
