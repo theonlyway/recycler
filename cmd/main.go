@@ -151,7 +151,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Recycler")
 		os.Exit(1)
 	}
-	
+
 	if err = (&controller.MonitorReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),

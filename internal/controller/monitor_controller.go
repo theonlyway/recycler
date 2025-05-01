@@ -59,7 +59,7 @@ type PodCPUUsage struct {
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -130,38 +130,38 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 }
 
 func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) {
-    // Create a label selector from the provided labels
-    selector := labels.SelectorFromSet(labelSelector)
+	// Create a label selector from the provided labels
+	selector := labels.SelectorFromSet(labelSelector)
 
-    // Fetch the pod metrics using the Kubernetes Metrics API
-    podMetricsList := &metricsv1beta1.PodMetricsList{}
-    listOptions := []client.ListOption{
-        client.InNamespace(namespace),
-        client.MatchingLabelsSelector{Selector: selector},
-    }
-    if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
-        log.Error(err, "Failed to fetch pod metrics", "controller", monitorControllerName, "namespace", namespace, "labelSelector", labelSelector)
-        return nil, err
-    }
+	// Fetch the pod metrics using the Kubernetes Metrics API
+	podMetricsList := &metricsv1beta1.PodMetricsList{}
+	listOptions := []client.ListOption{
+		client.InNamespace(namespace),
+		client.MatchingLabelsSelector{Selector: selector},
+	}
+	if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
+		log.Error(err, "Failed to fetch pod metrics", "controller", monitorControllerName, "namespace", namespace, "labelSelector", labelSelector)
+		return nil, err
+	}
 
-    log.Info("Successfully fetched pod metrics", "controller", monitorControllerName, "namespace", namespace, "podCount", len(podMetricsList.Items))
+	log.Info("Successfully fetched pod metrics", "controller", monitorControllerName, "namespace", namespace, "podCount", len(podMetricsList.Items))
 
-    // Process the metrics and calculate CPU utilization for each pod
-    var podCPUUsages []PodCPUUsage
-    for _, podMetrics := range podMetricsList.Items {
-        // Sum the CPU usage across all containers in the pod
-        totalCPUUsage := resource.Quantity{}
-        for _, container := range podMetrics.Containers {
-            totalCPUUsage.Add(container.Usage[corev1.ResourceCPU])
-        }
+	// Process the metrics and calculate CPU utilization for each pod
+	var podCPUUsages []PodCPUUsage
+	for _, podMetrics := range podMetricsList.Items {
+		// Sum the CPU usage across all containers in the pod
+		totalCPUUsage := resource.Quantity{}
+		for _, container := range podMetrics.Containers {
+			totalCPUUsage.Add(container.Usage[corev1.ResourceCPU])
+		}
 
-        // Get the CPU limit from the pod template
-        totalCPULimit := resource.Quantity{}
-        for _, container := range podTemplate.Spec.Containers {
-            if container.Resources.Limits != nil {
-                totalCPULimit.Add(container.Resources.Limits[corev1.ResourceCPU])
-            }
-        }
+		// Get the CPU limit from the pod template
+		totalCPULimit := resource.Quantity{}
+		for _, container := range podTemplate.Spec.Containers {
+			if container.Resources.Limits != nil {
+				totalCPULimit.Add(container.Resources.Limits[corev1.ResourceCPU])
+			}
+		}
 
 		// Calculate the percentage CPU utilization
 		var cpuUtilization float64
@@ -176,27 +176,27 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 		// Format the CPU utilization to two decimal places
 		cpuUtilization = math.Round(cpuUtilization*100) / 100
 
-        // Append the pod's CPU utilization to the result list
-        podCPUUsages = append(podCPUUsages, PodCPUUsage{
-            PodName:       podMetrics.Name,
-            CPUUsage:      totalCPUUsage,
-            CPULimit:      totalCPULimit,
-            CPUPercentage: cpuUtilization,
-        })
-    }
+		// Append the pod's CPU utilization to the result list
+		podCPUUsages = append(podCPUUsages, PodCPUUsage{
+			PodName:       podMetrics.Name,
+			CPUUsage:      totalCPUUsage,
+			CPULimit:      totalCPULimit,
+			CPUPercentage: cpuUtilization,
+		})
+	}
 
-    return podCPUUsages, nil
+	return podCPUUsages, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Register the metrics.k8s.io/v1beta1 API to the scheme
-    if err := metricsv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
-        return fmt.Errorf("failed to add metrics API to scheme: %w", err)
-    }
-    r.Recoder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
-    return ctrl.NewControllerManagedBy(mgr).
-        Named("monitor").
-        For(&recyclertheonlywayecomv1alpha1.Recycler{}).
-        Complete(r)
+	if err := metricsv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+		return fmt.Errorf("failed to add metrics API to scheme: %w", err)
+	}
+	r.Recoder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
+	return ctrl.NewControllerManagedBy(mgr).
+		Named("monitor").
+		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
+		Complete(r)
 }

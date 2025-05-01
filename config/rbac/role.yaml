@@ -29,7 +29,13 @@ rules:
   - list
   - patch
   - update
-  - watch
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
 - apiGroups:
   - recycler.theonlywaye.com
   resources:
