@@ -25,13 +25,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-	metricsv1beta1 "k8s.io/metrics/pkg/apis/metrics/v1beta1"
+	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -57,9 +55,6 @@ type PodCPUUsage struct {
 	CPUPercentage float64           // Percentage CPU utilization
 }
 
-// +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=monitors/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
@@ -85,13 +80,6 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, nil
 		}
 		log.Error(err, "unable to fetch Recycle", "controller", monitorControllerName)
-		return ctrl.Result{}, err
-	}
-
-	// Set status condition on the Recycler resource to true if condition status is unknown
-	meta.SetStatusCondition(&recycler.Status.Conditions, metav1.Condition{Type: typeHealthyCondition, Status: metav1.ConditionTrue, Reason: "Reconciling", Message: "Starting monitoring"})
-	if err = r.Status().Update(ctx, recycler); err != nil {
-		log.Error(err, "unable to update Recycler status", "controller", monitorControllerName)
 		return ctrl.Result{}, err
 	}
 
@@ -146,7 +134,7 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 	selector := labels.SelectorFromSet(labelSelector)
 
 	// Fetch the pod metrics using the Kubernetes Metrics API
-	podMetricsList := &metricsv1beta1.PodMetricsList{}
+	podMetricsList := &metricsapi.PodMetricsList{}
 	listOptions := []client.ListOption{
 		client.InNamespace(namespace),
 		client.MatchingLabelsSelector{Selector: selector},
@@ -203,7 +191,7 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 // SetupWithManager sets up the controller with the Manager.
 func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Register the metrics.k8s.io/v1beta1 API to the scheme
-	if err := metricsv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := metricsapi.AddToScheme(mgr.GetScheme()); err != nil {
 		return fmt.Errorf("failed to add metrics API to scheme: %w", err)
 	}
 	r.Recoder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
