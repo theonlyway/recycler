@@ -80,13 +80,13 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	case "Deployment":
 		// Fetch the target deployment using ScaleTargetRef
 		deployment := &appsv1.Deployment{}
-		log.Info("Retrieving pods in target deployment", "deployment", deployment.Name)
+		log.Info("Retrieving pods in target deployment", "controller", "monitor", "deployment", deployment.Name)
 		deploymentKey := client.ObjectKey{
 			Namespace: recycler.Namespace,
 			Name:      recycler.Spec.ScaleTargetRef.Name,
 		}
 		if err := r.Get(ctx, deploymentKey, deployment); err != nil {
-			log.Error(err, "Failed to fetch target deployment", "deployment", deploymentKey)
+			log.Error(err, "Failed to fetch target deployment", "controller", "monitor", "deployment", deploymentKey)
 			return ctrl.Result{}, err
 		}
 		// Fetch the pods in the deployment
@@ -96,23 +96,23 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
 		}
 		if err := r.List(ctx, podList, listOptions...); err != nil {
-			log.Error(err, "Failed to list pods in target deployment", "deployment", deploymentKey)
+			log.Error(err, "Failed to list pods in target deployment", "controller", "monitor", "deployment", deploymentKey)
 			return ctrl.Result{}, err
 		}
 		// Fetch the metrics for the pods in the deployment
 		podMetricsList, err := fetchPodMetrics(ctx, r.Client, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
 		if err != nil {
-			log.Error(err, "Failed to fetch metrics for pods in target deployment", "deployment", deploymentKey)
+			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", "monitor", "deployment", deploymentKey)
 			return ctrl.Result{}, err
 		}
 
 		// Log the CPU utilization for each pod
 		for _, podCPU := range podMetricsList {
-			log.Info("Pod CPU utilization", "pod", podCPU.PodName, "cpu_utilization", podCPU.CPUUsage.String()+"%")
+			log.Info("Pod CPU utilization", "controller", "monitor", "pod", podCPU.PodName, "cpu_utilization", podCPU.CPUUsage.String()+"%")
 		}
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 	default:
-		log.Info("Unsupported resource type", "kind", kind)
+		log.Info("Unsupported resource type", "controller", "monitor", "kind", kind)
 	}
 
 	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
@@ -129,11 +129,11 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 		client.MatchingLabelsSelector{Selector: selector},
 	}
 	if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
-		log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
+		log.Error(err, "Failed to fetch pod metrics", "controller", "monitor", "namespace", namespace, "labelSelector", labelSelector)
 		return nil, err
 	}
 
-	log.Info("Successfully fetched pod metrics", "namespace", namespace, "podCount", len(podMetricsList.Items))
+	log.Info("Successfully fetched pod metrics", "controller", "monitor", "namespace", namespace, "podCount", len(podMetricsList.Items))
 
 	// Process the metrics and calculate CPU utilization for each pod
 	var podCPUUsages []PodCPUUsage
@@ -157,7 +157,7 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 		if totalCPULimit.MilliValue() > 0 {
 			cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
 		} else {
-			log.Info("Pod CPU limit is 0, no CPU utilization will be calculated", "pod", podMetrics.Name)
+			log.Info("Pod CPU limit is 0, no CPU utilization will be calculated", "controller", "monitor", "pod", podMetrics.Name)
 			cpuUtilization = 0 // No CPU limit defined
 		}
 
