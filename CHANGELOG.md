@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.12] - 2025-05-01
+### :bug: Bug Fixes
+- [`9ac0e7c`](https://github.com/theonlyway/recycler/commit/9ac0e7cf2f1e14a3a59a620d7e1c31f38e61c658) - simplified controller naming *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.1.11] - 2025-05-01
 ### :bug: Bug Fixes
 - [`e3d0373`](https://github.com/theonlyway/recycler/commit/e3d0373848fea44f40b25d7f1e7f949f5809d2fd) - fixed naming *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -142,3 +147,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.9]: https://github.com/theonlyway/recycler/compare/v0.1.8...v0.1.9
 [v0.1.10]: https://github.com/theonlyway/recycler/compare/v0.1.9...v0.1.10
 [v0.1.11]: https://github.com/theonlyway/recycler/compare/v0.1.10...v0.1.11
+[v0.1.12]: https://github.com/theonlyway/recycler/compare/v0.1.11...v0.1.12
