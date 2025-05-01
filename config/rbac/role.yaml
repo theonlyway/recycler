@@ -39,7 +39,6 @@ rules:
 - apiGroups:
   - recycler.theonlywaye.com
   resources:
-  - monitors
   - recyclers
   verbs:
   - create
@@ -52,14 +51,12 @@ rules:
 - apiGroups:
   - recycler.theonlywaye.com
   resources:
-  - monitors/finalizers
   - recyclers/finalizers
   verbs:
   - update
 - apiGroups:
   - recycler.theonlywaye.com
   resources:
-  - monitors/status
   - recyclers/status
   verbs:
   - get

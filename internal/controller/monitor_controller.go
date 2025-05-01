@@ -58,7 +58,7 @@ type PodCPUUsage struct {
 }
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patchl;watch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -125,20 +125,17 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				"pod", podCPU.PodName,
 				"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
 		}
-		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+		return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
 	default:
 		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
 	}
 
-	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+	return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
 }
 
 func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetricsInterface, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) {
 	// Create a label selector from the provided labels
 	selector := labels.SelectorFromSet(labelSelector).String()
-
-	// Debug log before fetching pod metrics
-	log.Info("Attempting to fetch pod CPU metrics", "namespace", namespace, "labelSelector", labelSelector)
 
 	// Fetch the pod metrics using the Kubernetes Metrics API client
 	podMetricsList, err := metricsClient.List(ctx, metav1.ListOptions{LabelSelector: selector})
@@ -152,15 +149,9 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 		return nil, fmt.Errorf("no pod metrics returned from resource metrics API")
 	}
 
-	// Debug log after successfully fetching pod metrics
-	log.Info("Successfully fetched pod metrics", "namespace", namespace, "podCount", len(podMetricsList.Items))
-
 	// Process the metrics and calculate CPU utilization for each pod
 	var podCPUUsages []PodCPUUsage
 	for _, podMetrics := range podMetricsList.Items {
-		// Debug log for each pod's metrics
-		log.Info("Processing pod metrics", "podName", podMetrics.Name, "namespace", namespace)
-
 		// Sum the CPU usage across all containers in the pod
 		totalCPUUsage := resource.Quantity{}
 		for _, container := range podMetrics.Containers {

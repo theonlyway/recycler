@@ -43,6 +43,11 @@ spec:
                 description: Average CPU utilization percent of the target resource
                 format: int32
                 type: integer
+              pollingIntervalSeconds:
+                default: 60
+                description: Polling duration in seonds between metric fetches
+                format: int32
+                type: integer
               recycleDelaySeconds:
                 default: 300
                 description: Duration in seconds to wait before recycling the pod
@@ -69,6 +74,7 @@ spec:
                 type: object
             required:
             - averageCpuUtilizationPercent
+            - pollingIntervalSeconds
             - recycleDelaySeconds
             - scaleTargetRef
             type: object

@@ -51,6 +51,9 @@ type RecyclerSpec struct {
 	// Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold
 	//+default=300
 	RecycleDelaySeconds int32 `json:"recycleDelaySeconds"`
+	// Polling duration in seonds between metric fetches
+	//+default=60
+	PollingIntervalSeconds int32 `json:"pollingIntervalSeconds"`
 }
 
 // RecyclerStatus defines the observed state of Recycler
