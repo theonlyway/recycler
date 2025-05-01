@@ -34,6 +34,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
 
 	"github.com/go-logr/logr"
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
@@ -109,7 +110,8 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 		// Fetch the metrics for the pods in the deployment
-		podMetricsList, err := fetchPodMetrics(ctx, r.Client, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
+		metricsClient := resourceclient.NewForConfigOrDie(ctrl.GetConfigOrDie()).PodMetricses()
+		podMetricsList, err := fetchPodMetrics(ctx, metricsClient, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
 		if err != nil {
 			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
 			return ctrl.Result{}, err
@@ -130,23 +132,23 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 }
 
-func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) {
+func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetricsInterface, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) {
 	// Create a label selector from the provided labels
-	selector := labels.SelectorFromSet(labelSelector)
+	selector := labels.SelectorFromSet(labelSelector).String()
 
 	// Debug log before fetching pod metrics
-	log.Info("Attempting to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
+	log.Info("Attempting to fetch pod CPU metrics", "namespace", namespace, "labelSelector", labelSelector)
 
-	// Fetch the pod metrics using the Kubernetes Metrics API
-	podMetricsList := &metricsapi.PodMetricsList{}
-	listOptions := &client.ListOptions{
-		Namespace:     namespace,
-		LabelSelector: selector,
-		Raw:           &metav1.ListOptions{ResourceVersion: "0"}, // Disable implicit watch
-	}
-	if err := c.List(ctx, podMetricsList, listOptions); err != nil {
-		log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector, "listOptions", listOptions)
+	// Fetch the pod metrics using the Kubernetes Metrics API client
+	podMetricsList, err := metricsClient.List(ctx, metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
 		return nil, err
+	}
+
+	if len(podMetricsList.Items) == 0 {
+		log.Info("No pod metrics returned", "namespace", namespace, "labelSelector", labelSelector)
+		return nil, fmt.Errorf("no pod metrics returned from resource metrics API")
 	}
 
 	// Debug log after successfully fetching pod metrics
@@ -155,20 +157,26 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 	// Process the metrics and calculate CPU utilization for each pod
 	var podCPUUsages []PodCPUUsage
 	for _, podMetrics := range podMetricsList.Items {
-		 // Debug log for each pod's metrics
+		// Debug log for each pod's metrics
 		log.Info("Processing pod metrics", "podName", podMetrics.Name, "namespace", namespace)
 
 		// Sum the CPU usage across all containers in the pod
 		totalCPUUsage := resource.Quantity{}
 		for _, container := range podMetrics.Containers {
-			totalCPUUsage.Add(container.Usage[corev1.ResourceCPU])
+			if cpuUsage, found := container.Usage[corev1.ResourceCPU]; found {
+				totalCPUUsage.Add(cpuUsage)
+			} else {
+				log.Info("Missing CPU usage metric for container", "containerName", container.Name, "podName", podMetrics.Name)
+			}
 		}
 
 		// Get the CPU limit from the pod template
 		totalCPULimit := resource.Quantity{}
 		for _, container := range podTemplate.Spec.Containers {
 			if container.Resources.Limits != nil {
-				totalCPULimit.Add(container.Resources.Limits[corev1.ResourceCPU])
+				if cpuLimit, found := container.Resources.Limits[corev1.ResourceCPU]; found {
+					totalCPULimit.Add(cpuLimit)
+				}
 			}
 		}
 
