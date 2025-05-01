@@ -25,7 +25,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -86,6 +88,13 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	// Set status condition on the Recycler resource to true if condition status is unknown
+	meta.SetStatusCondition(&recycler.Status.Conditions, metav1.Condition{Type: typeHealthyCondition, Status: metav1.ConditionTrue, Reason: "Reconciling", Message: "Starting monitoring"})
+	if err = r.Status().Update(ctx, recycler); err != nil {
+		log.Error(err, "unable to update Recycler status", "controller", monitorControllerName)
+		return ctrl.Result{}, err
+	}
+
 	// Fetch the resource type using ScaleTargetRef
 	switch kind := recycler.Spec.ScaleTargetRef.Kind; kind {
 	case "Deployment":
@@ -119,7 +128,10 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		// Log the CPU utilization for each pod
 		for _, podCPU := range podMetricsList {
-			log.Info("Pod CPU utilization", "controller", monitorControllerName, "pod", podCPU.PodName, "cpu_utilization", podCPU.CPUUsage.String()+"%")
+			log.Info("Pod CPU utilization",
+				"controller", monitorControllerName,
+				"pod", podCPU.PodName,
+				"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
 		}
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 	default:
