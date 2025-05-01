@@ -120,10 +120,12 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		// Log the CPU utilization for each pod
 		for _, podCPU := range podMetricsList {
-			log.Info("Pod CPU utilization",
-				"controller", monitorControllerName,
-				"pod", podCPU.PodName,
-				"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
+			if podCPU.CPUPercentage >= float64(recycler.Spec.AverageCpuUtilizationPercent) {
+				log.Info("Pod CPU utilization",
+					"controller", monitorControllerName,
+					"pod", podCPU.PodName,
+					"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
+			}
 		}
 		return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
 	default:

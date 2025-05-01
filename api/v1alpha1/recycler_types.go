@@ -54,6 +54,9 @@ type RecyclerSpec struct {
 	// Polling duration in seonds between metric fetches
 	//+default=60
 	PollingIntervalSeconds int32 `json:"pollingIntervalSeconds"`
+	// Number of datapoints to keep in the pod metrics history
+	//+default=10
+	PodMetricsHistory int32 `json:"podMetricsHistory"`
 }
 
 // RecyclerStatus defines the observed state of Recycler

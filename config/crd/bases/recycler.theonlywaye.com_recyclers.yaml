@@ -43,6 +43,11 @@ spec:
                 description: Average CPU utilization percent of the target resource
                 format: int32
                 type: integer
+              podMetricsHistory:
+                default: 10
+                description: Number of datapoints to keep in the pod metrics history
+                format: int32
+                type: integer
               pollingIntervalSeconds:
                 default: 60
                 description: Polling duration in seonds between metric fetches
@@ -74,6 +79,7 @@ spec:
                 type: object
             required:
             - averageCpuUtilizationPercent
+            - podMetricsHistory
             - pollingIntervalSeconds
             - recycleDelaySeconds
             - scaleTargetRef
