@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.20] - 2025-05-01
+### :bug: Bug Fixes
+- [`c01b99c`](https://github.com/theonlyway/recycler/commit/c01b99cd87a8804b3d2a33ab594fea080cb5ebee) - testing removal of metrics fetch to see if rbac errors stop *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.1.19] - 2025-05-01
 ### :bug: Bug Fixes
 - [`ff9fd6c`](https://github.com/theonlyway/recycler/commit/ff9fd6c65258fff6872246eca64a16b43a61b069) - debug logging *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -190,3 +195,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.17]: https://github.com/theonlyway/recycler/compare/v0.1.16...v0.1.17
 [v0.1.18]: https://github.com/theonlyway/recycler/compare/v0.1.17...v0.1.18
 [v0.1.19]: https://github.com/theonlyway/recycler/compare/v0.1.18...v0.1.19
+[v0.1.20]: https://github.com/theonlyway/recycler/compare/v0.1.19...v0.1.20
