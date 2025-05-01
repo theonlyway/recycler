@@ -22,6 +22,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -70,9 +71,14 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Fetch the Recycler instance
 	recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
-	if err := r.Get(ctx, req.NamespacedName, recycler); err != nil {
-		// Handle not found or other errors
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+	err := r.Get(ctx, req.NamespacedName, recycler)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", "recycler")
+			return ctrl.Result{}, nil
+		}
+		log.Error(err, "unable to fetch Recycle", "controller", "recycler")
+		return ctrl.Result{}, err
 	}
 
 	// Fetch the resource type using ScaleTargetRef
