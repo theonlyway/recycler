@@ -75,10 +75,10 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	err := r.Get(ctx, req.NamespacedName, recycler)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", "recycler")
+			log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", "monitor")
 			return ctrl.Result{}, nil
 		}
-		log.Error(err, "unable to fetch Recycle", "controller", "recycler")
+		log.Error(err, "unable to fetch Recycle", "controller", "monitor")
 		return ctrl.Result{}, err
 	}
 
