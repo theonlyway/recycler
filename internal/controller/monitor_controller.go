@@ -22,7 +22,6 @@ import (
 	"math"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -82,49 +81,6 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 		log.Error(err, "unable to fetch Recycle", "controller", monitorControllerName)
 		return ctrl.Result{}, err
-	}
-
-	// Fetch the resource type using ScaleTargetRef
-	switch kind := recycler.Spec.ScaleTargetRef.Kind; kind {
-	case "Deployment":
-		// Fetch the target deployment using ScaleTargetRef
-		deployment := &appsv1.Deployment{}
-		log.Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", deployment.Name)
-		deploymentKey := client.ObjectKey{
-			Namespace: recycler.Namespace,
-			Name:      recycler.Spec.ScaleTargetRef.Name,
-		}
-		if err := r.Get(ctx, deploymentKey, deployment); err != nil {
-			log.Error(err, "Failed to fetch target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
-			return ctrl.Result{}, err
-		}
-		// Fetch the pods in the deployment
-		podList := &corev1.PodList{}
-		listOptions := []client.ListOption{
-			client.InNamespace(deployment.Namespace),
-			client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
-		}
-		if err := r.List(ctx, podList, listOptions...); err != nil {
-			log.Error(err, "Failed to list pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
-			return ctrl.Result{}, err
-		}
-		// Fetch the metrics for the pods in the deployment
-		podMetricsList, err := fetchPodMetrics(ctx, r.Client, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
-		if err != nil {
-			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
-			return ctrl.Result{}, err
-		}
-
-		// Log the CPU utilization for each pod
-		for _, podCPU := range podMetricsList {
-			log.Info("Pod CPU utilization",
-				"controller", monitorControllerName,
-				"pod", podCPU.PodName,
-				"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
-		}
-		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
-	default:
-		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
 	}
 
 	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
