@@ -163,17 +163,18 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
             }
         }
 
-        // Calculate the percentage CPU utilization
-        var cpuUtilization float64
-        if totalCPULimit.MilliValue() > 0 {
-            cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
-        } else {
-            log.Info("Pod CPU limit is 0, no CPU utilization will be calculated", "controller", monitorControllerName, "pod", podMetrics.Name)
-            cpuUtilization = 0 // No CPU limit defined
-        }
+		// Calculate the percentage CPU utilization
+		var cpuUtilization float64
+		if totalCPULimit.MilliValue() > 0 {
+			// Convert millicores to cores by dividing by 1000
+			cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
+		} else {
+			log.Info("Pod CPU limit is 0, no CPU utilization will be calculated", "controller", recyclerControllerName, "pod", podMetrics.Name)
+			cpuUtilization = 0 // No CPU limit defined
+		}
 
-        // Format the CPU utilization to two decimal places
-        cpuUtilization = math.Round(cpuUtilization*100) / 100
+		// Format the CPU utilization to two decimal places
+		cpuUtilization = math.Round(cpuUtilization*100) / 100
 
         // Append the pod's CPU utilization to the result list
         podCPUUsages = append(podCPUUsages, PodCPUUsage{
