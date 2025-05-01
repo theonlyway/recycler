@@ -175,11 +175,9 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
-
-	return ctrl.NewControllerManagedBy(mgr).
-		Named("monitor").
-		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
-		// Uncomment the following line adding a pointer to an instance of the controlled resource as an argument
-		// For().
-		Complete(r)
+    r.Recoder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
+    return ctrl.NewControllerManagedBy(mgr).
+        Named("monitor").
+        For(&recyclertheonlywayecomv1alpha1.Recycler{}).
+        Complete(r)
 }
