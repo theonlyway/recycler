@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -181,6 +182,10 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Register the metrics.k8s.io/v1beta1 API to the scheme
+    if err := metricsv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+        return fmt.Errorf("failed to add metrics API to scheme: %w", err)
+    }
     r.Recoder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
     return ctrl.NewControllerManagedBy(mgr).
         Named("monitor").
