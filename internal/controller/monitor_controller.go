@@ -89,7 +89,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	case "Deployment":
 		// Fetch the target deployment using ScaleTargetRef
 		deployment := &appsv1.Deployment{}
-		log.Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", deployment.Name)
+		log.Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
 		deploymentKey := client.ObjectKey{
 			Namespace: recycler.Namespace,
 			Name:      recycler.Spec.ScaleTargetRef.Name,
@@ -108,7 +108,20 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			log.Error(err, "Failed to list pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
 			return ctrl.Result{}, err
 		}
+		// Fetch the metrics for the pods in the deployment
+		podMetricsList, err := fetchPodMetrics(ctx, r.Client, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
+		if err != nil {
+			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
+			return ctrl.Result{}, err
+		}
 
+		// Log the CPU utilization for each pod
+		for _, podCPU := range podMetricsList {
+			log.Info("Pod CPU utilization",
+				"controller", monitorControllerName,
+				"pod", podCPU.PodName,
+				"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
+		}
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 	default:
 		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
