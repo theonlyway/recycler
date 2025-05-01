@@ -26,8 +26,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/apimachinery/pkg/labels"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
@@ -134,6 +134,9 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 	// Create a label selector from the provided labels
 	selector := labels.SelectorFromSet(labelSelector)
 
+	// Debug log before fetching pod metrics
+	log.Info("Attempting to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
+
 	// Fetch the pod metrics using the Kubernetes Metrics API
 	podMetricsList := &metricsapi.PodMetricsList{}
 	listOptions := &client.ListOptions{
@@ -142,15 +145,19 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 		Raw:           &metav1.ListOptions{ResourceVersion: "0"}, // Disable implicit watch
 	}
 	if err := c.List(ctx, podMetricsList, listOptions); err != nil {
-		log.Error(err, "Failed to fetch pod metrics", "controller", monitorControllerName, "namespace", namespace, "labelSelector", labelSelector)
+		log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector, "listOptions", listOptions)
 		return nil, err
 	}
 
-	log.Info("Successfully fetched pod metrics", "controller", monitorControllerName, "namespace", namespace, "podCount", len(podMetricsList.Items))
+	// Debug log after successfully fetching pod metrics
+	log.Info("Successfully fetched pod metrics", "namespace", namespace, "podCount", len(podMetricsList.Items))
 
 	// Process the metrics and calculate CPU utilization for each pod
 	var podCPUUsages []PodCPUUsage
 	for _, podMetrics := range podMetricsList.Items {
+		 // Debug log for each pod's metrics
+		log.Info("Processing pod metrics", "podName", podMetrics.Name, "namespace", namespace)
+
 		// Sum the CPU usage across all containers in the pod
 		totalCPUUsage := resource.Quantity{}
 		for _, container := range podMetrics.Containers {
@@ -171,7 +178,7 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 			// Convert millicores to cores by dividing by 1000
 			cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
 		} else {
-			log.Info("Pod CPU limit is 0, no CPU utilization will be calculated", "controller", recyclerControllerName, "pod", podMetrics.Name)
+			log.Info("Pod CPU limit is 0, skipping CPU utilization calculation", "podName", podMetrics.Name)
 			cpuUtilization = 0 // No CPU limit defined
 		}
 
