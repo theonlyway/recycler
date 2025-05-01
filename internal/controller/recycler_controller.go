@@ -39,6 +39,8 @@ const (
 	typeUnhealthyCondition = "Unavailable"
 )
 
+const recyclerControllerName = "recycler"
+
 // RecyclerReconciler reconciles a Recycler object
 type RecyclerReconciler struct {
 	client.Client
@@ -64,23 +66,23 @@ type RecyclerReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
 func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
-	log.Info("Starting Recycler reconciliation", "controller", "recycler")
+	log.Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
 
 	recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 	err := r.Get(ctx, req.NamespacedName, recycler)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", "recycler")
+			log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", recyclerControllerName)
 			return ctrl.Result{}, nil
 		}
-		log.Error(err, "unable to fetch Recycle", "controller", "recycler")
+		log.Error(err, "unable to fetch Recycle", "controller", recyclerControllerName)
 		return ctrl.Result{}, err
 	}
 
 	if len(recycler.Status.Conditions) == 0 {
 		meta.SetStatusCondition(&recycler.Status.Conditions, metav1.Condition{Type: typeHealthyCondition, Status: metav1.ConditionUnknown, Reason: "Reconciling", Message: "Starting reconciliation"})
 		if err = r.Status().Update(ctx, recycler); err != nil {
-			log.Error(err, "unable to update Recycle status", "controller", "recycler")
+			log.Error(err, "unable to update Recycle status", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 
@@ -90,19 +92,19 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		// your changes to the latest version and try again" which would re-trigger the reconciliation
 		// if we try to update it again in the following operations
 		if err := r.Get(ctx, req.NamespacedName, recycler); err != nil {
-			log.Error(err, "Failed to re-fetch Recycle", "controller", "recycler")
+			log.Error(err, "Failed to re-fetch Recycle", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 	}
 
 	if !controllerutil.ContainsFinalizer(recycler, recyclerFinalizer) {
-		log.Info("Adding finalizer for Recycle", "controller", "recycler")
+		log.Info("Adding finalizer for Recycle", "controller", recyclerControllerName)
 		if ok := controllerutil.AddFinalizer(recycler, recyclerFinalizer); !ok {
-			log.Error(err, "Failed to add finalizer for Recycle custom resource", "controller", "recycler")
+			log.Error(err, "Failed to add finalizer for Recycle custom resource", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 		if err := r.Update(ctx, recycler); err != nil {
-			log.Error(err, "Failed to update Recycle custom resource", "controller", "recycler")
+			log.Error(err, "Failed to update Recycle custom resource", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 	}
@@ -110,37 +112,37 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	isRecyclerMarkedForDeletion := recycler.GetDeletionTimestamp() != nil
 	if isRecyclerMarkedForDeletion {
 		if controllerutil.ContainsFinalizer(recycler, recyclerFinalizer) {
-			log.Info("Performing Finalizer operations for Recycler before deletion of custom resource", "controller", "recycler")
+			log.Info("Performing Finalizer operations for Recycler before deletion of custom resource", "controller", recyclerControllerName)
 
 			meta.SetStatusCondition(&recycler.Status.Conditions, metav1.Condition{Type: typeHealthyCondition, Status: metav1.ConditionFalse, Reason: "Finalizing", Message: fmt.Sprintf("Finalizing Recycler %s", recycler.Name)})
 		}
 
 		if err := r.Status().Update(ctx, recycler); err != nil {
-			log.Error(err, "Failed to update Recycler custom resource status", "controller", "recycler")
+			log.Error(err, "Failed to update Recycler custom resource status", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 
 		r.doFinalizerOperationsForRecycler(recycler)
 
 		if err := r.Get(ctx, req.NamespacedName, recycler); err != nil {
-			log.Error(err, "Failed to re-fetch Recycler", "controller", "recycler")
+			log.Error(err, "Failed to re-fetch Recycler", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 
 		meta.SetStatusCondition(&recycler.Status.Conditions, metav1.Condition{Type: typeHealthyCondition, Status: metav1.ConditionTrue, Reason: "Finalizing", Message: fmt.Sprintf("Finalizer operations for custom resource %s were successfully completed", recycler.Name)})
 
 		if err := r.Status().Update(ctx, recycler); err != nil {
-			log.Error(err, "Failed to update Recycler custom resource status", "controller", "recycler")
+			log.Error(err, "Failed to update Recycler custom resource status", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 
-		log.Info("Removing Finalizer for Recycler", "controller", "recycler")
+		log.Info("Removing Finalizer for Recycler", "controller", recyclerControllerName)
 		if ok := controllerutil.RemoveFinalizer(recycler, recyclerFinalizer); !ok {
-			log.Error(err, "Failed to remove finalizer for Recycler custom resource", "controller", "recycler")
+			log.Error(err, "Failed to remove finalizer for Recycler custom resource", "controller", recyclerControllerName)
 			return ctrl.Result{Requeue: true}, nil
 		}
 		if err := r.Update(ctx, recycler); err != nil {
-			log.Error(err, "Failed to remove finalizer for Recycler custom resource", "controller", "recycler")
+			log.Error(err, "Failed to remove finalizer for Recycler custom resource", "controller", recyclerControllerName)
 			return ctrl.Result{}, err
 		}
 	}
