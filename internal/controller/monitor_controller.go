@@ -27,6 +27,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
@@ -56,7 +57,7 @@ type PodCPUUsage struct {
 }
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patchl;watch
 // +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -135,11 +136,12 @@ func fetchPodMetrics(ctx context.Context, c client.Client, namespace string, lab
 
 	// Fetch the pod metrics using the Kubernetes Metrics API
 	podMetricsList := &metricsapi.PodMetricsList{}
-	listOptions := []client.ListOption{
-		client.InNamespace(namespace),
-		client.MatchingLabelsSelector{Selector: selector},
+	listOptions := &client.ListOptions{
+		Namespace:     namespace,
+		LabelSelector: selector,
+		Raw:           &metav1.ListOptions{ResourceVersion: "0"}, // Disable implicit watch
 	}
-	if err := c.List(ctx, podMetricsList, listOptions...); err != nil {
+	if err := c.List(ctx, podMetricsList, listOptions); err != nil {
 		log.Error(err, "Failed to fetch pod metrics", "controller", monitorControllerName, "namespace", namespace, "labelSelector", labelSelector)
 		return nil, err
 	}
