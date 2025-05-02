@@ -285,6 +285,12 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *c
 
 	log.Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
 
+	// Fetch the latest version of the pod
+	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
+		log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+		return err
+	}
+
 	// Check if the average CPU usage breaches the threshold
 	if averageCPU > float64(threshold) {
 		log.Info("CPU usage threshold breached", "podName", pod.Name, "averageCPU", averageCPU)
@@ -307,9 +313,40 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *c
 				return err
 			}
 
+			// Write an event to the CRD
+			r.Recoder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
+				"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
+
 			log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
 			return nil
 		})
+	} else {
+		// Remove the breach annotation if it exists
+		if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
+			log.Info("CPU usage recovered below threshold, removing breach annotation", "podName", pod.Name)
+
+			return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				// Fetch the latest version of the pod
+				if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
+					log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+					return err
+				}
+
+				// Remove the breach annotation
+				delete(pod.Annotations, cpuBreachTimestampAnnotation)
+				if err := r.Update(ctx, pod); err != nil {
+					log.Error(err, "Failed to update pod to remove breach annotation", "podName", pod.Name)
+					return err
+				}
+
+				// Write an event to the CRD
+				r.Recoder.Eventf(pod, corev1.EventTypeNormal, "CPUThresholdRecovered",
+					"CPU usage recovered below threshold for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
+
+				log.Info("Breach annotation removed from pod", "podName", pod.Name)
+				return nil
+			})
+		}
 	}
 
 	return nil

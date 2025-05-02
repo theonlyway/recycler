@@ -43,6 +43,11 @@ spec:
                 description: Average CPU utilization percent of the target resource
                 format: int32
                 type: integer
+              gracePeriodSeconds:
+                default: 30
+                description: Termination grace period in seconds
+                format: int32
+                type: integer
               podMetricsHistory:
                 default: 10
                 description: Number of datapoints to keep in the pod metrics history
@@ -79,6 +84,7 @@ spec:
                 type: object
             required:
             - averageCpuUtilizationPercent
+            - gracePeriodSeconds
             - podMetricsHistory
             - pollingIntervalSeconds
             - recycleDelaySeconds

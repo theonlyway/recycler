@@ -57,6 +57,9 @@ type RecyclerSpec struct {
 	// Number of datapoints to keep in the pod metrics history
 	//+default=10
 	PodMetricsHistory int32 `json:"podMetricsHistory"`
+	// Termination grace period in seconds
+	//+default=30
+	GracePeriodSeconds int32 `json:"gracePeriodSeconds"`
 }
 
 // RecyclerStatus defines the observed state of Recycler
