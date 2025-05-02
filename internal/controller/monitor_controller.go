@@ -56,6 +56,7 @@ type PodCPUUsage struct {
 	CPUUsage      resource.Quantity // Raw CPU usage
 	CPULimit      resource.Quantity // CPU limit
 	CPUPercentage float64           // Percentage CPU utilization
+	Timestamp     time.Time         // Timestamp of the metrics
 }
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
@@ -211,12 +212,13 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 		// Format the CPU utilization to two decimal places
 		cpuUtilization = math.Round(cpuUtilization*100) / 100
 
-		// Append the pod's CPU utilization to the result list
+		// Append the pod's CPU utilization to the result list, including the current timestamp
 		podCPUUsages = append(podCPUUsages, PodCPUUsage{
 			PodName:       podMetrics.Name,
 			CPUUsage:      totalCPUUsage,
 			CPULimit:      totalCPULimit,
 			CPUPercentage: cpuUtilization,
+			Timestamp:     podMetrics.Timestamp.Time, // Use the metrics query timestamp
 		})
 	}
 
