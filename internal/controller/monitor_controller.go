@@ -266,7 +266,11 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 		// Update the pod annotation
 		pod.Annotations[podMetricsAnnotation] = string(updatedHistoryJSON)
 		if err := r.Update(ctx, pod); err != nil {
-			log.Error(err, "Failed to update pod annotations", "podName", podName)
+			if apierrors.IsConflict(err) {
+				log.Info("Conflict detected while updating pod, retrying", "podName", podName)
+			} else {
+				log.Error(err, "Failed to update pod annotations", "podName", podName)
+			}
 			return err
 		}
 
