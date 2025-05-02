@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"time"
@@ -118,13 +119,10 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 
-		// Log the CPU utilization for each pod
 		for _, podCPU := range podMetricsList {
-			if podCPU.CPUPercentage >= float64(recycler.Spec.AverageCpuUtilizationPercent) {
-				log.Info("Pod CPU utilization",
-					"controller", monitorControllerName,
-					"pod", podCPU.PodName,
-					"cpu_utilization", fmt.Sprintf("%.2f", podCPU.CPUPercentage))
+			// Update the pod's metrics history annotation
+			if err := updatePodMetricsHistory(ctx, r, podCPU.PodName, deployment.Namespace, podCPU, recycler.Spec.PodMetricsHistory, log); err != nil {
+				log.Error(err, "Failed to update pod metrics history", "podName", podCPU.PodName)
 			}
 		}
 		return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
@@ -197,6 +195,54 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 	}
 
 	return podCPUUsages, nil
+}
+
+// UpdatePodMetricsHistory updates the pod's annotation with the latest metrics history
+func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName string, namespace string, newDataPoint PodCPUUsage, maxHistory int32, log logr.Logger) error {
+	// Fetch the pod object
+	pod := &corev1.Pod{}
+	podKey := client.ObjectKey{Namespace: namespace, Name: podName}
+	if err := r.Get(ctx, podKey, pod); err != nil {
+		log.Error(err, "Failed to fetch pod", "podName", podName)
+		return err
+	}
+
+	// Initialize or fetch existing metrics history
+	var metricsHistory []PodCPUUsage
+	if pod.Annotations == nil {
+		pod.Annotations = make(map[string]string)
+	}
+	if historyJSON, exists := pod.Annotations["recycler.theonlyway.com/pod-metrics-history"]; exists {
+		if err := json.Unmarshal([]byte(historyJSON), &metricsHistory); err != nil {
+			log.Error(err, "Failed to deserialize existing metrics history", "podName", podName)
+			return err
+		}
+	}
+
+	// Append the new data point
+	metricsHistory = append(metricsHistory, newDataPoint)
+
+	// Trim the history to the maximum allowed size
+	if len(metricsHistory) > int(maxHistory) {
+		metricsHistory = metricsHistory[len(metricsHistory)-int(maxHistory):]
+	}
+
+	// Serialize the updated history back to JSON
+	updatedHistoryJSON, err := json.Marshal(metricsHistory)
+	if err != nil {
+		log.Error(err, "Failed to serialize updated metrics history", "podName", podName)
+		return err
+	}
+
+	// Update the pod annotation
+	pod.Annotations["recycler.theonlyway.com/pod-metrics-history"] = string(updatedHistoryJSON)
+	if err := r.Update(ctx, pod); err != nil {
+		log.Error(err, "Failed to update pod annotations", "podName", podName)
+		return err
+	}
+
+	log.Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
