@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.28] - 2025-05-02
+### :bug: Bug Fixes
+- [`e7e19d3`](https://github.com/theonlyway/recycler/commit/e7e19d348e9ed9ad773ebe2aacecb86cb7714da7) - writing out metrics to container annotation *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.1.27] - 2025-05-02
 ### :bug: Bug Fixes
 - [`9301da5`](https://github.com/theonlyway/recycler/commit/9301da586596c133c26db25c9f4edf19d39b265a) - only log if values exceed *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -238,3 +243,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.25]: https://github.com/theonlyway/recycler/compare/v0.1.24...v0.1.25
 [v0.1.26]: https://github.com/theonlyway/recycler/compare/v0.1.25...v0.1.26
 [v0.1.27]: https://github.com/theonlyway/recycler/compare/v0.1.26...v0.1.27
+[v0.1.28]: https://github.com/theonlyway/recycler/compare/v0.1.27...v0.1.28
