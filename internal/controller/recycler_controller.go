@@ -19,7 +19,10 @@ package controller
 import (
 	"context"
 	"fmt"
+	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,16 +34,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
 
-const recyclerFinalizer = "recycler.k8s.io/recycler"
+const recyclerFinalizer string = "recycler.k8s.io/recycler"
 const (
-	typeHealthyCondition   = "Available"
-	typeUnhealthyCondition = "Unavailable"
+	typeHealthyCondition         string = "Available"
+	typeUnhealthyCondition       string = "Unavailable"
+	cpuBreachTimestampAnnotation string = "recycler.theonlyway.com/cpu-breach-timestamp"
+	podMetricsAnnotation         string = "recycler.theonlyway.com/pod-metrics-history"
 )
 
-const recyclerControllerName = "recycler"
+const recyclerControllerName string = "recycler"
 
 // RecyclerReconciler reconciles a Recycler object
 type RecyclerReconciler struct {
@@ -136,7 +142,68 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	if err := terminatePods(ctx, r, recycler, log); err != nil {
+		log.Error(err, "Failed to terminate pods", "controller", recyclerControllerName)
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
+}
+
+func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, log logr.Logger) error {
+	// Fetch the target deployment using ScaleTargetRef
+	deployment := &appsv1.Deployment{}
+	deploymentKey := client.ObjectKey{
+		Namespace: recycler.Namespace,
+		Name:      recycler.Spec.ScaleTargetRef.Name,
+	}
+	if err := r.Get(ctx, deploymentKey, deployment); err != nil {
+		log.Error(err, "Failed to fetch target deployment", "controller", recyclerControllerName)
+		return err
+	}
+
+	// List all pods in the target deployment
+	podList := &corev1.PodList{}
+	listOptions := []client.ListOption{
+		client.InNamespace(deployment.Namespace),
+		client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+	}
+	if err := r.List(ctx, podList, listOptions...); err != nil {
+		log.Error(err, "Failed to list pods for termination", "controller", recyclerControllerName)
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		// Check for the breach timestamp annotation
+		breachTimestamp, exists := pod.Annotations[cpuBreachTimestampAnnotation]
+		if !exists {
+			log.Info("Pod does not have breach timestamp annotation, skipping", "podName", pod.Name)
+			continue
+		}
+
+		// Parse the breach timestamp
+		breachTime, err := time.Parse(time.RFC3339, breachTimestamp)
+		if err != nil {
+			log.Error(err, "Failed to parse breach timestamp", "podName", pod.Name, "breachTimestamp", breachTimestamp)
+			continue
+		}
+
+		// Calculate the time elapsed since the breach
+		elapsed := time.Since(breachTime)
+		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
+		if elapsed >= delay {
+			log.Info("Terminating pod due to CPU threshold breach", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
+
+			// Terminate the pod
+			//if err := r.Delete(ctx, &pod); err != nil {
+			//	log.Error(err, "Failed to delete pod", "podName", pod.Name)
+			//}
+		} else {
+			log.Info("Pod not ready for termination yet", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
+		}
+	}
+
+	return nil
 }
 
 func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recyclertheonlywayecomv1alpha1.Recycler) {

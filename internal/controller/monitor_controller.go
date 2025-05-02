@@ -125,7 +125,33 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				log.Error(err, "Failed to update pod metrics history", "podName", podCPU.PodName)
 			}
 		}
-		return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
+
+		for _, pod := range podList.Items {
+			// Fetch the metrics history annotation
+			metricsHistoryJSON, exists := pod.Annotations[podMetricsAnnotation]
+			if !exists {
+				log.Info("Pod does not have metrics history annotation, skipping", "podName", pod.Name)
+				continue
+			}
+
+			// Deserialize the metrics history
+			var metricsHistory []PodCPUUsage
+			if err := json.Unmarshal([]byte(metricsHistoryJSON), &metricsHistory); err != nil {
+				log.Error(err, "Failed to deserialize metrics history", "podName", pod.Name)
+				continue
+			}
+
+			// Check if there are enough data points
+			if len(metricsHistory) < int(recycler.Spec.PodMetricsHistory) {
+				log.Info("Not enough data points for pod, skipping", "podName", pod.Name)
+				continue
+			}
+
+			// Check threshold and annotate if breached
+			if err := checkPodMetricsAnnotation(ctx, r, &pod, metricsHistory, recycler.Spec.AverageCpuUtilizationPercent, log); err != nil {
+				log.Error(err, "Failed to check threshold and annotate pod", "podName", pod.Name)
+			}
+		}
 	default:
 		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
 	}
@@ -212,7 +238,7 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 	if pod.Annotations == nil {
 		pod.Annotations = make(map[string]string)
 	}
-	if historyJSON, exists := pod.Annotations["recycler.theonlyway.com/pod-metrics-history"]; exists {
+	if historyJSON, exists := pod.Annotations[podMetricsAnnotation]; exists {
 		if err := json.Unmarshal([]byte(historyJSON), &metricsHistory); err != nil {
 			log.Error(err, "Failed to deserialize existing metrics history", "podName", podName)
 			return err
@@ -235,13 +261,43 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 	}
 
 	// Update the pod annotation
-	pod.Annotations["recycler.theonlyway.com/pod-metrics-history"] = string(updatedHistoryJSON)
+	pod.Annotations[podMetricsAnnotation] = string(updatedHistoryJSON)
 	if err := r.Update(ctx, pod); err != nil {
 		log.Error(err, "Failed to update pod annotations", "podName", podName)
 		return err
 	}
 
 	log.Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
+	return nil
+}
+
+func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
+	// Calculate the average CPU usage
+	var totalCPUPercentage float64
+	for _, dataPoint := range metricsHistory {
+		totalCPUPercentage += dataPoint.CPUPercentage
+	}
+	averageCPU := totalCPUPercentage / float64(len(metricsHistory))
+
+	log.Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
+
+	// Check if the average CPU usage breaches the threshold
+	if averageCPU > float64(threshold) {
+		log.Info("CPU usage threshold breached", "podName", pod.Name, "averageCPU", averageCPU)
+
+		// Write the breach timestamp annotation
+		if pod.Annotations == nil {
+			pod.Annotations = make(map[string]string)
+		}
+		breachTime := time.Now().Format(time.RFC3339)
+		pod.Annotations[cpuBreachTimestampAnnotation] = breachTime
+		if err := r.Update(ctx, pod); err != nil {
+			log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
+			return err
+		}
+		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
+	}
+
 	return nil
 }
 
