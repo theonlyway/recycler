@@ -39,6 +39,7 @@ import (
 
 	"github.com/go-logr/logr"
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
+	"k8s.io/client-go/util/retry"
 )
 
 const monitorControllerName = "monitor"
@@ -227,50 +228,51 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 
 // UpdatePodMetricsHistory updates the pod's annotation with the latest metrics history
 func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName string, namespace string, newDataPoint PodCPUUsage, maxHistory int32, log logr.Logger) error {
-	// Fetch the pod object
-	pod := &corev1.Pod{}
 	podKey := client.ObjectKey{Namespace: namespace, Name: podName}
-	if err := r.Get(ctx, podKey, pod); err != nil {
-		log.Error(err, "Failed to fetch pod", "podName", podName)
-		return err
-	}
 
-	// Initialize or fetch existing metrics history
-	var metricsHistory []PodCPUUsage
-	if pod.Annotations == nil {
-		pod.Annotations = make(map[string]string)
-	}
-	if historyJSON, exists := pod.Annotations[podMetricsAnnotation]; exists {
-		if err := json.Unmarshal([]byte(historyJSON), &metricsHistory); err != nil {
-			log.Error(err, "Failed to deserialize existing metrics history", "podName", podName)
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// Fetch the latest version of the pod
+		pod := &corev1.Pod{}
+		if err := r.Get(ctx, podKey, pod); err != nil {
+			log.Error(err, "Failed to fetch pod", "podName", podName)
 			return err
 		}
-	}
 
-	// Append the new data point
-	metricsHistory = append(metricsHistory, newDataPoint)
+		// Initialize or fetch existing metrics history
+		var metricsHistory []PodCPUUsage
+		if pod.Annotations == nil {
+			pod.Annotations = make(map[string]string)
+		}
+		if historyJSON, exists := pod.Annotations[podMetricsAnnotation]; exists {
+			if err := json.Unmarshal([]byte(historyJSON), &metricsHistory); err != nil {
+				log.Error(err, "Failed to deserialize existing metrics history", "podName", podName)
+				return err
+			}
+		}
 
-	// Trim the history to the maximum allowed size
-	if len(metricsHistory) > int(maxHistory) {
-		metricsHistory = metricsHistory[len(metricsHistory)-int(maxHistory):]
-	}
+		// Append the new data point and trim history
+		metricsHistory = append(metricsHistory, newDataPoint)
+		if len(metricsHistory) > int(maxHistory) {
+			metricsHistory = metricsHistory[len(metricsHistory)-int(maxHistory):]
+		}
 
-	// Serialize the updated history back to JSON
-	updatedHistoryJSON, err := json.Marshal(metricsHistory)
-	if err != nil {
-		log.Error(err, "Failed to serialize updated metrics history", "podName", podName)
-		return err
-	}
+		// Serialize updated history
+		updatedHistoryJSON, err := json.Marshal(metricsHistory)
+		if err != nil {
+			log.Error(err, "Failed to serialize updated metrics history", "podName", podName)
+			return err
+		}
 
-	// Update the pod annotation
-	pod.Annotations[podMetricsAnnotation] = string(updatedHistoryJSON)
-	if err := r.Update(ctx, pod); err != nil {
-		log.Error(err, "Failed to update pod annotations", "podName", podName)
-		return err
-	}
+		// Update the pod annotation
+		pod.Annotations[podMetricsAnnotation] = string(updatedHistoryJSON)
+		if err := r.Update(ctx, pod); err != nil {
+			log.Error(err, "Failed to update pod annotations", "podName", podName)
+			return err
+		}
 
-	log.Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
-	return nil
+		log.Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
+		return nil
+	})
 }
 
 func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
@@ -287,17 +289,27 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *c
 	if averageCPU > float64(threshold) {
 		log.Info("CPU usage threshold breached", "podName", pod.Name, "averageCPU", averageCPU)
 
-		// Write the breach timestamp annotation
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
-		}
-		breachTime := time.Now().Format(time.RFC3339)
-		pod.Annotations[cpuBreachTimestampAnnotation] = breachTime
-		if err := r.Update(ctx, pod); err != nil {
-			log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
-			return err
-		}
-		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
+		return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			// Fetch the latest version of the pod
+			if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
+				log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+				return err
+			}
+
+			// Write the breach timestamp annotation
+			if pod.Annotations == nil {
+				pod.Annotations = make(map[string]string)
+			}
+			breachTime := time.Now().Format(time.RFC3339)
+			pod.Annotations[cpuBreachTimestampAnnotation] = breachTime
+			if err := r.Update(ctx, pod); err != nil {
+				log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
+				return err
+			}
+
+			log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
+			return nil
+		})
 	}
 
 	return nil
