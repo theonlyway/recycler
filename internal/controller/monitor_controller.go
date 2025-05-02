@@ -150,7 +150,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			}
 
 			// Check threshold and annotate if breached
-			if err := checkPodMetricsAnnotation(ctx, r, &pod, metricsHistory, recycler.Spec.AverageCpuUtilizationPercent, log); err != nil {
+			if err := checkPodMetricsAnnotation(ctx, r, recycler, &pod, metricsHistory, recycler.Spec.AverageCpuUtilizationPercent, log); err != nil {
 				log.Error(err, "Failed to check threshold and annotate pod", "podName", pod.Name)
 			}
 		}
@@ -275,7 +275,7 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 	})
 }
 
-func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
+func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
 	// Calculate the average CPU usage
 	var totalCPUPercentage float64
 	for _, dataPoint := range metricsHistory {
@@ -294,6 +294,12 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *c
 	// Check if the average CPU usage breaches the threshold
 	if averageCPU > float64(threshold) {
 		log.Info("CPU usage threshold breached", "podName", pod.Name, "averageCPU", averageCPU)
+
+		// Check if the breach annotation already exists
+		if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
+			log.Info("Breach annotation already exists, skipping update", "podName", pod.Name)
+			return nil
+		}
 
 		return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			// Fetch the latest version of the pod
@@ -314,7 +320,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *c
 			}
 
 			// Write an event to the CRD
-			r.Recoder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
+			r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
 				"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
 			log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
@@ -340,7 +346,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, pod *c
 				}
 
 				// Write an event to the CRD
-				r.Recoder.Eventf(pod, corev1.EventTypeNormal, "CPUThresholdRecovered",
+				r.Recoder.Eventf(recycler, corev1.EventTypeNormal, "CPUThresholdRecovered",
 					"CPU usage recovered below threshold for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
 				log.Info("Breach annotation removed from pod", "podName", pod.Name)
