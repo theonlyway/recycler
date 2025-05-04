@@ -19,6 +19,8 @@ package controller
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -32,9 +34,16 @@ import (
 
 var _ = Describe("Recycler Controller", func() {
 	Context("When reconciling a resource", func() {
-		const resourceName = "test-resource"
+		const resourceName = "test-recycler"
 
 		ctx := context.Background()
+
+		namespace := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      resourceName,
+				Namespace: resourceName,
+			},
+		}
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
@@ -45,13 +54,25 @@ var _ = Describe("Recycler Controller", func() {
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Recycler")
 			err := k8sClient.Get(ctx, typeNamespacedName, recycler)
+			Expect(err).To(Not(HaveOccurred()))
+
 			if err != nil && errors.IsNotFound(err) {
 				resource := &recyclertheonlywayecomv1alpha1.Recycler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					// TODO(user): Specify other spec details if needed.
+					Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+						ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+							APIVersion: "apps/v1",
+							Kind:       "Deployment",
+							Name:       "test-deployment",
+						},
+
+						AverageCpuUtilizationPercent: 1,
+						RecycleDelaySeconds:          300,
+						GracePeriodSeconds:           30,
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}

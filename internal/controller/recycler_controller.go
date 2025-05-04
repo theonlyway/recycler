@@ -194,7 +194,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		if elapsed >= delay {
 			log.Info("Terminating pod due to CPU threshold breach", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
 
-			 // Set grace period for pod termination
+			// Set grace period for pod termination
 			gracePeriod := int64(recycler.Spec.GracePeriodSeconds)
 			deleteOptions := &client.DeleteOptions{
 				GracePeriodSeconds: &gracePeriod,
