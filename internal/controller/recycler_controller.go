@@ -242,14 +242,27 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recycler
 
 	// Remove annotations from each pod
 	for _, pod := range podList.Items {
-		if pod.Annotations != nil {
-			delete(pod.Annotations, cpuBreachTimestampAnnotation)
-			delete(pod.Annotations, podMetricsAnnotation)
-			if err := r.Update(context.TODO(), &pod); err != nil {
-				r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, err))
-			} else {
-				r.Recoder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
+		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			// Fetch the latest version of the pod
+			latestPod := &corev1.Pod{}
+			if err := r.Get(context.TODO(), client.ObjectKeyFromObject(&pod), latestPod); err != nil {
+				return err
 			}
+
+			// Remove annotations
+			if latestPod.Annotations != nil {
+				delete(latestPod.Annotations, cpuBreachTimestampAnnotation)
+				delete(latestPod.Annotations, podMetricsAnnotation)
+			}
+
+			// Update the pod
+			return r.Update(context.TODO(), latestPod)
+		})
+
+		if retryErr != nil {
+			r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, retryErr))
+		} else {
+			r.Recoder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
 		}
 	}
 }
