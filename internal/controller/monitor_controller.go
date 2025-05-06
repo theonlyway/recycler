@@ -287,7 +287,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycl
 	}
 	averageCPU := totalCPUPercentage / float64(len(metricsHistory))
 
-	log.Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
+	log.V(1).Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
 
 	// Fetch the latest version of the pod
 	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
