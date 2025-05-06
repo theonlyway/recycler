@@ -37,7 +37,6 @@ import (
 
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 	"github.com/theonlyway/recycler/internal/controller"
-	"go.uber.org/zap/zapcore"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -74,12 +73,6 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Enable debug-level logging")
 	opts := zap.Options{
 		Development: debug,
-	}
-
-	if debug {
-		opts.Level = zapcore.DebugLevel // Set log level to debug if debug flag is true
-	} else {
-		opts.Level = zapcore.InfoLevel // Default to info level
 	}
 
 	opts.BindFlags(flag.CommandLine)
