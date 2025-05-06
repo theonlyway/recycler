@@ -217,6 +217,41 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 
 func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recyclertheonlywayecomv1alpha1.Recycler) {
 	r.Recoder.Event(recycler, "Warning", "Deleting", fmt.Sprintf("Custom resource %s is being deleted from namespace %s", recycler.Name, recycler.Namespace))
+
+	// Fetch the target deployment using ScaleTargetRef
+	deployment := &appsv1.Deployment{}
+	deploymentKey := client.ObjectKey{
+		Namespace: recycler.Namespace,
+		Name:      recycler.Spec.ScaleTargetRef.Name,
+	}
+	if err := r.Get(context.TODO(), deploymentKey, deployment); err != nil {
+		r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to fetch deployment: %v", err))
+		return
+	}
+
+	// List all pods in the target deployment
+	podList := &corev1.PodList{}
+	listOptions := []client.ListOption{
+		client.InNamespace(deployment.Namespace),
+		client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+	}
+	if err := r.List(context.TODO(), podList, listOptions...); err != nil {
+		r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to list pods: %v", err))
+		return
+	}
+
+	// Remove annotations from each pod
+	for _, pod := range podList.Items {
+		if pod.Annotations != nil {
+			delete(pod.Annotations, cpuBreachTimestampAnnotation)
+			delete(pod.Annotations, podMetricsAnnotation)
+			if err := r.Update(context.TODO(), &pod); err != nil {
+				r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, err))
+			} else {
+				r.Recoder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
+			}
+		}
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.
