@@ -103,7 +103,7 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			log.V(1).Info("Performing finalizer operations", "controller", recyclerControllerName)
 
 			// Perform finalizer operations
-			r.doFinalizerOperationsForRecycler(recycler)
+			r.doFinalizerOperationsForRecycler(ctx, recycler)
 
 			// Remove finalizer
 			controllerutil.RemoveFinalizer(recycler, recyclerFinalizer)
@@ -215,7 +215,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 	return nil
 }
 
-func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recyclertheonlywayecomv1alpha1.Recycler) {
+func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Context, recycler *recyclertheonlywayecomv1alpha1.Recycler) {
 	r.Recoder.Event(recycler, "Warning", "Deleting", fmt.Sprintf("Custom resource %s is being deleted from namespace %s", recycler.Name, recycler.Namespace))
 
 	// Fetch the target deployment using ScaleTargetRef
@@ -224,7 +224,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recycler
 		Namespace: recycler.Namespace,
 		Name:      recycler.Spec.ScaleTargetRef.Name,
 	}
-	if err := r.Get(context.TODO(), deploymentKey, deployment); err != nil {
+	if err := r.Get(ctx, deploymentKey, deployment); err != nil {
 		r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to fetch deployment: %v", err))
 		return
 	}
@@ -235,7 +235,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recycler
 		client.InNamespace(deployment.Namespace),
 		client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
 	}
-	if err := r.List(context.TODO(), podList, listOptions...); err != nil {
+	if err := r.List(ctx, podList, listOptions...); err != nil {
 		r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to list pods: %v", err))
 		return
 	}
@@ -245,7 +245,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recycler
 		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			// Fetch the latest version of the pod
 			latestPod := &corev1.Pod{}
-			if err := r.Get(context.TODO(), client.ObjectKeyFromObject(&pod), latestPod); err != nil {
+			if err := r.Get(ctx, client.ObjectKeyFromObject(&pod), latestPod); err != nil {
 				return err
 			}
 
@@ -256,7 +256,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(recycler *recycler
 			}
 
 			// Update the pod
-			return r.Update(context.TODO(), latestPod)
+			return r.Update(ctx, latestPod)
 		})
 
 		if retryErr != nil {
