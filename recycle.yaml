@@ -8,5 +8,5 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: palms-user-profile
-  averageCpuUtilizationPercent: 1
-  recycleDelaySeconds: 300
+  averageCpuUtilizationPercent: 100
+  recycleDelaySeconds: 3600
