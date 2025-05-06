@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.37] - 2025-05-06
+### :bug: Bug Fixes
+- [`f58b440`](https://github.com/theonlyway/recycler/commit/f58b440b4b0cbb19624aa38cb04bbdd3de212ece) - updated finalizer to remove tags from pods *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v0.1.36] - 2025-05-06
 ### :bug: Bug Fixes
 - [`56c302f`](https://github.com/theonlyway/recycler/commit/56c302f636468b450ea0793e2222cab875b32d9d) - added debug flag *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -292,3 +297,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.1.34]: https://github.com/theonlyway/recycler/compare/v0.1.33...v0.1.34
 [v0.1.35]: https://github.com/theonlyway/recycler/compare/v0.1.34...v0.1.35
 [v0.1.36]: https://github.com/theonlyway/recycler/compare/v0.1.35...v0.1.36
+[v0.1.37]: https://github.com/theonlyway/recycler/compare/v0.1.36...v0.1.37
