@@ -73,7 +73,7 @@ type RecyclerReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
 func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
-	log.V(1).Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
+	log.Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
 
 	// Fetch the Recycler instance
 	recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
@@ -89,7 +89,7 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	// Add finalizer if not present
 	if !controllerutil.ContainsFinalizer(recycler, recyclerFinalizer) {
-		log.V(1).Info("Adding finalizer for Recycler", "controller", recyclerControllerName)
+		log.Info("Adding finalizer for Recycler", "controller", recyclerControllerName)
 		controllerutil.AddFinalizer(recycler, recyclerFinalizer)
 		if err := r.Update(ctx, recycler); err != nil {
 			log.Error(err, "Failed to update Recycler with finalizer", "controller", recyclerControllerName)
@@ -100,7 +100,7 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	// Handle deletion
 	if recycler.GetDeletionTimestamp() != nil {
 		if controllerutil.ContainsFinalizer(recycler, recyclerFinalizer) {
-			log.V(1).Info("Performing finalizer operations", "controller", recyclerControllerName)
+			log.Info("Performing finalizer operations", "controller", recyclerControllerName)
 
 			// Perform finalizer operations
 			r.doFinalizerOperationsForRecycler(ctx, recycler)
@@ -177,7 +177,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		// Check for the breach timestamp annotation
 		breachTimestamp, exists := pod.Annotations[cpuBreachTimestampAnnotation]
 		if !exists {
-			log.V(1).Info("Pod does not have breach timestamp annotation, skipping", "podName", pod.Name)
+			log.Info("Pod does not have breach timestamp annotation, skipping", "podName", pod.Name)
 			continue
 		}
 
@@ -194,7 +194,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		if elapsed >= delay {
 			log.Info("Terminating pod due to CPU threshold breach", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
 
-			 // Set grace period for pod termination
+			// Set grace period for pod termination
 			gracePeriod := int64(recycler.Spec.GracePeriodSeconds)
 			deleteOptions := &client.DeleteOptions{
 				GracePeriodSeconds: &gracePeriod,
@@ -208,7 +208,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				r.Recoder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))
 			}
 		} else {
-			log.V(1).Info("Pod not ready for termination yet", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
+			log.Info("Pod not ready for termination yet", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
 		}
 	}
 

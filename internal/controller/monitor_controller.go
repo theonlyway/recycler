@@ -93,7 +93,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	case "Deployment":
 		// Fetch the target deployment using ScaleTargetRef
 		deployment := &appsv1.Deployment{}
-		log.V(1).Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
+		log.Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
 		deploymentKey := client.ObjectKey{
 			Namespace: recycler.Namespace,
 			Name:      recycler.Spec.ScaleTargetRef.Name,
@@ -132,7 +132,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			// Fetch the metrics history annotation
 			metricsHistoryJSON, exists := pod.Annotations[podMetricsAnnotation]
 			if !exists {
-				log.V(1).Info("Pod does not have metrics history annotation, skipping", "podName", pod.Name)
+				log.Info("Pod does not have metrics history annotation, skipping", "podName", pod.Name)
 				continue
 			}
 
@@ -145,7 +145,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 			// Check if there are enough data points
 			if len(metricsHistory) < int(recycler.Spec.PodMetricsHistory) {
-				log.V(1).Info("Not enough data points for pod, skipping", "podName", pod.Name)
+				log.Info("Not enough data points for pod, skipping", "podName", pod.Name)
 				continue
 			}
 
@@ -155,7 +155,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			}
 		}
 	default:
-		log.V(1).Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
+		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
 	}
 
 	return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
@@ -173,7 +173,7 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 	}
 
 	if len(podMetricsList.Items) == 0 {
-		log.V(1).Info("No pod metrics returned", "namespace", namespace, "labelSelector", labelSelector)
+		log.Info("No pod metrics returned", "namespace", namespace, "labelSelector", labelSelector)
 		return nil, fmt.Errorf("no pod metrics returned from resource metrics API")
 	}
 
@@ -186,7 +186,7 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 			if cpuUsage, found := container.Usage[corev1.ResourceCPU]; found {
 				totalCPUUsage.Add(cpuUsage)
 			} else {
-				log.V(1).Info("Missing CPU usage metric for container", "containerName", container.Name, "podName", podMetrics.Name)
+				log.Info("Missing CPU usage metric for container", "containerName", container.Name, "podName", podMetrics.Name)
 			}
 		}
 
@@ -206,7 +206,7 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 			// Convert millicores to cores by dividing by 1000
 			cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
 		} else {
-			log.V(1).Info("Pod CPU limit is 0, skipping CPU utilization calculation", "podName", podMetrics.Name)
+			log.Info("Pod CPU limit is 0, skipping CPU utilization calculation", "podName", podMetrics.Name)
 			cpuUtilization = 0 // No CPU limit defined
 		}
 
@@ -267,14 +267,14 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 		pod.Annotations[podMetricsAnnotation] = string(updatedHistoryJSON)
 		if err := r.Update(ctx, pod); err != nil {
 			if apierrors.IsConflict(err) {
-				log.V(1).Info("Conflict detected while updating pod, retrying", "podName", podName)
+				log.Info("Conflict detected while updating pod, retrying", "podName", podName)
 			} else {
 				log.Error(err, "Failed to update pod annotations", "podName", podName)
 			}
 			return err
 		}
 
-		log.V(1).Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
+		log.Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
 		return nil
 	})
 }
@@ -287,7 +287,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycl
 	}
 	averageCPU := totalCPUPercentage / float64(len(metricsHistory))
 
-	log.V(1).Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
+	log.Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
 
 	// Fetch the latest version of the pod
 	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
@@ -301,7 +301,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycl
 
 		// Check if the breach annotation already exists
 		if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
-			log.V(1).Info("Breach annotation already exists, skipping update", "podName", pod.Name)
+			log.Info("Breach annotation already exists, skipping update", "podName", pod.Name)
 			return nil
 		}
 
