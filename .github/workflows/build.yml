@@ -29,6 +29,7 @@ jobs:
         token: ${{ github.token }}
         branch: ${{ github.head_ref || github.ref_name }}
         patchAll: true
+        majorList: "breaking,major"
 
     - name: Update CHANGELOG
       id: changelog
