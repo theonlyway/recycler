@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.11] - 2025-05-07
+### :bug: Bug Fixes
+- [`f6b6554`](https://github.com/theonlyway/recycler/commit/f6b6554193a82ba5b795a5fea005ad76b112303a) - removed pointless flags since zap has built in ways to do it *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v1.0.10] - 2025-05-07
 ### :bug: Bug Fixes
 - [`95db506`](https://github.com/theonlyway/recycler/commit/95db50644ebf7dcacd6d7d3265a7167eb5536ed1) - more logging testing *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -358,3 +363,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.0.8]: https://github.com/theonlyway/recycler/compare/v1.0.7...v1.0.8
 [v1.0.9]: https://github.com/theonlyway/recycler/compare/v1.0.8...v1.0.9
 [v1.0.10]: https://github.com/theonlyway/recycler/compare/v1.0.9...v1.0.10
+[v1.0.11]: https://github.com/theonlyway/recycler/compare/v1.0.10...v1.0.11
