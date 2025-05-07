@@ -134,7 +134,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		for _, pod := range podList.Items {
 			// Fetch the metrics history based on storage location
-			metricsHistory, err := fetchPodMetricsHistory(ctx, r, &pod, recycler.Spec.PodMetricsHistory, log, recycler.Spec.MetricStorageLocation)
+			metricsHistory, err := fetchPodMetricsHistory(ctx, r, &pod, log, recycler.Spec.MetricStorageLocation)
 			if err != nil {
 				log.Error(err, "Failed to fetch metrics history", "podName", pod.Name)
 				continue
@@ -294,7 +294,7 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 	}
 }
 
-func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, maxHistory int32, log logr.Logger, storageLocation string) ([]PodCPUUsage, error) {
+func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, log logr.Logger, storageLocation string) ([]PodCPUUsage, error) {
 	switch storageLocation {
 	case "memory":
 		// Use thread-safe in-memory storage
@@ -308,20 +308,27 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 		log.V(1).Info("Fetched in-memory metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
 		return metricsHistory, nil
 	case "annotation":
-		// Use annotation-based storage
-		metricsHistoryJSON, exists := pod.Annotations[podMetricsAnnotation]
-		if !exists {
-			log.Info("Pod does not have metrics history annotation", "podName", pod.Name)
-			return nil, nil
-		}
+			// Fetch the latest version of the pod
+			latestPod := &corev1.Pod{}
+			if err := r.Get(ctx, client.ObjectKeyFromObject(pod), latestPod); err != nil {
+				log.Error(err, "Failed to fetch latest pod", "podName", pod.Name)
+				return nil, err
+			}
 
-		var metricsHistory []PodCPUUsage
-		if err := json.Unmarshal([]byte(metricsHistoryJSON), &metricsHistory); err != nil {
-			log.Error(err, "Failed to deserialize metrics history", "podName", pod.Name)
-			return nil, err
-		}
-		log.V(1).Info("Fetched annotation-based metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
-		return metricsHistory, nil
+			// Use annotation-based storage
+			metricsHistoryJSON, exists := latestPod.Annotations[podMetricsAnnotation]
+			if !exists {
+				log.Info("Pod does not have metrics history annotation", "podName", pod.Name)
+				return nil, nil
+			}
+
+			var metricsHistory []PodCPUUsage
+			if err := json.Unmarshal([]byte(metricsHistoryJSON), &metricsHistory); err != nil {
+				log.Error(err, "Failed to deserialize metrics history", "podName", pod.Name)
+				return nil, err
+			}
+			log.V(1).Info("Fetched annotation-based metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
+			return metricsHistory, nil
 	default:
 		log.Error(fmt.Errorf("unsupported storage location"), "Invalid storage location", "storageLocation", storageLocation)
 		return nil, fmt.Errorf("unsupported storage location: %s", storageLocation)
