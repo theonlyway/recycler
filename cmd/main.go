@@ -83,7 +83,7 @@ func main() {
 	}
 
 	opts := zap.Options{
-		Level: lvl,
+		Level:       lvl,
 		Development: debug,
 	}
 

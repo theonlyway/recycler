@@ -93,7 +93,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	case "Deployment":
 		// Fetch the target deployment using ScaleTargetRef
 		deployment := &appsv1.Deployment{}
-		log.V(1).nfo("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
+		log.V(1).Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
 		deploymentKey := client.ObjectKey{
 			Namespace: recycler.Namespace,
 			Name:      recycler.Spec.ScaleTargetRef.Name,
