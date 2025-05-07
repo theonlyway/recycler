@@ -61,10 +61,8 @@ func main() {
 	var enableHTTP2 bool
 	var tlsOpts []func(*tls.Config)
 	var loglevel string
-	var zapTimeEncoding string
 	var lvl zapcore.Level
 	var debug bool
-	var enc zapcore.TimeEncoder
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -78,7 +76,6 @@ func main() {
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
 	flag.BoolVar(&debug, "debug", false, "Enable development config")
 	flag.StringVar(&loglevel, "loglevel", "info", "loglevel to use, one of: debug, info, warn, error, dpanic, panic, fatal")
-	flag.StringVar(&zapTimeEncoding, "zap-time-encoding", "epoch", "Zap time encoding (one of 'epoch', 'millis', 'nano', 'iso8601', 'rfc3339' or 'rfc3339nano')")
 
 	lvlErr := lvl.UnmarshalText([]byte(loglevel))
 	if lvlErr != nil {
@@ -86,15 +83,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	encErr := enc.UnmarshalText([]byte(zapTimeEncoding))
-	if encErr != nil {
-		setupLog.Error(encErr, "error unmarshalling timeEncoding")
-		os.Exit(1)
-	}
-
 	opts := zap.Options{
 		Level:       lvl,
-		TimeEncoder: enc,
 	}
 
 	opts.BindFlags(flag.CommandLine)
