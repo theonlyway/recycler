@@ -248,30 +248,43 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 		return
 	}
 
-	// Remove annotations from each pod
-	for _, pod := range podList.Items {
-		retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			// Fetch the latest version of the pod
-			latestPod := &corev1.Pod{}
-			if err := r.Get(ctx, client.ObjectKeyFromObject(&pod), latestPod); err != nil {
-				return err
+	// Handle cleanup based on MetricStorageLocation
+	switch recycler.Spec.MetricStorageLocation {
+	case "annotation":
+		// Remove annotations from each pod
+		for _, pod := range podList.Items {
+			retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				// Fetch the latest version of the pod
+				latestPod := &corev1.Pod{}
+				if err := r.Get(ctx, client.ObjectKeyFromObject(&pod), latestPod); err != nil {
+					return err
+				}
+
+				// Remove annotations
+				if latestPod.Annotations != nil {
+					delete(latestPod.Annotations, cpuBreachTimestampAnnotation)
+					delete(latestPod.Annotations, podMetricsAnnotation)
+				}
+
+				// Update the pod
+				return r.Update(ctx, latestPod)
+			})
+
+			if retryErr != nil {
+				r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, retryErr))
+			} else {
+				r.Recoder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
 			}
-
-			// Remove annotations
-			if latestPod.Annotations != nil {
-				delete(latestPod.Annotations, cpuBreachTimestampAnnotation)
-				delete(latestPod.Annotations, podMetricsAnnotation)
-			}
-
-			// Update the pod
-			return r.Update(ctx, latestPod)
-		})
-
-		if retryErr != nil {
-			r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, retryErr))
-		} else {
-			r.Recoder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
 		}
+	case "memory":
+		// Clear in-memory metrics storage for each pod
+		for _, pod := range podList.Items {
+			key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+			InMemoryMetricsStorage.Delete(key)
+			r.Log.V(1).Info("Cleared in-memory metrics storage for pod", "podName", pod.Name, "key", key)
+		}
+	default:
+		r.Log.Error(fmt.Errorf("unsupported storage location"), "Invalid MetricStorageLocation", "MetricStorageLocation", recycler.Spec.MetricStorageLocation)
 	}
 }
 
