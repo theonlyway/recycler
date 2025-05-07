@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.1.1] - 2025-05-07
+### :bug: Bug Fixes
+- [`1553cc7`](https://github.com/theonlyway/recycler/commit/1553cc72e79c57394086366d46d0973dd6d762f9) - always fetch latest annotations for metrics *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v1.1.0] - 2025-05-07
 ### :sparkles: New Features
 - [`956e4a3`](https://github.com/theonlyway/recycler/commit/956e4a34fa968234e73c4a4d24b7bc0eafa7c59e) - added in memory metric storage *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -370,3 +375,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.0.10]: https://github.com/theonlyway/recycler/compare/v1.0.9...v1.0.10
 [v1.0.11]: https://github.com/theonlyway/recycler/compare/v1.0.10...v1.0.11
 [v1.1.0]: https://github.com/theonlyway/recycler/compare/v1.0.11...v1.1.0
+[v1.1.1]: https://github.com/theonlyway/recycler/compare/v1.1.0...v1.1.1
