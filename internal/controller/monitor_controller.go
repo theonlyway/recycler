@@ -49,6 +49,7 @@ type MonitorReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Recoder record.EventRecorder
+	Log     logr.Logger
 }
 
 // PodCPUUsage represents the CPU usage of a pod
@@ -74,7 +75,7 @@ type PodCPUUsage struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
 func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	log := r.Log.WithValues("monitor", req.NamespacedName)
 
 	// Fetch the Recycler instance
 	recycler := &recyclertheonlywayecomv1alpha1.Recycler{}

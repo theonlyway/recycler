@@ -32,7 +32,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
@@ -53,6 +52,7 @@ type RecyclerReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
 	Recoder record.EventRecorder
+	Log     logr.Logger
 }
 
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers,verbs=get;list;watch;create;update;patch;delete
@@ -72,7 +72,7 @@ type RecyclerReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
 func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	log := r.Log.WithValues("recycler", req.NamespacedName)
 	log.V(1).Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
 
 	// Fetch the Recycler instance

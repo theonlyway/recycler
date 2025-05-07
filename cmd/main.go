@@ -61,8 +61,11 @@ func main() {
 	var enableHTTP2 bool
 	var tlsOpts []func(*tls.Config)
 	var loglevel string
+	var zapTimeEncoding string
 	var lvl zapcore.Level
 	var debug bool
+	var enc zapcore.TimeEncoder
+
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -75,6 +78,7 @@ func main() {
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
 	flag.BoolVar(&debug, "debug", false, "Enable development config")
 	flag.StringVar(&loglevel, "loglevel", "info", "loglevel to use, one of: debug, info, warn, error, dpanic, panic, fatal")
+	flag.StringVar(&zapTimeEncoding, "zap-time-encoding", "epoch", "Zap time encoding (one of 'epoch', 'millis', 'nano', 'iso8601', 'rfc3339' or 'rfc3339nano')")
 
 	lvlErr := lvl.UnmarshalText([]byte(loglevel))
 	if lvlErr != nil {
@@ -82,9 +86,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	encErr := enc.UnmarshalText([]byte(zapTimeEncoding))
+	if encErr != nil {
+		setupLog.Error(encErr, "error unmarshalling timeEncoding")
+		os.Exit(1)
+	}
+
 	opts := zap.Options{
 		Level:       lvl,
-		Development: debug,
+		TimeEncoder: enc,
 	}
 
 	opts.BindFlags(flag.CommandLine)
@@ -162,6 +172,7 @@ func main() {
 	if err = (&controller.RecyclerReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Recycler")
 		os.Exit(1)
@@ -170,6 +181,7 @@ func main() {
 	if err = (&controller.MonitorReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Monitor")
 		os.Exit(1)
