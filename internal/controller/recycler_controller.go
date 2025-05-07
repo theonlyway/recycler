@@ -204,6 +204,14 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 			if err := r.Delete(ctx, &pod, deleteOptions); err != nil {
 				log.Error(err, "Failed to delete pod", "podName", pod.Name)
 			} else {
+				// Check if in-memory storage is being used
+				if recycler.Spec.MetricStorageLocation == "memory" {
+					// Remove the pod's entry from in-memory storage
+					key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+					inMemoryMetricsStorage.Delete(key)
+					log.V(1).Info("Removed pod entry from in-memory storage", "podName", pod.Name, "key", key)
+				}
+
 				// Write an event to the CRD
 				r.Recoder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))
 			}

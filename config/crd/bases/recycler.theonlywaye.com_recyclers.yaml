@@ -48,6 +48,14 @@ spec:
                 description: Termination grace period in seconds
                 format: int32
                 type: integer
+              metricStorageLocation:
+                default: memory
+                description: Location to store metric data. Certain options are bad
+                  based on the number of datapoints and frequency
+                enum:
+                - memory
+                - annotation
+                type: string
               podMetricsHistory:
                 default: 10
                 description: Number of datapoints to keep in the pod metrics history
@@ -85,6 +93,7 @@ spec:
             required:
             - averageCpuUtilizationPercent
             - gracePeriodSeconds
+            - metricStorageLocation
             - podMetricsHistory
             - pollingIntervalSeconds
             - recycleDelaySeconds

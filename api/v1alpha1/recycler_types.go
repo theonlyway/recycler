@@ -60,6 +60,10 @@ type RecyclerSpec struct {
 	// Termination grace period in seconds
 	//+default=30
 	GracePeriodSeconds int32 `json:"gracePeriodSeconds"`
+	// Location to store metric data. Certain options are bad based on the number of datapoints and frequency
+	//+kubebuilder:validation:Enum=memory;annotation
+	//+kubebuilder:default=memory
+	MetricStorageLocation string `json:"metricStorageLocation"`
 }
 
 // RecyclerStatus defines the observed state of Recycler
