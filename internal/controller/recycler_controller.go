@@ -73,7 +73,7 @@ type RecyclerReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
 func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
-	log.Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
+	log.V(1).Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
 
 	// Fetch the Recycler instance
 	recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
@@ -177,7 +177,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		// Check for the breach timestamp annotation
 		breachTimestamp, exists := pod.Annotations[cpuBreachTimestampAnnotation]
 		if !exists {
-			log.Info("Pod does not have breach timestamp annotation, skipping", "podName", pod.Name)
+			log.V(1).Info("Pod does not have breach timestamp annotation, skipping", "podName", pod.Name)
 			continue
 		}
 
@@ -208,7 +208,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				r.Recoder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))
 			}
 		} else {
-			log.Info("Pod not ready for termination yet", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
+			log.V(1).Info("Pod not ready for termination yet", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
 		}
 	}
 

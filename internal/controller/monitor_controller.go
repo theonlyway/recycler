@@ -93,7 +93,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	case "Deployment":
 		// Fetch the target deployment using ScaleTargetRef
 		deployment := &appsv1.Deployment{}
-		log.Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
+		log.V(1).nfo("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
 		deploymentKey := client.ObjectKey{
 			Namespace: recycler.Namespace,
 			Name:      recycler.Spec.ScaleTargetRef.Name,
@@ -145,7 +145,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 			// Check if there are enough data points
 			if len(metricsHistory) < int(recycler.Spec.PodMetricsHistory) {
-				log.Info("Not enough data points for pod, skipping", "podName", pod.Name)
+				log.V(1).Info("Not enough data points for pod, skipping", "podName", pod.Name)
 				continue
 			}
 
@@ -274,7 +274,7 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 			return err
 		}
 
-		log.Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
+		log.V(1).Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
 		return nil
 	})
 }
@@ -287,7 +287,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycl
 	}
 	averageCPU := totalCPUPercentage / float64(len(metricsHistory))
 
-	log.Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
+	log.V(1).Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
 
 	// Fetch the latest version of the pod
 	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
@@ -301,7 +301,7 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycl
 
 		// Check if the breach annotation already exists
 		if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
-			log.Info("Breach annotation already exists, skipping update", "podName", pod.Name)
+			log.V(1).Info("Breach annotation already exists, skipping update", "podName", pod.Name)
 			return nil
 		}
 
