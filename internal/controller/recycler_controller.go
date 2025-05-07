@@ -9,7 +9,7 @@ You may obtain a copy of the License at
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+WITHOUT WARRANTIES OR CONDITIONS, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
@@ -208,7 +208,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				if recycler.Spec.MetricStorageLocation == "memory" {
 					// Remove the pod's entry from in-memory storage
 					key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
-					inMemoryMetricsStorage.Delete(key)
+					InMemoryMetricsStorage.Delete(key) // Access exported variable
 					log.V(1).Info("Removed pod entry from in-memory storage", "podName", pod.Name, "key", key)
 				}
 

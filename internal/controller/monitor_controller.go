@@ -44,8 +44,8 @@ import (
 
 const monitorControllerName = "monitor"
 
-// Thread-safe in-memory storage for metrics
-var inMemoryMetricsStorage sync.Map
+// Exported thread-safe in-memory storage for metrics
+var InMemoryMetricsStorage sync.Map
 
 // MonitorReconciler reconciles a Monitor object
 type MonitorReconciler struct {
@@ -229,14 +229,15 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 	case "memory":
 		// Use thread-safe in-memory storage
 		key := fmt.Sprintf("%s/%s", namespace, podName)
-		value, _ := inMemoryMetricsStorage.LoadOrStore(key, []PodCPUUsage{})
+		log.V(1).Info("Working with in-memory storage", "key", key)
+		value, _ := InMemoryMetricsStorage.LoadOrStore(key, []PodCPUUsage{})
 		metricsHistory := value.([]PodCPUUsage)
 		metricsHistory = append(metricsHistory, newDataPoint)
 		if len(metricsHistory) > int(maxHistory) {
 			metricsHistory = metricsHistory[len(metricsHistory)-int(maxHistory):]
 		}
-		inMemoryMetricsStorage.Store(key, metricsHistory)
-		log.V(1).Info("Updated in-memory metrics history", "podName", podName, "historySize", len(metricsHistory))
+		InMemoryMetricsStorage.Store(key, metricsHistory)
+		log.V(1).Info("Updated in-memory metrics history", "key", key, "historySize", len(metricsHistory))
 		return nil
 	case "annotation":
 		// Use annotation-based storage
@@ -299,36 +300,37 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 	case "memory":
 		// Use thread-safe in-memory storage
 		key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
-		value, exists := inMemoryMetricsStorage.Load(key)
+		log.V(1).Info("Fetching from in-memory storage", "key", key)
+		value, exists := InMemoryMetricsStorage.Load(key)
 		if !exists {
-			log.Info("No in-memory metrics history found", "podName", pod.Name)
+			log.Info("No in-memory metrics history found", "key", key)
 			return nil, nil
 		}
 		metricsHistory := value.([]PodCPUUsage)
-		log.V(1).Info("Fetched in-memory metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
+		log.V(1).Info("Fetched in-memory metrics history", "key", key, "historySize", len(metricsHistory))
 		return metricsHistory, nil
 	case "annotation":
-			// Fetch the latest version of the pod
-			latestPod := &corev1.Pod{}
-			if err := r.Get(ctx, client.ObjectKeyFromObject(pod), latestPod); err != nil {
-				log.Error(err, "Failed to fetch latest pod", "podName", pod.Name)
-				return nil, err
-			}
+		// Fetch the latest version of the pod
+		latestPod := &corev1.Pod{}
+		if err := r.Get(ctx, client.ObjectKeyFromObject(pod), latestPod); err != nil {
+			log.Error(err, "Failed to fetch latest pod", "podName", pod.Name)
+			return nil, err
+		}
 
-			// Use annotation-based storage
-			metricsHistoryJSON, exists := latestPod.Annotations[podMetricsAnnotation]
-			if !exists {
-				log.Info("Pod does not have metrics history annotation", "podName", pod.Name)
-				return nil, nil
-			}
+		// Use annotation-based storage
+		metricsHistoryJSON, exists := latestPod.Annotations[podMetricsAnnotation]
+		if !exists {
+			log.Info("Pod does not have metrics history annotation", "podName", pod.Name)
+			return nil, nil
+		}
 
-			var metricsHistory []PodCPUUsage
-			if err := json.Unmarshal([]byte(metricsHistoryJSON), &metricsHistory); err != nil {
-				log.Error(err, "Failed to deserialize metrics history", "podName", pod.Name)
-				return nil, err
-			}
-			log.V(1).Info("Fetched annotation-based metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
-			return metricsHistory, nil
+		var metricsHistory []PodCPUUsage
+		if err := json.Unmarshal([]byte(metricsHistoryJSON), &metricsHistory); err != nil {
+			log.Error(err, "Failed to deserialize metrics history", "podName", pod.Name)
+			return nil, err
+		}
+		log.V(1).Info("Fetched annotation-based metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
+		return metricsHistory, nil
 	default:
 		log.Error(fmt.Errorf("unsupported storage location"), "Invalid storage location", "storageLocation", storageLocation)
 		return nil, fmt.Errorf("unsupported storage location: %s", storageLocation)
@@ -336,86 +338,85 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 }
 
 func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
-	// Calculate the average CPU usage
-	var totalCPUPercentage float64
-	for _, dataPoint := range metricsHistory {
-		totalCPUPercentage += dataPoint.CPUPercentage
-	}
-	averageCPU := totalCPUPercentage / float64(len(metricsHistory))
+	averageCPU := calculateAverageCPU(metricsHistory, log, pod.Name)
 
-	log.V(1).Info("Calculated average CPU usage", "podName", pod.Name, "averageCPU", averageCPU)
-
-	// Fetch the latest version of the pod
 	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
 		log.Error(err, "Failed to fetch pod", "podName", pod.Name)
 		return err
 	}
 
-	// Check if the average CPU usage breaches the threshold
 	if averageCPU > float64(threshold) {
-		log.Info("CPU usage threshold breached", "podName", pod.Name, "averageCPU", averageCPU)
-
-		// Check if the breach annotation already exists
-		if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
-			log.V(1).Info("Breach annotation already exists, skipping update", "podName", pod.Name)
-			return nil
-		}
-
-		return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			// Fetch the latest version of the pod
-			if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
-				log.Error(err, "Failed to fetch pod", "podName", pod.Name)
-				return err
-			}
-
-			// Write the breach timestamp annotation
-			if pod.Annotations == nil {
-				pod.Annotations = make(map[string]string)
-			}
-			breachTime := time.Now().Format(time.RFC3339)
-			pod.Annotations[cpuBreachTimestampAnnotation] = breachTime
-			if err := r.Update(ctx, pod); err != nil {
-				log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
-				return err
-			}
-
-			// Write an event to the CRD
-			r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
-				"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
-
-			log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
-			return nil
-		})
-	} else {
-		// Remove the breach annotation if it exists
-		if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
-			log.Info("CPU usage recovered below threshold, removing breach annotation", "podName", pod.Name)
-
-			return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				// Fetch the latest version of the pod
-				if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
-					log.Error(err, "Failed to fetch pod", "podName", pod.Name)
-					return err
-				}
-
-				// Remove the breach annotation
-				delete(pod.Annotations, cpuBreachTimestampAnnotation)
-				if err := r.Update(ctx, pod); err != nil {
-					log.Error(err, "Failed to update pod to remove breach annotation", "podName", pod.Name)
-					return err
-				}
-
-				// Write an event to the CRD
-				r.Recoder.Eventf(recycler, corev1.EventTypeNormal, "CPUThresholdRecovered",
-					"CPU usage recovered below threshold for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
-
-				log.Info("Breach annotation removed from pod", "podName", pod.Name)
-				return nil
-			})
-		}
+		return handleThresholdBreach(ctx, r, recycler, pod, averageCPU, log)
 	}
 
-	return nil
+	return handleThresholdRecovery(ctx, r, recycler, pod, averageCPU, log)
+}
+
+func calculateAverageCPU(metricsHistory []PodCPUUsage, log logr.Logger, podName string) float64 {
+	var totalCPUPercentage float64
+	for _, dataPoint := range metricsHistory {
+		totalCPUPercentage += dataPoint.CPUPercentage
+	}
+	averageCPU := totalCPUPercentage / float64(len(metricsHistory))
+	log.V(1).Info("Calculated average CPU usage", "podName", podName, "averageCPU", averageCPU)
+	return averageCPU
+}
+
+func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, averageCPU float64, log logr.Logger) error {
+	if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists {
+		log.V(1).Info("Breach annotation already exists, skipping update", "podName", pod.Name)
+		return nil
+	}
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
+			log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+			return err
+		}
+
+		if pod.Annotations == nil {
+			pod.Annotations = make(map[string]string)
+		}
+		breachTime := time.Now().Format(time.RFC3339)
+		pod.Annotations[cpuBreachTimestampAnnotation] = breachTime
+		if err := r.Update(ctx, pod); err != nil {
+			log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
+			return err
+		}
+
+		r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
+			"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
+
+		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
+		return nil
+	})
+}
+
+func handleThresholdRecovery(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, averageCPU float64, log logr.Logger) error {
+	if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; !exists {
+		return nil
+	}
+
+	log.Info("CPU usage recovered below threshold, removing breach annotation", "podName", pod.Name)
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
+			log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+			return err
+		}
+
+		delete(pod.Annotations, cpuBreachTimestampAnnotation)
+		if err := r.Update(ctx, pod); err != nil {
+			log.Error(err, "Failed to update pod to remove breach annotation", "podName", pod.Name)
+			return err
+		}
+
+		r.Recoder.Eventf(recycler, corev1.EventTypeNormal, "CPUThresholdRecovered",
+			"CPU usage recovered below threshold for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
+
+		log.Info("Breach annotation removed from pod", "podName", pod.Name)
+		return nil
+	})
 }
 
 // SetupWithManager sets up the controller with the Manager.
