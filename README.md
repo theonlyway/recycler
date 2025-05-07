@@ -1,17 +1,40 @@
 # recycler
-// TODO(user): Add simple overview of use/purpose
+A Kubernetes controller that monitors pods CPU utilisation inside a deployment, replicaset, or statefulset and terminates the pod if it exceeds a specified threshold.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+Ordinarialy something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of manually restarting things so you write a controller to monitor the pods and terminate them if they exceed a threshold.
 
 ## Getting Started
+* Install the operator using the following:
+// Todo: Add instructions for installing the operator. Probably helm
+
+* Create the Recycler custom resource using the following:
+```yaml
+apiVersion: recycler.theonlywaye.com/v1alpha1
+kind: Recycler
+metadata:
+  name: name-of-recycler # Should be unique but can be anything you want
+  namespace: namespace-of-recycler # Should be the same as the namespace of the deployment, replicaset, or statefulset
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: name-of-deployment # Should be the same as the name of the deployment, replicaset, or statefulset
+  pollingIntervalSeconds: 30 # This is how long between polling for metrics from the metrics api
+  podMetricsHistory: 5 # This is how many historical metrics to keep which is used to calculate the average CPU averageCpuUtilizationPercent
+  averageCpuUtilizationPercent: 80 # This is the threshold for when to terminate the pod
+  recycleDelaySeconds: 3600 # This is how long to wait before terminating the pod once it's breached the average CPU utilization threshold
+  gracePeriodSeconds: 60 # Configuraable time to wait when terminating the pod before it's forcefully terminated
+  metricStorageLocation: memory # Where to store the metrics data. Either in memory or as an annotation on the pod. There are implications to both
+```
 
 ### Prerequisites
-- go version v1.22.0+
+- go version v1.24.0+
 - docker version 17.03+.
 - kubectl version v1.11.3+.
 - Access to a Kubernetes v1.11.3+ cluster.
 
+## Building and deploying manually
 ### To Deploy on the cluster
 **Build and push your image to the location specified by `IMG`:**
 
@@ -111,4 +134,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: palmsacr.azurecr.io/theonlywaye/recycler
-  newTag: 1.0.10
+  newTag: 1.1.4
