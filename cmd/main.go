@@ -62,7 +62,6 @@ func main() {
 	var tlsOpts []func(*tls.Config)
 	var loglevel string
 	var lvl zapcore.Level
-	var debug bool
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -74,7 +73,6 @@ func main() {
 		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
-	flag.BoolVar(&debug, "debug", false, "Enable development config")
 	flag.StringVar(&loglevel, "loglevel", "info", "loglevel to use, one of: debug, info, warn, error, dpanic, panic, fatal")
 
 	lvlErr := lvl.UnmarshalText([]byte(loglevel))
@@ -82,9 +80,11 @@ func main() {
 		setupLog.Error(lvlErr, "error unmarshalling loglevel")
 		os.Exit(1)
 	}
+	setupLog.Info("Log level set", "level", lvl.String())
 
 	opts := zap.Options{
 		Level:       lvl,
+		Development: lvl != zapcore.InfoLevel, // Enable development mode if loglevel is not info
 	}
 
 	opts.BindFlags(flag.CommandLine)
