@@ -118,8 +118,8 @@ jobs:
         allowUpdates: true
         draft: false
         makeLatest: true
-        name: ${{ steps.semver.outputs.next }}
-        tag: ${{ steps.semver.outputs.next }}
+        name: ${{ needs.semver.outputs.next_version }}
+        tag: ${{ needs.semver.outputs.next_version }}
         body: ${{ steps.changelog.outputs.changes }}
         token: ${{ github.token }}
         artifactContentType: application/gzip
@@ -136,21 +136,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Revert CHANGELOG.md Changes
-        run: |
-          git fetch origin
-          git checkout origin/main -- CHANGELOG.md
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add CHANGELOG.md
-          git commit -m "Revert CHANGELOG.md changes [skip ci]"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: ClementTsang/delete-tag-and-release@v0.3.1
         with:
           delete_release: true # default: false
           tag_name: v${{ needs.semver.outputs.next_version }} # tag name to delete
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reset Branch to Initial Commit
+        run: |
+          git fetch origin
+          git reset --hard ${{ github.sha }}
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git push --force origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
