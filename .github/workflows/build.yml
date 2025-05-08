@@ -11,7 +11,7 @@ on:
     types: [published]
 
 jobs:
-  tag:
+  semver:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     permissions:
@@ -32,34 +32,8 @@ jobs:
         patchAll: true
         majorList: "breaking,major"
 
-    - name: Update CHANGELOG
-      id: changelog
-      uses: requarks/changelog-action@v1
-      with:
-        token: ${{ github.token }}
-        tag: ${{ steps.semver.outputs.current }}
-
-    - name: Create Release
-      uses: ncipollo/release-action@v1
-      id: release
-      with:
-        allowUpdates: true
-        draft: false
-        makeLatest: true
-        name: ${{ steps.semver.outputs.next }}
-        tag: ${{ steps.semver.outputs.next }}
-        body: ${{ steps.changelog.outputs.changes }}
-        token: ${{ github.token }}
-
-    - name: Commit CHANGELOG.md
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        branch: main
-        commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
-        file_pattern: CHANGELOG.md
-
   build:
-    needs: [tag]
+    needs: [semver]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -77,7 +51,7 @@ jobs:
 
     - name: Update Chart Version
       env:
-        NEXT_VERSION: ${{ needs.tag.outputs.next_version }}
+        NEXT_VERSION: ${{ needs.semver.outputs.next_version }}
       run: |
         sed -i "s/^version: .*/version: ${NEXT_VERSION}/" helm-charts/recycler/Chart.yaml
         sed -i "s/^appVersion: .*/appVersion: \"${NEXT_VERSION}\"/" helm-charts/recycler/Chart.yaml
@@ -90,7 +64,7 @@ jobs:
 
     - name: Update Helm Chart Tag
       run: |
-        sed -i "s/tag: .*/tag: ${{ needs.tag.outputs.next_version }}/" helm-charts/recycler/values.yaml
+        sed -i "s/tag: .*/tag: ${{ needs.semver.outputs.next_version }}/" helm-charts/recycler/values.yaml
 
     - name: Package Helm Chart
       run: |
@@ -116,16 +90,50 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Operator
-      #run: make docker-buildx IMG=theonlywaye/recycler:${{ needs.tag.outputs.next_version }} VERSION=${{ needs.tag.outputs.next_version }}
-      run: make docker-build docker-push IMG=theonlywaye/recycler:${{ needs.tag.outputs.next_version }} VERSION=${{ needs.tag.outputs.next_version }}
+      #run: make docker-buildx IMG=theonlywaye/recycler:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
+      run: make docker-build docker-push IMG=theonlywaye/recycler:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
 
     - name: Upload Helm Chart to Release
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ needs.tag.outputs.release_upload_url }}
+        upload_url: ${{ needs.semver.outputs.release_upload_url }}
         asset_path: ./releases/recycler-*.tgz
-        asset_name: recycler-${{ needs.tag.outputs.next_version }}.tgz
+        asset_name: recycler-${{ needs.semver.outputs.next_version }}.tgz
         asset_content_type: application/gzip
+
+  release:
+    needs: [tag, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Update CHANGELOG
+      id: changelog
+      uses: requarks/changelog-action@v1
+      with:
+        token: ${{ github.token }}
+        tag: ${{ steps.semver.outputs.current }}
+
+    - name: Commit CHANGELOG.md
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        branch: main
+        commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
+        file_pattern: CHANGELOG.md
+
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      id: release
+      with:
+        allowUpdates: true
+        draft: false
+        makeLatest: true
+        name: ${{ steps.semver.outputs.next }}
+        tag: ${{ steps.semver.outputs.next }}
+        body: ${{ steps.changelog.outputs.changes }}
+        token: ${{ github.token }}
+        artifactContentType: application/gzip
+        artifacts: ./releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
 
   cleanup:
     needs: [tag, build]
@@ -153,6 +161,6 @@ jobs:
       - uses: ClementTsang/delete-tag-and-release@v0.3.1
         with:
           delete_release: true # default: false
-          tag_name: v${{ needs.tag.outputs.next_version }} # tag name to delete
+          tag_name: v${{ needs.semver.outputs.next_version }} # tag name to delete
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
