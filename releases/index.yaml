@@ -2,8 +2,20 @@ apiVersion: v1
 entries:
   recycler:
   - apiVersion: v2
+    appVersion: 1.1.10
+    created: "2025-05-08T05:00:14.225231798Z"
+    description: A Kubernetes controller that monitors pods CPU utilisation inside
+      a deployment, replicaset, or statefulset and terminates the pod if it exceeds
+      a specified threshold
+    digest: 936aa005a8fcbc42a2c3f5ced6911a971b9f3dd5ed1099a3c07964f412969954
+    name: recycler
+    type: application
+    urls:
+    - https://theonlyway.github.io/theonlyway/recycler/releases/recycler-1.1.10.tgz
+    version: 1.1.10
+  - apiVersion: v2
     appVersion: 1.1.9
-    created: "2025-05-08T04:34:08.37046049Z"
+    created: "2025-05-08T05:00:14.226279371Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -15,7 +27,7 @@ entries:
     version: 1.1.9
   - apiVersion: v2
     appVersion: 1.1.8
-    created: "2025-05-08T04:34:08.370088844Z"
+    created: "2025-05-08T05:00:14.225958647Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -27,7 +39,7 @@ entries:
     version: 1.1.8
   - apiVersion: v2
     appVersion: 1.1.7
-    created: "2025-05-08T04:34:08.369278921Z"
+    created: "2025-05-08T05:00:14.22559961Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -37,4 +49,4 @@ entries:
     urls:
     - https://theonlyway.github.io/theonlyway/recycler/releases/recycler-1.1.7.tgz
     version: 1.1.7
-generated: "2025-05-08T04:34:08.36811899Z"
+generated: "2025-05-08T05:00:14.22341267Z"
