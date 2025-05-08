@@ -2,12 +2,63 @@
 A Kubernetes controller that monitors pods CPU utilisation inside a deployment, replicaset, or statefulset and terminates the pod if it exceeds a specified threshold.
 
 ## Description
-Ordinarialy something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of manually restarting things so you write a controller to monitor the pods and terminate them if they exceed a threshold.
+Ordinarialy something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of a HPA scaling needlessly, a pod not failing health checks even though it's at 100% CPU, and you get sick of manually restarting things so you write a controller to monitor the pods and terminate them if they exceed a threshold.
 
-## Getting Started
-* Install the operator using the following:
-// Todo: Add instructions for installing the operator. Probably helm
+## Operator installation
+### Helm
+**Add the Helm repository:**
+```sh
+helm repo add recycler https://theonlyway.github.io/recycler
+helm repo update
+```
 
+**Install the operator:**
+```sh
+helm install recycler recycler/recycler --namespace <namespace> --create-namespace
+```
+
+**Upgrade the operator:**
+```sh
+helm upgrade recycler recycler/recycler --namespace <namespace>
+```
+
+**Uninstall the operator:**
+```sh
+helm uninstall recycler --namespace <namespace>
+```
+
+### Kustomize
+**Install the CRDs into the cluster:**
+```sh
+make install
+```
+
+**Deploy the Manager to the cluster with the image specified by `IMG`:**
+```sh
+make deploy IMG=theonlywaye/recycler:latest
+```
+
+**Uninstall the CRDs from the cluster:**
+```sh
+make uninstall
+```
+
+**UnDeploy the controller from the cluster:**
+```sh
+make undeploy
+```
+
+**Generate a consolidated YAML with CRDs and deployment:**
+```sh
+make build-installer IMG=theonlywaye/recycler:latest
+```
+
+The generated YAML file will be located in the `dist/install.yaml` file. You can apply it to your cluster using:
+```sh
+kubectl apply -f dist/install.yaml
+```
+
+## Custom Resource Definition
 * Create the Recycler custom resource using the following:
 ```yaml
 apiVersion: recycler.theonlywaye.com/v1alpha1
