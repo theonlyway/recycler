@@ -100,6 +100,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      ref: main
 
     - name: Update CHANGELOG
       id: changelog
@@ -107,6 +108,10 @@ jobs:
       with:
         token: ${{ github.token }}
         tag: ${{ needs.semver.outputs.current_version }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+      ref: main
 
     - name: Commit CHANGELOG.md
       uses: stefanzweifel/git-auto-commit-action@v4
@@ -130,7 +135,7 @@ jobs:
         artifacts: ./releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
 
   cleanup:
-    needs: [semver, build]
+    needs: [semver, build, release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
