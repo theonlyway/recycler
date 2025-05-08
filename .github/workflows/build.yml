@@ -80,7 +80,7 @@ jobs:
 
     - name: Update Helm Chart Tag
       run: |
-        sed -i "s/tag: .*/tag: ${needs.tag.outputs.next_version}/" helm-charts/recycler/values.yaml
+        sed -i "s/tag: .*/tag: ${{ needs.tag.outputs.next_version }}/" helm-charts/recycler/values.yaml
 
     - name: Package Helm Chart
       run: |
