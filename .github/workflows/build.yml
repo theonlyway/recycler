@@ -69,7 +69,7 @@ jobs:
       run: |
         mkdir -p ./releases
         helm package ./helm-charts/recycler --destination ./releases
-        helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/releases
+        helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/recycler/releases
 
     - name: Commit and Push Helm Chart Updates
       if: success()

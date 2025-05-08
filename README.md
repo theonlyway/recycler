@@ -14,7 +14,7 @@ Ordinarialy something like this shouldn't even exist if people wrote their softw
 ### Helm
 **Add the Helm repository:**
 ```sh
-helm repo add recycler https://theonlyway.github.io/recycler
+helm repo add recycler https://theonlyway.github.io/recycler/releases
 helm repo update
 ```
 
