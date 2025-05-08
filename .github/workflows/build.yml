@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: write
     outputs:
+      current_version: ${{ steps.semver.outputs.current }}
       next_version: ${{ steps.semver.outputs.nextStrict }}
       release_upload_url: ${{ steps.release.outputs.upload_url }}
     steps:
@@ -102,7 +103,7 @@ jobs:
       uses: requarks/changelog-action@v1
       with:
         token: ${{ github.token }}
-        tag: ${{ needs.semver.outputs.next_version }}
+        tag: ${{ needs.semver.outputs.current_version }}
 
     - name: Commit CHANGELOG.md
       uses: stefanzweifel/git-auto-commit-action@v4
