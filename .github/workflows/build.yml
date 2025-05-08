@@ -102,7 +102,7 @@ jobs:
       uses: requarks/changelog-action@v1
       with:
         token: ${{ github.token }}
-        tag: ${{ steps.semver.outputs.current }}
+        tag: ${{ needs.semver.outputs.next_version }}
 
     - name: Commit CHANGELOG.md
       uses: stefanzweifel/git-auto-commit-action@v4
