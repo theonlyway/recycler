@@ -40,6 +40,7 @@ jobs:
 
     - name: Create Release
       uses: ncipollo/release-action@v1
+      id: release
       with:
         allowUpdates: true
         draft: false
@@ -104,3 +105,16 @@ jobs:
         asset_path: ./releases/recycler-*.tgz
         asset_name: recycler-${{ needs.tag.outputs.next_version }}.tgz
         asset_content_type: application/gzip
+
+  cleanup:
+    needs: [tag, build]
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - uses: ClementTsang/delete-tag-and-release@v0.3.1
+        with:
+          delete_release: true # default: false
+          tag_name: ${{ needs.tag.outputs.next_version }} # tag name to delete
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
