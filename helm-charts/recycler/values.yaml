@@ -11,7 +11,7 @@ controllerManager:
         - ALL
     image:
       repository: theonlywaye/recycler
-      tag: latest
+      tag: 1.1.9
     resources:
       limits:
         cpu: 500m
@@ -24,6 +24,7 @@ controllerManager:
   replicas: 1
   serviceAccount:
     annotations: {}
+kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
   - name: https
