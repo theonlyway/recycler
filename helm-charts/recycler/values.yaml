@@ -11,7 +11,7 @@ controllerManager:
         - ALL
     image:
       repository: theonlywaye/recycler
-      tag: 1.1.15
+      tag: 1.1.16
     resources:
       limits:
         cpu: 500m
