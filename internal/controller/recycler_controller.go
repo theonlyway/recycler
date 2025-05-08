@@ -192,7 +192,11 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		elapsed := time.Since(breachTime)
 		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
 		if elapsed >= delay {
-			log.Info("Terminating pod due to CPU threshold breach", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
+			log.Info("Terminating pod due to CPU threshold breach",
+				"podName", pod.Name,
+				"breachTimestamp", breachTimestamp,
+				"elapsed", elapsed,
+				"delay", delay)
 
 			// Set grace period for pod termination
 			gracePeriod := int64(recycler.Spec.GracePeriodSeconds)
@@ -216,7 +220,13 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				r.Recoder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))
 			}
 		} else {
-			log.V(1).Info("Pod not ready for termination yet", "podName", pod.Name, "elapsed", elapsed, "delay", delay)
+			terminationTime := breachTime.Add(delay)
+			log.V(1).Info("Pod not ready for termination yet",
+				"podName", pod.Name,
+				"breachTimestamp", breachTimestamp,
+				"elapsed", elapsed,
+				"delay", delay,
+				"terminationTime", terminationTime)
 		}
 	}
 
