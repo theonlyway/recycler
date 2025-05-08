@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.1.8] - 2025-05-08
+### :bug: Bug Fixes
+- [`2473bb9`](https://github.com/theonlyway/recycler/commit/2473bb94a47906ccb26e3d9412f744be404f02bc) - updating build to generate helm charts *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v1.1.7] - 2025-05-08
 ### :bug: Bug Fixes
 - [`fe95723`](https://github.com/theonlyway/recycler/commit/fe95723884c968de4a2aaa503fbfcb89d21aaa59) - fixing templates *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -412,3 +417,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.1.5]: https://github.com/theonlyway/recycler/compare/v1.1.4...v1.1.5
 [v1.1.6]: https://github.com/theonlyway/recycler/compare/v1.1.5...v1.1.6
 [v1.1.7]: https://github.com/theonlyway/recycler/compare/v1.1.6...v1.1.7
+[v1.1.8]: https://github.com/theonlyway/recycler/compare/v1.1.7...v1.1.8
