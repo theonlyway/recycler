@@ -26,3 +26,4 @@ go.work
 *.swo
 *~
 bin
+config/manager/kustomization.yaml

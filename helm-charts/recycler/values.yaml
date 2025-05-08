@@ -10,8 +10,8 @@ controllerManager:
         drop:
         - ALL
     image:
-      repository: palmsacr.azurecr.io/theonlywaye/recycler
-      tag: 1.1.4
+      repository: theonlywaye/recycler
+      tag: latest
     resources:
       limits:
         cpu: 500m
