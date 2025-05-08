@@ -17,7 +17,7 @@ jobs:
       contents: write
     outputs:
       next_version: ${{ steps.semver.outputs.nextStrict }}
-
+      release_upload_url: ${{ steps.release.outputs.upload_url }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -101,7 +101,7 @@ jobs:
     - name: Upload Helm Chart to Release
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ needs.tag.outputs.release.upload_url }}
+        upload_url: ${{ needs.tag.outputs.release_upload_url }}
         asset_path: ./releases/recycler-*.tgz
         asset_name: recycler-${{ needs.tag.outputs.next_version }}.tgz
         asset_content_type: application/gzip
@@ -115,6 +115,6 @@ jobs:
       - uses: ClementTsang/delete-tag-and-release@v0.3.1
         with:
           delete_release: true # default: false
-          tag_name: ${{ needs.tag.outputs.next_version }} # tag name to delete
+          tag_name: v${{ needs.tag.outputs.next_version }} # tag name to delete
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
