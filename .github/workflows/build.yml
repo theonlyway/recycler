@@ -102,7 +102,7 @@ jobs:
         asset_content_type: application/gzip
 
   release:
-    needs: [tag, build]
+    needs: [semver, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -136,7 +136,7 @@ jobs:
         artifacts: ./releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
 
   cleanup:
-    needs: [tag, build]
+    needs: [semver, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
