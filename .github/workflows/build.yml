@@ -71,16 +71,16 @@ jobs:
         helm package ./helm-charts/recycler --destination ./releases
         helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/releases
 
-    - name: Commit and Push Releases
+    - name: Commit and Push Helm Chart Updates
       if: success()
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git add ./releases
-        git commit -m "Add Helm chart to releases [skip ci]"
+        git add helm-charts/recycler/Chart.yaml helm-charts/recycler/values.yaml ./releases
+        git commit -m "Update Helm chart to version ${{ needs.semver.outputs.next_version }} [skip ci]"
         git push origin main
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Login to Docker Hub
       uses: docker/login-action@v3
@@ -98,6 +98,9 @@ jobs:
     permissions:
       contents: write
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
     - name: Update CHANGELOG
       id: changelog
       uses: requarks/changelog-action@v1
