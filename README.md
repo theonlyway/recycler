@@ -34,6 +34,12 @@ helm uninstall recycler --namespace <namespace>
 ```
 
 ### Kustomize
+**Clone the repository:**
+```sh
+git clone https://github.com/theonlyway/recycler.git
+cd recycler
+```
+
 **Install the CRDs into the cluster:**
 ```sh
 make install
