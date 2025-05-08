@@ -3,11 +3,11 @@ entries:
   recycler:
   - apiVersion: v2
     appVersion: 1.1.8
-    created: "2025-05-08T03:38:01.461476539Z"
+    created: "2025-05-08T03:50:41.067589705Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
-    digest: 7dacd1367e3cfe1e82058ec82b500020bf2dca72845f69aec8b3bb2e62cecc2d
+    digest: b7de7c0677491f667dfe56eac1a13c6707d2a3d594c81b58689ef5b18aed916c
     name: recycler
     type: application
     urls:
@@ -15,7 +15,7 @@ entries:
     version: 1.1.8
   - apiVersion: v2
     appVersion: 1.1.7
-    created: "2025-05-08T03:38:01.460955744Z"
+    created: "2025-05-08T03:50:41.06722231Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -25,4 +25,4 @@ entries:
     urls:
     - https://theonlyway.github.io/theonlyway/recycler/releases/recycler-1.1.7.tgz
     version: 1.1.7
-generated: "2025-05-08T03:38:01.460490623Z"
+generated: "2025-05-08T03:50:41.066706329Z"
