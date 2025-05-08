@@ -50,11 +50,9 @@ jobs:
       run: make operator-sdk
 
     - name: Update Chart Version
-      env:
-        NEXT_VERSION: ${{ needs.semver.outputs.next_version }}
       run: |
-        sed -i "s/^version: .*/version: ${NEXT_VERSION}/" helm-charts/recycler/Chart.yaml
-        sed -i "s/^appVersion: .*/appVersion: \"${NEXT_VERSION}\"/" helm-charts/recycler/Chart.yaml
+        sed -i "s/^version: .*/version: ${{ needs.semver.outputs.next_version }}/" helm-charts/recycler/Chart.yaml
+        sed -i "s/^appVersion: .*/appVersion: \"${{ needs.semver.outputs.next_version }}\"/" helm-charts/recycler/Chart.yaml
 
     - name: Install Helmify
       run: make helmify
