@@ -27,6 +27,7 @@ import (
 type CrossVersionObjectReference struct {
 	// kind is the kind of the referent; More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 	//+default="Deployment"
+	//+kubebuilder:validation:Enum=Deployment
 	//+optional
 	Kind string `json:"kind" protobuf:"bytes,1,opt,name=kind"`
 
