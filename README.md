@@ -4,7 +4,13 @@ A Kubernetes controller that monitors pods CPU utilisation inside a deployment, 
 ## Description
 Ordinarialy something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of a HPA scaling needlessly, a pod not failing health checks even though it's at 100% CPU, and you get sick of manually restarting things so you write a controller to monitor the pods and terminate them if they exceed a threshold.
 
-## Operator installation
+### Prerequisites
+- go version v1.24.0+
+- docker version 17.03+.
+- kubectl version v1.11.3+.
+- Access to a Kubernetes v1.11.3+ cluster.
+
+## Automatic installation
 ### Helm
 **Add the Helm repository:**
 ```sh
@@ -59,7 +65,7 @@ kubectl apply -f dist/install.yaml
 ```
 
 ## Custom Resource Definition
-* Create the Recycler custom resource using the following:
+These are the configurable values for the Recycler custom resource. View the openAPI schema [here](config/crd/bases/recycler.theonlywaye.com_recyclers.yaml).
 ```yaml
 apiVersion: recycler.theonlywaye.com/v1alpha1
 kind: Recycler
@@ -78,12 +84,6 @@ spec:
   gracePeriodSeconds: 60 # Configuraable time to wait when terminating the pod before it's forcefully terminated
   metricStorageLocation: memory # Where to store the metrics data. Either in memory or as an annotation on the pod. There are implications to both
 ```
-
-### Prerequisites
-- go version v1.24.0+
-- docker version 17.03+.
-- kubectl version v1.11.3+.
-- Access to a Kubernetes v1.11.3+ cluster.
 
 ## Building and deploying manually
 ### To Deploy on the cluster
