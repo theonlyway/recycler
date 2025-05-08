@@ -90,7 +90,7 @@ jobs:
 
     - name: Build Operator
       #run: make docker-buildx IMG=theonlywaye/recycler:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
-      run: make docker-build docker-push IMG=theonlywaye/recycler:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
+      run: make docker-buildx docker-push IMG=theonlywaye/recycler:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
 
   release:
     needs: [semver, build]
