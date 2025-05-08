@@ -85,6 +85,7 @@ jobs:
 
     - name: Package Helm Chart
       run: |
+        mkdir -p ./releases
         helm package ./helm-charts/recycler --destination ./releases
         helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/releases
 
@@ -109,6 +110,8 @@ jobs:
   cleanup:
     needs: [tag, build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: failure()
 
     steps:
