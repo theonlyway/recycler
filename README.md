@@ -2,7 +2,7 @@
 A Kubernetes controller that monitors pods CPU utilisation inside a deployment, replicaset, or statefulset and terminates the pod if it exceeds a specified threshold.
 
 ## Description
-Ordinarialy something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of a HPA scaling needlessly, a pod not failing health checks even though it's at 100% CPU, and you get sick of manually restarting things so you write a controller to monitor the pods and terminate them if they exceed a threshold.
+Ideally something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of a HPA scaling needlessly, a pod not failing health checks even though it's at 100% CPU, and one day you are on leave and you've hit the limit you set on the HPA. All this results in some graph being more red then it should be which causes someone to panic. To avoid all that I created a controller to monitor the pods and terminate them if they exceed a threshold.
 
 ### Prerequisites
 - go version v1.24.0+
