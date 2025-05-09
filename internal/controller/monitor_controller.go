@@ -384,6 +384,9 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 			return err
 		}
 
+		 // Calculate termination time based on delay
+		terminationTime := time.Now().Add(time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second).Format(time.RFC3339)
+
 		// Write an event to the pod
 		r.Recoder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached. Average CPU: %.2f%%", averageCPU)
@@ -391,7 +394,7 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
-		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime)
+		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime, "terminationTime", terminationTime)
 		return nil
 	})
 }
