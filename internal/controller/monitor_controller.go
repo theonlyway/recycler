@@ -377,15 +377,16 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
-		breachTime := time.Now().Format(time.RFC3339)
-		pod.Annotations[cpuBreachTimestampAnnotation] = breachTime
+		breachTime := time.Now()
+		pod.Annotations[cpuBreachTimestampAnnotation] = breachTime.Format(time.RFC3339)
 		if err := r.Update(ctx, pod); err != nil {
 			log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
 			return err
 		}
 
-		 // Calculate termination time based on delay
-		terminationTime := time.Now().Add(time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second).Format(time.RFC3339)
+		// Calculate termination time based on breach time and delay
+		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
+		terminationTime := breachTime.Add(delay).Format(time.RFC3339)
 
 		// Write an event to the pod
 		r.Recoder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
@@ -394,7 +395,7 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
-		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime, "terminationTime", terminationTime)
+		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime.Format(time.RFC3339), "terminationTime", terminationTime)
 		return nil
 	})
 }
