@@ -70,6 +70,10 @@ CONTAINER_TOOL ?= docker
 # CHART_NAME defines the name of the Helm chart
 CHART_NAME ?= helm-charts/recycler
 
+# CACHE_TTL defines the time-to-live for cache layers in the registry.
+# Default is 30 days. You can override this by setting CACHE_TTL (e.g., make CACHE_TTL=7d docker-build).
+CACHE_TTL ?= 90d
+
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
@@ -146,8 +150,8 @@ run: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
 	$(CONTAINER_TOOL) build \
-		--cache-from=type=registry,ref=${IMG} \
-		--cache-to=type=registry,ref=${IMG},mode=max \
+		--cache-from=type=registry,ref=${IMAGE_TAG_BASE}:cache \
+		--cache-to=type=registry,ref=${IMAGE_TAG_BASE}:cache,mode=max,ttl=$(CACHE_TTL) \
 		-t ${IMG} \
 		-t ${IMAGE_TAG_BASE}:latest .
 
@@ -170,8 +174,8 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 	$(CONTAINER_TOOL) buildx use recycler-builder
 	- $(CONTAINER_TOOL) buildx build --push \
 		--platform=$(PLATFORMS) \
-		--cache-from=type=registry,ref=${IMG} \
-		--cache-to=type=registry,ref=${IMG},mode=max \
+		--cache-from=type=registry,ref=${IMAGE_TAG_BASE}:cache \
+		--cache-to=type=registry,ref=${IMAGE_TAG_BASE}:cache,mode=max,ttl=$(CACHE_TTL) \
 		--tag ${IMG} \
 		--tag ${IMAGE_TAG_BASE}:latest \
 		-f Dockerfile.cross .
