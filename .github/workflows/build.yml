@@ -71,8 +71,6 @@ jobs:
       run: |
         FULL_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
         make docker-buildx IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
-        docker push ${FULL_IMAGE}:${{ needs.semver.outputs.next_version }}
-      #run: make docker-build docker-push IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
 
   release:
     needs: [semver, build]
