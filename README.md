@@ -18,18 +18,27 @@ Ideally something like this shouldn't even exist if people wrote their software 
 ### Helm
 **Add the Helm repository:**
 ```sh
-helm repo add recycler https://theonlyway.github.io/recycler/releases
-helm repo update
+helm registry login ghcr.io
 ```
 
 **Install the operator:**
 ```sh
-helm install recycler recycler/recycler --namespace <namespace> --create-namespace
+helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace
+```
+
+**Install a specific version of the operator:**
+```sh
+helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace --version <version>
 ```
 
 **Upgrade the operator:**
 ```sh
-helm upgrade recycler recycler/recycler --namespace <namespace>
+helm upgrade recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace>
+```
+
+**Upgrade to a specific version of the operator:**
+```sh
+helm upgrade recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --version <version>
 ```
 
 **Uninstall the operator:**
@@ -51,7 +60,7 @@ make install
 
 **Deploy the Manager to the cluster with the image specified by `IMG`:**
 ```sh
-make deploy IMG=theonlywaye/recycler:latest
+make deploy IMG=ghcr.io/theonlyway/recycler:latest
 ```
 
 **Uninstall the CRDs from the cluster:**
@@ -66,7 +75,7 @@ make undeploy
 
 **Generate a consolidated YAML with CRDs and deployment:**
 ```sh
-make build-installer IMG=theonlywaye/recycler:latest
+make build-installer IMG=ghcr.io/theonlyway/recycler:latest
 ```
 
 The generated YAML file will be located in the `dist/install.yaml` file. You can apply it to your cluster using:
@@ -100,7 +109,7 @@ spec:
 **Build and push your image to the location specified by `IMG`:**
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/recycler:tag
+make docker-build docker-push IMG=ghcr.io/theonlyway/recycler:tag
 ```
 
 **NOTE:** This image ought to be published in the personal registry you specified.
@@ -116,7 +125,7 @@ make install
 **Deploy the Manager to the cluster with the image specified by `IMG`:**
 
 ```sh
-make deploy IMG=<some-registry>/recycler:tag
+make deploy IMG=ghcr.io/theonlyway/recycler:tag
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
