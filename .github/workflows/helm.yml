@@ -1,10 +1,9 @@
 name: Helm Chart Release
 
 on:
-  workflow_dispatch:
-  push:
-  release:
-    types: [published]
+    workflow_run:
+        workflows: ["Build and Push Recycler Operator image"]
+        types: [completed]
 
 jobs:
   helm:
