@@ -1,13 +1,15 @@
 name: Helm Chart Release
 
 on:
-    workflow_run:
-        workflows: ["Build and Push Recycler Operator image"]
-        types: [completed]
+  workflow_run:
+    workflows: ['Build and Push Recycler Operator image']
+    types:
+      - completed
 
 jobs:
   helm:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
     steps:
