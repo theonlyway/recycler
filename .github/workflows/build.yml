@@ -19,7 +19,6 @@ jobs:
     outputs:
       current_version: ${{ steps.semver.outputs.current }}
       next_version: ${{ steps.semver.outputs.nextStrict }}
-      release_upload_url: ${{ steps.release.outputs.upload_url }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -71,6 +70,14 @@ jobs:
       with:
         ref: main
 
+    - name: Update CHANGELOG
+      id: changelog
+      uses: requarks/changelog-action@v1
+      with:
+        token: ${{ github.token }}
+        fromTag: ${{ needs.semver.outputs.next_version }}
+        toTag: ${{ needs.semver.outputs.current_version }}
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       id: release
@@ -80,19 +87,6 @@ jobs:
         name: ${{ needs.semver.outputs.next_version }}
         tag_name: ${{ needs.semver.outputs.next_version }}
         body: ${{ steps.changelog.outputs.changes }}
-
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: main
-
-    - name: Update CHANGELOG
-      id: changelog
-      uses: requarks/changelog-action@v1
-      with:
-        token: ${{ github.token }}
-        fromTag: ${{ needs.semver.outputs.current_version }}
-        toTag: ${{ needs.semver.outputs.next_version }}
 
     - name: Commit CHANGELOG.md
       uses: stefanzweifel/git-auto-commit-action@v4

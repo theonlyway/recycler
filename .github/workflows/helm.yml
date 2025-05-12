@@ -14,18 +14,22 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: main
+
     - name: Update Chart Version
       run: |
         sed -i "s/^version: .*/version: ${{ github.event.client_payload.next_version }}/" helm-charts/recycler/Chart.yaml
         sed -i "s/^appVersion: .*/appVersion: \"${{ github.event.client_payload.next_version }}\"/" helm-charts/recycler/Chart.yaml
+
     - name: Update Helm chart image tag
       run: |
         sed -i "s/tag: .*/tag: ${{ github.event.client_payload.next_version }}/" helm-charts/recycler/values.yaml
+
     - name: Package Helm Chart
       run: |
         mkdir -p ./releases
         helm package ./helm-charts/recycler --destination ./releases
         helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/recycler/releases
+
     - name: Commit and Push Helm Chart Updates
       if: success()
       run: |
@@ -36,11 +40,13 @@ jobs:
         git push origin main
       env:
         GITHUB_TOKEN: ${{ github.token }}
+
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
         files: ./releases/recycler-${{ github.event.client_payload.next_version }}.tgz
+
     - name: Upload Helm Chart to Release
       uses: softprops/action-gh-release@v2
       id: release
@@ -59,12 +65,15 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: main
+
     - name: Setup Pages
       uses: actions/configure-pages@v5
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: '.'
+
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
