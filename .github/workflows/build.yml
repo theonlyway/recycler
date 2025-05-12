@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REPOSITORY_OWNER: ${{ github.repository_owner }}
+  REPOSITORY_OWNER: ${{ github.repository_owner | toLower }}
   IMAGE_NAME: recycler
   FULL_IMAGE: ${REGISTRY}/${REPOSITORY_OWNER}/${IMAGE_NAME}
 
