@@ -1,0 +1,70 @@
+name: Helm Chart Release
+
+on:
+  workflow_dispatch:
+  push:
+  release:
+    types: [published]
+
+jobs:
+  helm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: joutvhu/get-release@v1
+      id: get_release
+      with:
+        latest: true
+        pattern: '^v.*'
+    - name: Update Chart Version
+      run: |
+        sed -i "s/^version: .*/version: ${{ steps.get_current_release.outputs.tag_name }}/" helm-charts/recycler/Chart.yaml
+        sed -i "s/^appVersion: .*/appVersion: \"${{ steps.get_current_release.outputs.tag_name }}\"/" helm-charts/recycler/Chart.yaml
+    - name: Update Helm chart image tag
+      run: |
+        sed -i "s/tag: .*/tag: ${{ steps.get_current_release.outputs.tag_name }}/" helm-charts/recycler/values.yaml
+    - name: Package Helm Chart
+      run: |
+        mkdir -p ./releases
+        helm package ./helm-charts/recycler --destination ./releases
+        helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/recycler/releases
+    - name: Commit and Push Helm Chart Updates
+      if: success()
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add helm-charts/recycler/Chart.yaml helm-charts/recycler/values.yaml ./releases
+        git commit -m "Update Helm chart to version ${{ needs.semver.outputs.next_version }} [skip ci]"
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+    - name: Upload Helm Chart to Release
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.get_current_release.outputs.upload_url }}
+        asset_path: ./releases/recycler-*.tgz
+        asset_name: recycler-${{ steps.get_current_release.outputs.tag_name }}.tgz
+        asset_content_type: application/gzip
+  pages:
+    needs: [helm]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

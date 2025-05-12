@@ -19,12 +19,14 @@ controllerManager:
       requests:
         cpu: 10m
         memory: 64Mi
+    env:
+      - name: KUBERNETES_CLUSTER_DOMAIN
+        value: cluster.local
   podSecurityContext:
     runAsNonRoot: true
   replicas: 1
   serviceAccount:
     annotations: {}
-kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
   - name: https
