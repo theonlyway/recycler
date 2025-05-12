@@ -36,15 +36,17 @@ jobs:
         git push origin main
       env:
         GITHUB_TOKEN: ${{ github.token }}
-    - name: Upload Helm Chart to Release
-      uses: actions/upload-release-asset@v1
-      env:
-          GITHUB_TOKEN: ${{ github.token }}
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
       with:
-        upload_url: ${{ github.event.client_payload.upload_url }}
-        asset_path: ./releases/recycler-*.tgz
-        asset_name: recycler-${{ github.event.client_payload.next_version }}.tgz
-        asset_content_type: application/gzip
+        files: ./releases/recycler-${{ github.event.client_payload.next_version }}.tgz
+    - name: Upload Helm Chart to Release
+      uses: softprops/action-gh-release@v2
+      id: release
+      with:
+        files: |
+          releases/recycler-${{ github.event.client_payload.next_version }}.tgz
   pages:
     needs: [helm]
     runs-on: ubuntu-latest
