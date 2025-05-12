@@ -50,7 +50,7 @@ jobs:
       run: |
         CHART_FILE=releases/recycler-${{ github.event.client_payload.next_version }}.tgz
         echo "Pushing $CHART_FILE to Docker hub..."
-        helm push $CHART_FILE oci://registry-1.docker.io/theonlywaye/recycler
+        helm push $CHART_FILE oci://registry-1.docker.io/theonlywaye
 
     - name: Link GHCR and Docker Hub Packages to Release
       run: |
