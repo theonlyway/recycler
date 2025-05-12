@@ -30,6 +30,11 @@ jobs:
         helm package ./helm-charts/recycler --destination ./releases
         helm repo index ./releases --url https://${{ github.repository_owner }}.github.io/recycler/releases
 
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: main
+
     - name: Commit and Push Helm Chart Updates
       if: success()
       run: |
@@ -54,6 +59,7 @@ jobs:
         tag_name: ${{ github.event.client_payload.next_version }}
         files: |
           releases/recycler-${{ github.event.client_payload.next_version }}.tgz
+
   pages:
     needs: [helm]
     runs-on: ubuntu-latest
