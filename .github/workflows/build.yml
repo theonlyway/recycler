@@ -75,6 +75,7 @@ jobs:
       id: release
       with:
         draft: false
+        prerelease: false # Ensure the release is marked as published
         make_latest: true
         name: ${{ needs.semver.outputs.next_version }}
         tag_name: ${{ needs.semver.outputs.next_version }}
