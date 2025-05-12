@@ -42,11 +42,24 @@ jobs:
         echo "Pushing $CHART_FILE to GHCR..."
         helm push $CHART_FILE oci://ghcr.io/${{ github.repository_owner }}/charts
 
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.event.client_payload.next_version }}
-        files: ./releases/recycler-${{ github.event.client_payload.next_version }}.tgz
+    - name: Authenticate with Docker Hub
+      run: |
+        echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login ghcr.io --username ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
+
+    - name: Push Helm Chart to GitHub Container Registry
+      run: |
+        CHART_FILE=releases/recycler-${{ github.event.client_payload.next_version }}.tgz
+        echo "Pushing $CHART_FILE to Docker hub..."
+        helm push $CHART_FILE oci://theonlywaye/recycler
+
+    - name: Link GHCR and Docker Hub Packages to Release
+      run: |
+        GHCR_PACKAGE_URL="https://ghcr.io/${{ github.repository_owner }}/charts/recycler:${{ github.event.client_payload.next_version }}"
+        DOCKERHUB_PACKAGE_URL="https://hub.docker.com/r/theonlywaye/recycler/tags?page=1&name=${{ github.event.client_payload.next_version }}"
+        CURRENT_NOTES=$(gh release view ${{ github.event.client_payload.next_version }} --json body -q ".body")
+        UPDATED_NOTES="${CURRENT_NOTES}\n\nHelm chart packages available at:\n- GHCR: ${GHCR_PACKAGE_URL}\n- Docker Hub: ${DOCKERHUB_PACKAGE_URL}"
+        gh release edit ${{ github.event.client_payload.next_version }} --notes "${UPDATED_NOTES}"
+        echo "Appended GHCR and Docker Hub package URLs to release notes."
 
   pages:
     needs: [helm]
