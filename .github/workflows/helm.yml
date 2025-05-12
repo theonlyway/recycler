@@ -29,6 +29,10 @@ jobs:
         mkdir -p ./releases
         helm package ./helm-charts/recycler --destination ./releases
 
+    - name: Authenticate with GHCR
+      run: |
+        echo "${{ github.token }}" | helm registry login ghcr.io --username ${{ github.actor }} --password-stdin
+
     - name: Push Helm Chart to GitHub Container Registry
       run: |
         CHART_FILE=releases/recycler-${{ github.event.client_payload.next_version }}.tgz
