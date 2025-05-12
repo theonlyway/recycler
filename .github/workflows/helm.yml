@@ -44,7 +44,7 @@ jobs:
 
     - name: Authenticate with Docker Hub
       run: |
-        echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login ghcr.io --username ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
+        echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login registry-1.docker.io --username ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
 
     - name: Push Helm Chart to GitHub Container Registry
       run: |
