@@ -71,6 +71,16 @@ jobs:
       with:
         ref: main
 
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      id: release
+      with:
+        draft: false
+        make_latest: true
+        name: ${{ needs.semver.outputs.next_version }}
+        tag_name: ${{ needs.semver.outputs.next_version }}
+        body: ${{ steps.changelog.outputs.changes }}
+
     - name: Update CHANGELOG
       id: changelog
       uses: requarks/changelog-action@v1
@@ -86,15 +96,6 @@ jobs:
         commit_message: 'docs: update CHANGELOG.md for ${{ needs.semver.outputs.next_version }} [skip ci]'
         file_pattern: CHANGELOG.md
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      id: release
-      with:
-        draft: false
-        make_latest: true
-        name: ${{ needs.semver.outputs.next_version }}
-        tag_name: ${{ needs.semver.outputs.next_version }}
-        body: ${{ steps.changelog.outputs.changes }}
     - name: Trigger Helm Chart Release Workflow
       run: |
         curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -112,6 +113,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Check and Delete Docker Image
+        run: |
+          IMAGE="theonlywaye/recycler:${{ needs.semver.outputs.next_version }}"
+          if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+            echo "Docker image $IMAGE exists. Deleting..."
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
+            docker rmi $IMAGE || true
+          else
+            echo "Docker image $IMAGE does not exist. Skipping deletion."
+          fi
 
       - uses: ClementTsang/delete-tag-and-release@v0.3.1
         with:
