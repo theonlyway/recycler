@@ -8,7 +8,10 @@ jobs:
   helm:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
