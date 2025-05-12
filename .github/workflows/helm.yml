@@ -13,6 +13,8 @@ jobs:
     steps:
     - uses: joutvhu/get-release@v1
       id: get_release
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
       with:
         latest: true
         pattern: '^v.*'
