@@ -123,9 +123,9 @@ jobs:
         run: |
           IMAGE="theonlywaye/recycler:${{ needs.semver.outputs.next_version }}"
           if docker manifest inspect $IMAGE > /dev/null 2>&1; then
-            echo "Docker image $IMAGE exists. Deleting..."
-            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
-            docker rmi $IMAGE || true
+            echo "Docker image $IMAGE exists. Deleting from Docker Hub..."
+            curl -X DELETE -u "${{ vars.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" \
+              "https://hub.docker.com/v2/repositories/theonlywaye/recycler/tags/${{ needs.semver.outputs.next_version }}/"
           else
             echo "Docker image $IMAGE does not exist. Skipping deletion."
           fi
