@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.21] - 2025-05-12
+### :bug: Bug Fixes
+- [`42b984d`](https://github.com/theonlyway/recycler/commit/42b984dcadf7f3017977f0d32504ff1e26ada8f6) - updated platforms [skip ci] *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`a556216`](https://github.com/theonlyway/recycler/commit/a556216e623754cf810434f5cc7b322dd7ca61f9) - testing moving to ghcr *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`d7e6280`](https://github.com/theonlyway/recycler/commit/d7e628056049600c8bf0b52d360cb60124ff7ef6) - building ghcr *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`83d2492`](https://github.com/theonlyway/recycler/commit/83d2492d4d36290ba0c585274f97a9ca2baad9bf) - testing ghcr *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`ff188ff`](https://github.com/theonlyway/recycler/commit/ff188ff9ab0840b6a4eb6daada677d5e5aef8775) - cleaned up env vars *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`34a302f`](https://github.com/theonlyway/recycler/commit/34a302feca8791ab94a8f61d6d6ca239e3c8ea99) - to lower *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`a2f8528`](https://github.com/theonlyway/recycler/commit/a2f85280e85b39196038ec7c2d7c1074f08d5943) - fixing copilot hullucinations *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`213b193`](https://github.com/theonlyway/recycler/commit/213b193af34494d91142b2ec8d402e2f7e96d53a) - that was unneeded command *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [1.1.20] - 2025-05-12
 ### :bug: Bug Fixes
 - [`b57830f`](https://github.com/theonlyway/recycler/commit/b57830f862fc289efbfc30feda62051cbffb1411) - updated helm chart env vars *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -473,3 +485,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.1.11]: https://github.com/theonlyway/recycler/compare/v1.1.10...v1.1.11
 [v1.1.6]: https://github.com/theonlyway/recycler/compare/v1.1.5...v1.1.6
 [1.1.20]: https://github.com/theonlyway/recycler/compare/1.1.19...1.1.20
+[1.1.21]: https://github.com/theonlyway/recycler/compare/1.1.20...1.1.21
