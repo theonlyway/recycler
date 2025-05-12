@@ -106,10 +106,6 @@ jobs:
         https://api.github.com/repos/${{ github.repository }}/dispatches \
         -d '{"event_type":"helm_chart_release","client_payload":{"next_version":"${{ needs.semver.outputs.next_version }}"}}'
 
-  trigger:
-    runs-on: ubuntu-latest
-    steps:
-
   cleanup:
     needs: [semver, build, release]
     runs-on: ubuntu-latest
