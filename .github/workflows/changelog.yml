@@ -1,9 +1,9 @@
 name: Update changelog
 
 on:
-  release:
+  repository_dispatch:
     types:
-      - published
+      - update_changelog
 
 jobs:
   deploy:
@@ -19,19 +19,19 @@ jobs:
         uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
+          tag: ${{ github.event.client_payload.tag_name }}
 
       - name: Update Release with Changelog
         uses: softprops/action-gh-release@v2
         id: release
         with:
-            name: ${{ github.ref_name }}
+            name: ${{ github.event.client_payload.tag_name }}
             body: ${{ steps.changelog.outputs.changes }}
-            tag_name: ${{ github.ref_name }}
+            tag_name: ${{ github.event.client_payload.tag_name }}
 
       - name: Commit CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: main
-          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
+          commit_message: 'docs: update CHANGELOG.md for ${{ github.event.client_payload.tag_name }} [skip ci]'
           file_pattern: CHANGELOG.md

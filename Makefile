@@ -145,7 +145,11 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
-	$(CONTAINER_TOOL) build -t ${IMG} -t ${IMAGE_TAG_BASE}:latest .
+	$(CONTAINER_TOOL) build \
+		--cache-from=type=registry,ref=${IMG} \
+		--cache-to=type=registry,ref=${IMG},mode=max \
+		-t ${IMG} \
+		-t ${IMAGE_TAG_BASE}:latest .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
@@ -162,9 +166,15 @@ PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 docker-buildx: ## Build and push docker image for the manager for cross-platform support
 	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name recycler-builder
+	- $(CONTAINER_TOOL) buildx create --name recycler-builder || true
 	$(CONTAINER_TOOL) buildx use recycler-builder
-	- $(CONTAINER_TOOL) buildx build --push --platform=$(PLATFORMS) --tag ${IMG} --tag ${IMAGE_TAG_BASE}:latest -f Dockerfile.cross .
+	- $(CONTAINER_TOOL) buildx build --push \
+		--platform=$(PLATFORMS) \
+		--cache-from=type=registry,ref=${IMG} \
+		--cache-to=type=registry,ref=${IMG},mode=max \
+		--tag ${IMG} \
+		--tag ${IMAGE_TAG_BASE}:latest \
+		-f Dockerfile.cross .
 	- $(CONTAINER_TOOL) buildx rm recycler-builder
 	rm Dockerfile.cross
 

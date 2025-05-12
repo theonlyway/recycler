@@ -87,6 +87,13 @@ jobs:
         https://api.github.com/repos/${{ github.repository }}/dispatches \
         -d '{"event_type":"helm_chart_release","client_payload":{"next_version":"${{ needs.semver.outputs.next_version }}", "upload_url":"${{ steps.release.outputs.upload_url }}"}}'
 
+    - name: Trigger Changelog Workflow
+      run: |
+        curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/${{ github.repository }}/dispatches \
+        -d '{"event_type":"update_changelog","client_payload":{"tag_name":"${{ needs.semver.outputs.next_version }}"}}'
+
   cleanup:
     needs: [semver, build, release]
     runs-on: ubuntu-latest
