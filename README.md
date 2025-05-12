@@ -1,5 +1,6 @@
 [![Build and Push Recycler Operator image](https://github.com/theonlyway/recycler/actions/workflows/build.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/build.yml)
 [![Helm Chart Release](https://github.com/theonlyway/recycler/actions/workflows/helm.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/helm.yml)
+[![Update changelog](https://github.com/theonlyway/recycler/actions/workflows/changlog.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/changlog.yml)
 # recycler
 
 A Kubernetes controller that monitors pods CPU utilisation inside a deployment, replicaset, or statefulset and terminates the pod if it exceeds a specified threshold.
