@@ -44,6 +44,7 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ github.event.client_payload.next_version }}
         files: ./releases/recycler-${{ github.event.client_payload.next_version }}.tgz
 
     - name: Upload Helm Chart to Release
