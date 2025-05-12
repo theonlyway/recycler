@@ -3,11 +3,11 @@ entries:
   recycler:
   - apiVersion: v2
     appVersion: 1.1.20
-    created: "2025-05-12T05:51:51.586088187Z"
+    created: "2025-05-12T06:11:22.244628338Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
-    digest: 737f24decf075361520c15dc0ae07ffc41ee415c8660234dee8f6e00c9e55f46
+    digest: e5baa8164d077b7eb6556b6d9be412df5d42ffecb9989284b534d5b0816b6b50
     name: recycler
     type: application
     urls:
@@ -15,7 +15,7 @@ entries:
     version: 1.1.20
   - apiVersion: v2
     appVersion: 1.1.19
-    created: "2025-05-12T05:51:51.585755822Z"
+    created: "2025-05-12T06:11:22.244292691Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -27,7 +27,7 @@ entries:
     version: 1.1.19
   - apiVersion: v2
     appVersion: 1.1.18
-    created: "2025-05-12T05:51:51.585429419Z"
+    created: "2025-05-12T06:11:22.243969967Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -39,7 +39,7 @@ entries:
     version: 1.1.18
   - apiVersion: v2
     appVersion: 1.1.17
-    created: "2025-05-12T05:51:51.58510027Z"
+    created: "2025-05-12T06:11:22.243621867Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -51,7 +51,7 @@ entries:
     version: 1.1.17
   - apiVersion: v2
     appVersion: 1.1.16
-    created: "2025-05-12T05:51:51.584775941Z"
+    created: "2025-05-12T06:11:22.243305155Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -63,7 +63,7 @@ entries:
     version: 1.1.16
   - apiVersion: v2
     appVersion: 1.1.15
-    created: "2025-05-12T05:51:51.584466649Z"
+    created: "2025-05-12T06:11:22.242983834Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -75,7 +75,7 @@ entries:
     version: 1.1.15
   - apiVersion: v2
     appVersion: 1.1.14
-    created: "2025-05-12T05:51:51.584143272Z"
+    created: "2025-05-12T06:11:22.242627448Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -87,7 +87,7 @@ entries:
     version: 1.1.14
   - apiVersion: v2
     appVersion: 1.1.13
-    created: "2025-05-12T05:51:51.583806028Z"
+    created: "2025-05-12T06:11:22.242295368Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -99,7 +99,7 @@ entries:
     version: 1.1.13
   - apiVersion: v2
     appVersion: 1.1.11
-    created: "2025-05-12T05:51:51.583476048Z"
+    created: "2025-05-12T06:11:22.24195938Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -111,7 +111,7 @@ entries:
     version: 1.1.11
   - apiVersion: v2
     appVersion: 1.1.10
-    created: "2025-05-12T05:51:51.58312606Z"
+    created: "2025-05-12T06:11:22.241598485Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -123,7 +123,7 @@ entries:
     version: 1.1.10
   - apiVersion: v2
     appVersion: 1.1.9
-    created: "2025-05-12T05:51:51.587261802Z"
+    created: "2025-05-12T06:11:22.251271827Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -135,7 +135,7 @@ entries:
     version: 1.1.9
   - apiVersion: v2
     appVersion: 1.1.8
-    created: "2025-05-12T05:51:51.586732467Z"
+    created: "2025-05-12T06:11:22.250940998Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -147,7 +147,7 @@ entries:
     version: 1.1.8
   - apiVersion: v2
     appVersion: 1.1.7
-    created: "2025-05-12T05:51:51.586416634Z"
+    created: "2025-05-12T06:11:22.244978082Z"
     description: A Kubernetes controller that monitors pods CPU utilisation inside
       a deployment, replicaset, or statefulset and terminates the pod if it exceeds
       a specified threshold
@@ -157,4 +157,4 @@ entries:
     urls:
     - https://theonlyway.github.io/recycler/releases/recycler-1.1.7.tgz
     version: 1.1.7
-generated: "2025-05-12T05:51:51.582571839Z"
+generated: "2025-05-12T06:11:22.241105744Z"
