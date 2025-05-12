@@ -53,6 +53,8 @@ jobs:
         helm push $CHART_FILE oci://registry-1.docker.io/theonlywaye
 
     - name: Link GHCR and Docker Hub Packages to Release
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         GHCR_PACKAGE_URL="https://ghcr.io/${{ github.repository_owner }}/charts/recycler:${{ github.event.client_payload.next_version }}"
         DOCKERHUB_PACKAGE_URL="https://hub.docker.com/r/theonlywaye/recycler/tags?page=1&name=${{ github.event.client_payload.next_version }}"

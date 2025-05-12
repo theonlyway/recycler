@@ -124,16 +124,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Check and Delete Docker Image
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Check and Delete Docker Image from GHCR
         run: |
-          FULL_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
+          FULL_IMAGE=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
           IMAGE="${FULL_IMAGE}:${{ needs.semver.outputs.next_version }}"
           if docker manifest inspect $IMAGE > /dev/null 2>&1; then
-            echo "Docker image $IMAGE exists. Deleting from GitHub Container Registry..."
+            echo "Docker image $IMAGE exists in GHCR. Deleting..."
             curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              "${REGISTRY}/v2/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}/manifests/${{ needs.semver.outputs.next_version }}"
+              "${{ env.GHCR_REGISTRY }}/v2/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}/manifests/${{ needs.semver.outputs.next_version }}"
           else
-            echo "Docker image $IMAGE does not exist. Skipping deletion."
+            echo "Docker image $IMAGE does not exist in GHCR. Skipping deletion."
+          fi
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Check and Delete Docker Image from Docker Hub
+        run: |
+          FULL_IMAGE=${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}
+          IMAGE="${FULL_IMAGE}:${{ needs.semver.outputs.next_version }}"
+          if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+            echo "Docker image $IMAGE exists in Docker Hub. Deleting..."
+            curl -X DELETE -u "${{ vars.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" \
+              "https://hub.docker.com/v2/repositories/${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}/tags/${{ needs.semver.outputs.next_version }}/"
+          else
+            echo "Docker image $IMAGE does not exist in Docker Hub. Skipping deletion."
           fi
 
       - uses: ClementTsang/delete-tag-and-release@v0.3.1
