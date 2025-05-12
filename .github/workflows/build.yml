@@ -76,12 +76,8 @@ jobs:
       uses: requarks/changelog-action@v1
       with:
         token: ${{ github.token }}
-        tag: ${{ needs.semver.outputs.current_version }}
-
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: main
+        fromTag: ${{ needs.semver.outputs.current_version }}
+        toTag: ${{ needs.semver.outputs.next_version }}
 
     - name: Commit CHANGELOG.md
       uses: stefanzweifel/git-auto-commit-action@v4
