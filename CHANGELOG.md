@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.20] - 2025-05-12
+### :bug: Bug Fixes
+- [`b57830f`](https://github.com/theonlyway/recycler/commit/b57830f862fc289efbfc30feda62051cbffb1411) - updated helm chart env vars *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`c5901ce`](https://github.com/theonlyway/recycler/commit/c5901ce206d3ebb1db7e553ad94d6cf70446206b) - fixed order and trigger *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`452fd74`](https://github.com/theonlyway/recycler/commit/452fd749ec1c342514ae54b8cf0dfd72affe17f8) - added missing env *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`f1bfc14`](https://github.com/theonlyway/recycler/commit/f1bfc146af6e8a78de53911adc0e687f9e2fce48) - only on successful image build *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`5508e81`](https://github.com/theonlyway/recycler/commit/5508e811dbd5da158edf60cbdd0e39c3f6449a14) - fix linting error with condition *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`8d1f5e9`](https://github.com/theonlyway/recycler/commit/8d1f5e9cc5d464113c572443437f7faff65b9ecc) - reverted *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`8d48277`](https://github.com/theonlyway/recycler/commit/8d48277f1f8581952e1cb10e2db43e9cccfe124f) - forgot missing checkout *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`71971cf`](https://github.com/theonlyway/recycler/commit/71971cf4294984fc222b14c88020add3c7e484fc) - working on workflow *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`7290dc5`](https://github.com/theonlyway/recycler/commit/7290dc5e43e642b5d324f0365d1f8b446fc7133b) - fixed ref to token *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`78ae615`](https://github.com/theonlyway/recycler/commit/78ae6156251b7c11574e44acfb5d8f3cfd22e1ba) - removed skip condition *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`7cd1350`](https://github.com/theonlyway/recycler/commit/7cd1350d6176acf49a31aefe410d1cce931ad536) - trying new action *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`ba15861`](https://github.com/theonlyway/recycler/commit/ba15861cae34069e2ed1a7466edd2783f8264135) - that shouldn't be there *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`58adff0`](https://github.com/theonlyway/recycler/commit/58adff06655cbedc63880cfea2746acb64e669a7) - updates to helm workflow *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`3dceb04`](https://github.com/theonlyway/recycler/commit/3dceb0466c034be9849a64f95ed66092447d8a78) - changelog not updating *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`3e7f258`](https://github.com/theonlyway/recycler/commit/3e7f258a747e9b0fdbc7782a548fcf61279c1992) - fixed commit messages for updates *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`b4f0529`](https://github.com/theonlyway/recycler/commit/b4f0529dd4af5d745e96380177c4d2a31f2355c9) - changed order *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`578fc98`](https://github.com/theonlyway/recycler/commit/578fc98e11a880dd890c70c28bc644354c4c7f8c) - maybe need another checkout? *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`23778a0`](https://github.com/theonlyway/recycler/commit/23778a07885ff4eda668a1e0c586f2265a4ae94b) - updated image deletion step to delete from dockerhub *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`9e549bb`](https://github.com/theonlyway/recycler/commit/9e549bb70a16a2f9712afe77c15fcd49076dfbc4) - fixing tags? *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`ce1711e`](https://github.com/theonlyway/recycler/commit/ce1711e837e121ac5ad036a9606ea29478c3c676) - more workflow stuff *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`560c6db`](https://github.com/theonlyway/recycler/commit/560c6db0df7b2b5b68e76b88df1c5fbabc37a1f9) - working on workflow *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`b85fb72`](https://github.com/theonlyway/recycler/commit/b85fb723f217858547895f541076d748960035fb) - more fixes *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`a97b623`](https://github.com/theonlyway/recycler/commit/a97b623014bc5f0232f953aaa4971888c4c3ba90) - testing flag *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`0ab5e8a`](https://github.com/theonlyway/recycler/commit/0ab5e8a45d56f291a4a6ce4110ede99b6b7e2581) - updated makefile and actions *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`c8a3097`](https://github.com/theonlyway/recycler/commit/c8a3097d4f774c8799a9aac92cef78a1415320ec) - updated cache source and ttl *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+- [`12f899b`](https://github.com/theonlyway/recycler/commit/12f899b31650bd9d2478edc658bf4eddf3388ed5) - fixed checkout *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
+
+
 ## [v1.1.6] - 2025-05-08
 ### :bug: Bug Fixes
 - [`e2d8ea6`](https://github.com/theonlyway/recycler/commit/e2d8ea679de6ae6e2053eec51849cae21719f200) - added helm charts *(commit by [@rtt-anthonywaye](https://github.com/rtt-anthonywaye))*
@@ -442,3 +472,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.1.10]: https://github.com/theonlyway/recycler/compare/v1.1.9...v1.1.10
 [v1.1.11]: https://github.com/theonlyway/recycler/compare/v1.1.10...v1.1.11
 [v1.1.6]: https://github.com/theonlyway/recycler/compare/v1.1.5...v1.1.6
+[1.1.20]: https://github.com/theonlyway/recycler/compare/1.1.19...1.1.20
