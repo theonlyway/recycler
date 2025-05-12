@@ -70,13 +70,12 @@ jobs:
 
     - name: Build and Push Operator to GHCR
       run: |
-        FULL_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
+        FULL_IMAGE=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
         make docker-buildx IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
 
     - name: Login to Dockerhub
       uses: docker/login-action@v3
       with:
-        registry: ${{ env.DOCKERHUB_REGISTRY }}
         username: ${{ vars.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
