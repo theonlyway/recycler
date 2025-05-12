@@ -19,26 +19,47 @@ Ideally something like this shouldn't even exist if people wrote their software 
 **Add the Helm repository:**
 ```sh
 helm registry login ghcr.io
+helm repo add recycler https://docker.io/theonlyway/charts
 ```
 
-**Install the operator:**
+**Install the operator from `ghcr`:**
 ```sh
 helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace
 ```
 
-**Install a specific version of the operator:**
+**Install the operator from `dockerhub`:**
+```sh
+helm install recycler recycler/recycler --namespace <namespace> --create-namespace
+```
+
+**Install a specific version of the operator from `ghcr`:**
 ```sh
 helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace --version <version>
 ```
 
-**Upgrade the operator:**
+**Install a specific version of the operator from `dockerhub`:**
+```sh
+helm install recycler recycler/recycler --namespace <namespace> --create-namespace --version <version>
+```
+
+**Upgrade the operator from `ghcr`:**
 ```sh
 helm upgrade recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace>
 ```
 
-**Upgrade to a specific version of the operator:**
+**Upgrade the operator from `dockerhub`:**
+```sh
+helm upgrade recycler recycler/recycler --namespace <namespace>
+```
+
+**Upgrade to a specific version of the operator from `ghcr`:**
 ```sh
 helm upgrade recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --version <version>
+```
+
+**Upgrade to a specific version of the operator from `dockerhub`:**
+```sh
+helm upgrade recycler recycler/recycler --namespace <namespace> --version <version>
 ```
 
 **Uninstall the operator:**

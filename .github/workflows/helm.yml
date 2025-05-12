@@ -54,13 +54,13 @@ jobs:
 
     - name: Link GHCR and Docker Hub Packages to Release
       env:
-        GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         GHCR_PACKAGE_URL="https://ghcr.io/${{ github.repository_owner }}/charts/recycler:${{ github.event.client_payload.next_version }}"
         DOCKERHUB_PACKAGE_URL="https://hub.docker.com/r/theonlywaye/recycler/tags?page=1&name=${{ github.event.client_payload.next_version }}"
         CURRENT_NOTES=$(gh release view ${{ github.event.client_payload.next_version }} --json body -q ".body")
         UPDATED_NOTES="${CURRENT_NOTES}\n\nHelm chart packages available at:\n- GHCR: ${GHCR_PACKAGE_URL}\n- Docker Hub: ${DOCKERHUB_PACKAGE_URL}"
-        gh release edit ${{ github.event.client_payload.next_version }} --notes "${UPDATED_NOTES}"
+        gh release edit ${{ github.event.client_payload.next_version }} --notes "${UPDATED_NOTES}" --repo ${{ github.repository }}
         echo "Appended GHCR and Docker Hub package URLs to release notes."
 
   pages:
