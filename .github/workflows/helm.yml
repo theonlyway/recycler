@@ -42,23 +42,13 @@ jobs:
         echo "Pushing $CHART_FILE to GHCR..."
         helm push $CHART_FILE oci://ghcr.io/${{ github.repository_owner }}/charts
 
-    - name: Get package ID from GitHub API
-      id: get-package-id
-      run: |
-        PACKAGE_NAME="charts/recycler"
-        RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github+json" \
-          "https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}")
-        PACKAGE_ID=$(echo "$RESPONSE" | jq -r '.id')
-        echo "PACKAGE_ID=$PACKAGE_ID" >> $GITHUB_ENV
-
     - name: Update Release with Changelog and Helm Chart Link
       uses: softprops/action-gh-release@v2
       id: release
       with:
           name: ${{ github.event.client_payload.next_version }}
           body: |
-            [Helm Chart on GHCR](https://github.com/${{ github.repository_owner }}/packages/container/charts%2Frecycler/${{ env.PACKAGE_ID }}?tag=${{ github.event.client_payload.next_version }})
+            [Helm Chart on GHCR](https://github.com/${{ github.repository_owner }}/packages/container/charts%2Frecycler)
           tag_name: ${{ github.event.client_payload.next_version }}
           append_body: true
 
