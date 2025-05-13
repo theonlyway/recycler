@@ -16,10 +16,9 @@ Ideally something like this shouldn't even exist if people wrote their software 
 
 ## Automatic installation
 ### Helm
-**Add the Helm repository:**
+**Login to the GitHub Container Registry via Helm:**
 ```sh
 helm registry login ghcr.io
-helm repo add recycler https://docker.io/theonlyway/charts
 ```
 
 **Install the operator from `ghcr`:**
