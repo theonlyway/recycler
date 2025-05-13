@@ -48,7 +48,7 @@ jobs:
       with:
           name: ${{ github.event.client_payload.next_version }}
           body: |
-            [Helm Chart on GHCR](https://github.com/${{ github.repository_owner }}/packages/container/charts%2Frecycler)
+            [Helm Chart ${{ github.event.client_payload.next_version }}](https://github.com/${{ github.repository_owner }}/recycler/pkgs/container/charts%2Frecycler)
           tag_name: ${{ github.event.client_payload.next_version }}
           append_body: true
 
