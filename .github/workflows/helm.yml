@@ -59,12 +59,13 @@ jobs:
           name: ${{ github.event.client_payload.next_version }}
           body: |
             Helm Chart Paths:
-            - GHCR: oci://ghcr.io/${{ github.repository_owner }}/charts/recycler-${{ github.event.client_payload.next_version }}.tgz
-            - Docker Hub: oci://registry-1.docker.io/theonlywaye/recycler-${{ github.event.client_payload.next_version }}.tgz
+            - [GHCR](https://github.com/${{ github.repository_owner }}/packages/charts/recycler-${{ github.event.client_payload.next_version }}.tgz)
+            - [Docker Hub](https://hub.docker.com/r/theonlywaye/recycler/tags?page=1&name=${{ github.event.client_payload.next_version }})
           tag_name: ${{ github.event.client_payload.next_version }}
           append_body: true
 
   pages:
+    if: false
     needs: [helm]
     runs-on: ubuntu-latest
     permissions:
