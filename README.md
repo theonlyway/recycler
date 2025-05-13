@@ -27,19 +27,9 @@ helm repo add recycler https://docker.io/theonlyway/charts
 helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace
 ```
 
-**Install the operator from `dockerhub`:**
-```sh
-helm install recycler recycler/recycler --namespace <namespace> --create-namespace
-```
-
 **Install a specific version of the operator from `ghcr`:**
 ```sh
 helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace --version <version>
-```
-
-**Install a specific version of the operator from `dockerhub`:**
-```sh
-helm install recycler recycler/recycler --namespace <namespace> --create-namespace --version <version>
 ```
 
 **Upgrade the operator from `ghcr`:**
@@ -47,19 +37,9 @@ helm install recycler recycler/recycler --namespace <namespace> --create-namespa
 helm upgrade recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace>
 ```
 
-**Upgrade the operator from `dockerhub`:**
-```sh
-helm upgrade recycler recycler/recycler --namespace <namespace>
-```
-
 **Upgrade to a specific version of the operator from `ghcr`:**
 ```sh
 helm upgrade recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --version <version>
-```
-
-**Upgrade to a specific version of the operator from `dockerhub`:**
-```sh
-helm upgrade recycler recycler/recycler --namespace <namespace> --version <version>
 ```
 
 **Uninstall the operator:**
