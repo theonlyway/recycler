@@ -155,7 +155,20 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
 	}
 
+	// Log all in-memory metrics at the end of the reconciliation loop
+	logInMemoryMetrics(r.Log)
+
 	return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
+}
+
+func logInMemoryMetrics(log logr.Logger) {
+	InMemoryMetricsStorage.Range(func(key, value interface{}) bool {
+		metricsHistory := value.([]PodCPUUsage)
+		for i, metric := range metricsHistory {
+			log.V(1).Info("In-memory metric stored", "key", key, "index", i, "podName", metric.PodName, "CPUUsage", metric.CPUUsage.String(), "CPULimit", metric.CPULimit.String(), "CPUPercentage", metric.CPUPercentage, "Timestamp", metric.Timestamp)
+		}
+		return true
+	})
 }
 
 func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetricsInterface, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) {
@@ -388,6 +401,9 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
 		terminationTime := breachTime.Add(delay).Format(time.RFC3339)
 
+		// Calculate pod age
+		podAge := time.Since(pod.CreationTimestamp.Time)
+
 		// Write an event to the pod
 		r.Recoder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached. Average CPU: %.2f%%", averageCPU)
@@ -395,7 +411,7 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
-		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "breachTime", breachTime.Format(time.RFC3339), "terminationTime", terminationTime)
+		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "podAge", podAge.String(), "breachTime", breachTime.Format(time.RFC3339), "terminationTime", terminationTime)
 		return nil
 	})
 }

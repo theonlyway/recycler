@@ -26,6 +26,11 @@ helm registry login ghcr.io
 helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace
 ```
 
+**Download a copy of the chart files locally from `ghcr`:**
+```sh
+helm pull oci://ghcr.io/theonlyway/charts/recycler --version <version>
+```
+
 **Install a specific version of the operator from `ghcr`:**
 ```sh
 helm install recycler oci://ghcr.io/theonlyway/charts/recycler --namespace <namespace> --create-namespace --version <version>

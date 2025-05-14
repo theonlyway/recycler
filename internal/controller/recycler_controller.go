@@ -191,9 +191,14 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		// Calculate the time elapsed since the breach
 		elapsed := time.Since(breachTime)
 		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
+
+		// Calculate pod age
+		podAge := time.Since(pod.CreationTimestamp.Time)
+
 		if elapsed >= delay {
 			log.Info("Terminating pod due to CPU threshold breach",
 				"podName", pod.Name,
+				"podAge", podAge.String(),
 				"breachTimestamp", breachTimestamp,
 				"elapsed", elapsed,
 				"delay", delay)
