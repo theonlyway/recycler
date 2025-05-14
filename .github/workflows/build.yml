@@ -132,7 +132,6 @@ jobs:
         -d '{"event_type":"update_changelog","client_payload":{"tag_name":"${{ needs.semver.outputs.next_version }}"}}'
 
   cleanup:
-    needs: [semver, build-ghcr, build-dockerhub, release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
