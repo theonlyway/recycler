@@ -40,7 +40,7 @@ jobs:
         patchAll: true
         majorList: "breaking,major"
 
-  build:
+  build-ghcr:
     needs: [semver]
     runs-on: ubuntu-latest
     permissions:
@@ -74,6 +74,24 @@ jobs:
         CACHE_PATH=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache
         make docker-buildx IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${CACHE_PATH}
 
+  build-dockerhub:
+    needs: [semver]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Install Operator SDK
+      run: make operator-sdk
+
     - name: Login to Dockerhub
       uses: docker/login-action@v3
       with:
@@ -86,7 +104,7 @@ jobs:
         make docker-buildx IMAGE_TAG_BASE=${FULL_IMAGE} IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${FULL_IMAGE}
 
   release:
-    needs: [semver, build]
+    needs: [semver, build-ghcr, build-dockerhub]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -114,7 +132,7 @@ jobs:
         -d '{"event_type":"update_changelog","client_payload":{"tag_name":"${{ needs.semver.outputs.next_version }}"}}'
 
   cleanup:
-    needs: [semver, build, release]
+    needs: [semver, build-ghcr, build-dockerhub, release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
