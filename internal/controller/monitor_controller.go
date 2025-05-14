@@ -316,7 +316,8 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 		log.V(1).Info("Fetching from in-memory storage", "key", key)
 		value, exists := InMemoryMetricsStorage.Load(key)
 		if !exists {
-			log.Info("No in-memory metrics history found", "key", key)
+			podAge := time.Since(pod.CreationTimestamp.Time)
+			log.Info("No in-memory metrics history found", "key", key, "podAge", podAge.String())
 			return nil, nil
 		}
 		metricsHistory := value.([]PodCPUUsage)
