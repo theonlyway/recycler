@@ -1,0 +1,9 @@
+apiVersion: recycler.theonlywaye.com/v1alpha1
+kind: Recycler
+metadata:
+  labels:
+    app.kubernetes.io/name: recycler
+    app.kubernetes.io/managed-by: kustomize
+  name: recycler-sample
+spec:
+  # TODO(user): Add fields here
