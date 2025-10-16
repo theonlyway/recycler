@@ -17,7 +17,7 @@ spec:
         control-plane: controller-manager
       {{- include "recycler.selectorLabels" . | nindent 8 }}
       annotations:
-        kubectl.kubernetes.io/default-container: manager
+        kubectl.kubernetes.io/default-container: recycler
     spec:
       containers:
       - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
@@ -27,15 +27,14 @@ spec:
         {{- with .Values.controllerManager.manager.env }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
-          | default .Chart.AppVersion }}
+        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default .Chart.AppVersion }}
         livenessProbe:
           httpGet:
             path: /healthz
             port: 8081
           initialDelaySeconds: 15
           periodSeconds: 20
-        name: manager
+        name: recycler
         readinessProbe:
           httpGet:
             path: /readyz
