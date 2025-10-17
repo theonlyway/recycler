@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-10-17
+### :bug: Bug Fixes
+- [`5a1edf5`](https://github.com/theonlyway/recycler/commit/5a1edf5ab5ff4cd70cb0cd7115995c19920c8f0e) - updated push logic *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`df89eb8`](https://github.com/theonlyway/recycler/commit/df89eb8f5da56b5976f8dac867f9b585acee367f) - **deps**: update golang docker tag to v1.25 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.0.4] - 2025-10-17
 ### :wrench: Chores
 - [`cc58cad`](https://github.com/theonlyway/recycler/commit/cc58cad4a86cdf2640f592e25a8d405dc3be37dc) - Update renovate.json with new settings *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -22,3 +30,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.0.1]: https://github.com/theonlyway/recycler/compare/v1.0.0...1.0.1
 [1.0.3]: https://github.com/theonlyway/recycler/compare/1.0.2...1.0.3
 [1.0.4]: https://github.com/theonlyway/recycler/compare/1.0.3...1.0.4
+[1.0.5]: https://github.com/theonlyway/recycler/compare/1.0.4...1.0.5
