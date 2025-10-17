@@ -32,7 +32,7 @@ jobs:
             tag_name: ${{ github.event.client_payload.tag_name }}
 
       - name: Commit CHANGELOG.md
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: main
           commit_message: 'docs: update CHANGELOG.md for ${{ github.event.client_payload.tag_name }} [skip ci]'
