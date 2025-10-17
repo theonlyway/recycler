@@ -32,7 +32,7 @@ jobs:
       next_version: ${{ steps.semver.outputs.nextStrict }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
 
     - name: Get Next Version
       id: semver
@@ -51,7 +51,7 @@ jobs:
       packages: write
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
 
     - name: Set up Go
       uses: actions/setup-go@v6
@@ -85,7 +85,7 @@ jobs:
       packages: write
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
 
     - name: Set up Go
       uses: actions/setup-go@v6
@@ -113,7 +113,7 @@ jobs:
       contents: write
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         ref: main
 
@@ -143,7 +143,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
       - name: Login to GHCR
         uses: docker/login-action@v3
