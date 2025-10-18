@@ -64,7 +64,7 @@ var _ = Describe("controller", Ordered, func() {
 			var platform = "linux/amd64"
 
 			By("building the manager(Operator) image")
-			cmd := exec.Command("make", "docker-build", fmt.Sprintf("IMG=%s", projectimage), fmt.Sprintf("PLATFORM=%s", platform))
+			cmd := exec.Command("make", "docker-buildx", fmt.Sprintf("IMG=%s", projectimage), fmt.Sprintf("PLATFORM=%s", platform))
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
