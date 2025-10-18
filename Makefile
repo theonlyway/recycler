@@ -193,19 +193,34 @@ docker-push: ## Push docker image with the manager.
 # To adequately provide solutions that are compatible with multiple platforms, you should consider using this option.
 #PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 PLATFORMS ?= linux/arm64,linux/amd64
+BUILD_MODE ?= push # or 'load'
 .PHONY: docker-buildx
-docker-buildx: ## Build and push docker image for the manager for cross-platform support
-	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
-	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name recycler-builder
-	$(CONTAINER_TOOL) buildx use recycler-builder
-	- $(CONTAINER_TOOL) buildx build --push \
+docker-buildx: ## Build docker image for cross-platform support (BUILD_MODE=push|load)
+	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross
+	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e '1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
+
+	- $(CONTAINER_TOOL) buildx create --name recycler-builder --use
+
+ifeq ($(BUILD_MODE),push)
+	@echo "🔹 Building and pushing multi-arch image..."
+	$(CONTAINER_TOOL) buildx build --push \
 		--platform=$(PLATFORMS) \
 		--cache-from=type=registry,ref=$(CACHE_PATH):cache \
 		--cache-to=type=registry,ref=$(CACHE_PATH):cache,mode=max,ttl=$(CACHE_TTL) \
 		--tag ${IMG} \
 		--tag ${IMAGE_TAG_BASE}:latest \
 		-f Dockerfile.cross .
+else ifeq ($(BUILD_MODE),load)
+	@echo "🔹 Building and loading image into local Docker daemon..."
+	$(CONTAINER_TOOL) buildx build --load \
+		--platform=linux/amd64 \
+		--tag ${IMG} \
+		--tag ${IMAGE_TAG_BASE}:latest \
+		-f Dockerfile.cross .
+else
+	$(error Invalid BUILD_MODE="$(BUILD_MODE)". Must be 'push' or 'load')
+endif
+
 	- $(CONTAINER_TOOL) buildx rm recycler-builder
 	rm Dockerfile.cross
 
