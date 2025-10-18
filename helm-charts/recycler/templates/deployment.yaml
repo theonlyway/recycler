@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "recycler.fullname" . }}-controller-manager
+  namespace: {{ include "recycler.fullname" . }}-system
   labels:
     control-plane: controller-manager
   {{- include "recycler.labels" . | nindent 4 }}
