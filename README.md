@@ -1,6 +1,9 @@
 [![Build and Push Recycler Operator image](https://github.com/theonlyway/recycler/actions/workflows/build.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/build.yml)
 [![Helm Chart Release](https://github.com/theonlyway/recycler/actions/workflows/helm.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/helm.yml)
 [![Update changelog](https://github.com/theonlyway/recycler/actions/workflows/changelog.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/changelog.yml)
+[![Lint](https://github.com/theonlyway/recycler/actions/workflows/lint.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/lint.yml)
+[![Tests](https://github.com/theonlyway/recycler/actions/workflows/test.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/test.yml)
+[![E2E Tests](https://github.com/theonlyway/recycler/actions/workflows/test-e2e.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/test-e2e.yml)
 # recycler
 
 A Kubernetes controller that monitors pods CPU utilisation inside a deployment, replicaset, or statefulset and terminates the pod if it exceeds a specified threshold.
