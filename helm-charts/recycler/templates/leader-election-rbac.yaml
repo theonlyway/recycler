@@ -51,4 +51,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: '{{ include "recycler.fullname" . }}-controller-manager'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: {{ include "recycler.namespace" . }}

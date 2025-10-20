@@ -2,7 +2,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ include "recycler.fullname" . }}-metrics-auth-role
-  namespace: {{ include "recycler.namespace" . }}
   labels:
   {{- include "recycler.labels" . | nindent 4 }}
 rules:
@@ -32,4 +31,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: '{{ include "recycler.fullname" . }}-controller-manager'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: {{ include "recycler.namespace" . }}
