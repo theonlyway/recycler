@@ -51,9 +51,9 @@ func Run(cmd *exec.Cmd) ([]byte, error) {
 	dir, _ := GetProjectDir()
 	cmd.Dir = dir
 
-       if err := os.Chdir(cmd.Dir); err != nil {
-	       _, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "chdir dir: %s\n", err)
-       }
+	if err := os.Chdir(cmd.Dir); err != nil {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "chdir dir: %s\n", err)
+	}
 
 	cmd.Env = append(os.Environ(), "GO111MODULE=on")
 	command := strings.Join(cmd.Args, " ")

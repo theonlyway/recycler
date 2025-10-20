@@ -45,9 +45,10 @@ import (
 const monitorControllerName = "monitor"
 
 const (
-    StorageMemory     string = "memory"
-    StorageAnnotation  string = "annotation"
+	StorageMemory     string = "memory"
+	StorageAnnotation string = "annotation"
 )
+
 // Exported thread-safe in-memory storage for metrics
 var InMemoryMetricsStorage sync.Map
 
