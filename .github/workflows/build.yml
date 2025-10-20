@@ -104,7 +104,7 @@ jobs:
     - name: Build and Push Operator to Docker Hub
       run: |
         FULL_IMAGE=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
-        make docker-buildx IMAGE_TAG_BASE=${FULL_IMAGE} IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${FULL_IMAGE}
+        make docker-buildx BUILD_MODE=push IMAGE_TAG_BASE=${FULL_IMAGE} IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${FULL_IMAGE}
 
   release:
     needs: [semver, build-ghcr, build-dockerhub]
