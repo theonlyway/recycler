@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-10-20
+### :bug: Bug Fixes
+- [`20d82e1`](https://github.com/theonlyway/recycler/commit/20d82e104a54cab7586413b18153ff723809aa9a) - fixed indenting *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.1.1] - 2025-10-20
 ### :bug: Bug Fixes
 - [`b1fc00a`](https://github.com/theonlyway/recycler/commit/b1fc00a737f6229ae9759b774a50fa9d0b76e50a) - updated namespace in helm charts *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -96,3 +101,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.0.8]: https://github.com/theonlyway/recycler/compare/1.0.7...1.0.8
 [1.1.0]: https://github.com/theonlyway/recycler/compare/1.0.8...1.1.0
 [1.1.1]: https://github.com/theonlyway/recycler/compare/1.1.0...1.1.1
+[1.1.2]: https://github.com/theonlyway/recycler/compare/1.1.1...1.1.2
