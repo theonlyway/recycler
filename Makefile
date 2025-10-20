@@ -51,8 +51,7 @@ endif
 OPERATOR_SDK_VERSION ?= v1.39.2
 # Image URL to use all building/pushing image targets
 IMG ?= ${IMAGE_TAG_BASE}:latest
-# ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.31.0
+
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -122,14 +121,38 @@ vet: ## Run go vet against code.
 	go vet ./...
 
 .PHONY: test
-test: manifests generate fmt vet envtest ## Run tests.
+test: manifests generate fmt vet setup-envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test $$(go list ./... | grep -v /e2e) -coverprofile cover.out
 
+KIND ?= kind
+KIND_CLUSTER ?= recycler-operator-test-e2e
+.PHONY: install-kind
+install-kind: ## Install Kind
+	curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+	chmod +x ./kind
+	mv ./kind /usr/local/bin/kind
 # Utilize Kind or modify the e2e tests to load the image locally, enabling compatibility with other vendors.
+.PHONY: setup-test-e2e
+setup-test-e2e: ## Set up a Kind cluster for e2e tests if it does not exist
+	@command -v $(KIND) >/dev/null 2>&1 || { \
+		echo "Kind is not installed. Please install Kind manually."; \
+		exit 1; \
+	}
+	@case "$$($(KIND) get clusters)" in \
+		*"$(KIND_CLUSTER)"*) \
+			echo "Kind cluster '$(KIND_CLUSTER)' already exists. Skipping creation." ;; \
+		*) \
+			echo "Creating Kind cluster '$(KIND_CLUSTER)'..."; \
+			$(KIND) create cluster --name $(KIND_CLUSTER) ;; \
+	esac
+.PHONY: cleanup-test-e2e
+cleanup-test-e2e: ## Tear down the Kind cluster used for e2e tests
+	@$(KIND) delete cluster --name $(KIND_CLUSTER)
 .PHONY: test-e2e  # Run the e2e tests against a Kind k8s instance that is spun up.
 test-e2e:
-	go test ./test/e2e/ -v -ginkgo.v
-
+	$(MAKE) setup-test-e2e
+	KIND_CLUSTER=$(KIND_CLUSTER) go test ./test/e2e/ -v -ginkgo.v
+	$(MAKE) cleanup-test-e2e
 .PHONY: lint
 lint: golangci-lint ## Run golangci-lint linter
 	$(GOLANGCI_LINT) run
@@ -154,8 +177,6 @@ run: manifests generate fmt vet ## Run a controller from your host.
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
 	$(CONTAINER_TOOL) build \
-		--cache-from=type=registry,ref=$(CACHE_PATH):cache \
-		--cache-to=type=registry,ref=$(CACHE_PATH):cache,mode=max,ttl=$(CACHE_TTL) \
 		-t ${IMG} \
 		-t ${IMAGE_TAG_BASE}:latest .
 
@@ -171,19 +192,34 @@ docker-push: ## Push docker image with the manager.
 # To adequately provide solutions that are compatible with multiple platforms, you should consider using this option.
 #PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 PLATFORMS ?= linux/arm64,linux/amd64
+BUILD_MODE ?= push # or 'load'
 .PHONY: docker-buildx
-docker-buildx: ## Build and push docker image for the manager for cross-platform support
-	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
-	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name recycler-builder
-	$(CONTAINER_TOOL) buildx use recycler-builder
-	- $(CONTAINER_TOOL) buildx build --push \
+docker-buildx: ## Build docker image for cross-platform support (BUILD_MODE=push|load)
+	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross
+	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e '1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
+
+	- $(CONTAINER_TOOL) buildx create --name recycler-builder --use
+
+ifeq ($(BUILD_MODE),push)
+	@echo "🔹 Building and pushing multi-arch image..."
+	$(CONTAINER_TOOL) buildx build --push \
 		--platform=$(PLATFORMS) \
 		--cache-from=type=registry,ref=$(CACHE_PATH):cache \
 		--cache-to=type=registry,ref=$(CACHE_PATH):cache,mode=max,ttl=$(CACHE_TTL) \
 		--tag ${IMG} \
 		--tag ${IMAGE_TAG_BASE}:latest \
 		-f Dockerfile.cross .
+else ifeq ($(BUILD_MODE),load)
+	@echo "🔹 Building and loading image into local Docker daemon..."
+	$(CONTAINER_TOOL) buildx build --load \
+		--platform=linux/amd64 \
+		--tag ${IMG} \
+		--tag ${IMAGE_TAG_BASE}:latest \
+		-f Dockerfile.cross .
+else
+	$(error Invalid BUILD_MODE="$(BUILD_MODE)". Must be 'push' or 'load')
+endif
+
 	- $(CONTAINER_TOOL) buildx rm recycler-builder
 	rm Dockerfile.cross
 
@@ -232,9 +268,12 @@ GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.4.3
-CONTROLLER_TOOLS_VERSION ?= v0.16.1
-ENVTEST_VERSION ?= release-0.19
-GOLANGCI_LINT_VERSION ?= v1.59.1
+CONTROLLER_TOOLS_VERSION ?= v0.19.0
+#ENVTEST_VERSION is the version of controller-runtime release branch to fetch the envtest setup script (i.e. release-0.20)
+ENVTEST_VERSION ?= $(shell go list -m -f "{{ .Version }}" sigs.k8s.io/controller-runtime | awk -F'[v.]' '{printf "release-%d.%d", $$2, $$3}')
+#ENVTEST_K8S_VERSION is the version of Kubernetes to use for setting up ENVTEST binaries (i.e. 1.31)
+ENVTEST_K8S_VERSION ?= $(shell go list -m -f "{{ .Version }}" k8s.io/api | awk -F'[v.]' '{printf "1.%d", $$3}')
+GOLANGCI_LINT_VERSION ?= v2.5.0
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
@@ -245,6 +284,14 @@ $(KUSTOMIZE): $(LOCALBIN)
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
 $(CONTROLLER_GEN): $(LOCALBIN)
 	$(call go-install-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen,$(CONTROLLER_TOOLS_VERSION))
+
+.PHONY: setup-envtest
+setup-envtest: envtest ## Download the binaries required for ENVTEST in the local bin directory.
+	@echo "Setting up envtest binaries for Kubernetes version $(ENVTEST_K8S_VERSION)..."
+	@$(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path || { \
+		echo "Error: Failed to set up envtest binaries for version $(ENVTEST_K8S_VERSION)."; \
+		exit 1; \
+	}
 
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download setup-envtest locally if necessary.

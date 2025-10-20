@@ -27,5 +27,5 @@ go.work
 *~
 bin
 crd.yaml
-**/manager/kustomization.yaml
-config/manager/kustomization.yaml
+
+kind

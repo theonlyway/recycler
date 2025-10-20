@@ -44,6 +44,11 @@ import (
 
 const monitorControllerName = "monitor"
 
+const (
+	StorageMemory     string = "memory"
+	StorageAnnotation string = "annotation"
+)
+
 // Exported thread-safe in-memory storage for metrics
 var InMemoryMetricsStorage sync.Map
 
@@ -188,7 +193,7 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 	}
 
 	// Process the metrics and calculate CPU utilization for each pod
-	var podCPUUsages []PodCPUUsage
+	podCPUUsages := make([]PodCPUUsage, 0, len(podMetricsList.Items))
 	for _, podMetrics := range podMetricsList.Items {
 		// Sum the CPU usage across all containers in the pod
 		totalCPUUsage := resource.Quantity{}
@@ -239,7 +244,7 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 // UpdatePodMetricsHistory updates the pod's metrics history in memory or annotations
 func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName string, namespace string, newDataPoint PodCPUUsage, maxHistory int32, log logr.Logger, storageLocation string) error {
 	switch storageLocation {
-	case "memory":
+	case StorageMemory:
 		// Use thread-safe in-memory storage
 		key := fmt.Sprintf("%s/%s", namespace, podName)
 		log.V(1).Info("Working with in-memory storage", "key", key)
@@ -252,7 +257,7 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 		InMemoryMetricsStorage.Store(key, metricsHistory)
 		log.V(1).Info("Updated in-memory metrics history", "key", key, "historySize", len(metricsHistory))
 		return nil
-	case "annotation":
+	case StorageAnnotation:
 		// Use annotation-based storage
 		podKey := client.ObjectKey{Namespace: namespace, Name: podName}
 		return retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -310,7 +315,7 @@ func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName 
 
 func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, log logr.Logger, storageLocation string) ([]PodCPUUsage, error) {
 	switch storageLocation {
-	case "memory":
+	case StorageMemory:
 		// Use thread-safe in-memory storage
 		key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 		log.V(1).Info("Fetching from in-memory storage", "key", key)
@@ -323,7 +328,7 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 		metricsHistory := value.([]PodCPUUsage)
 		log.V(1).Info("Fetched in-memory metrics history", "key", key, "historySize", len(metricsHistory))
 		return metricsHistory, nil
-	case "annotation":
+	case StorageAnnotation:
 		// Fetch the latest version of the pod
 		latestPod := &corev1.Pod{}
 		if err := r.Get(ctx, client.ObjectKeyFromObject(pod), latestPod); err != nil {

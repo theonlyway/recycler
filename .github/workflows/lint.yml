@@ -1,0 +1,34 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: Run on Ubuntu
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run go fmt
+        run: |
+          go fmt ./...
+
+      - name: Commit formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'chore: go fmt [skip ci]'
+
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest

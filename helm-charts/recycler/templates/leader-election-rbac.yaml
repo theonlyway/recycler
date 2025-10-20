@@ -2,6 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "recycler.fullname" . }}-leader-election-role
+  namespace: {{ include "recycler.fullname" . }}-system
   labels:
   {{- include "recycler.labels" . | nindent 4 }}
 rules:

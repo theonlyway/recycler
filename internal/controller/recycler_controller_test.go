@@ -25,6 +25,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
@@ -43,6 +45,32 @@ var _ = Describe("Recycler Controller", func() {
 		recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 
 		BeforeEach(func() {
+			By("Creating the target dummy deployment")
+			deployment := &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "target-deployment",
+					Namespace: "default",
+				},
+				Spec: appsv1.DeploymentSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{"app": "test"},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{"app": "test"},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{{
+								Name:    "test",
+								Image:   "busybox",
+								Command: []string{"sleep", "3600"},
+							}},
+						},
+					},
+				},
+			}
+			_ = k8sClient.Create(ctx, deployment) // Ignore error if already exists
+
 			By("creating the custom resource for the Kind Recycler")
 			err := k8sClient.Get(ctx, typeNamespacedName, recycler)
 			if err != nil && errors.IsNotFound(err) {
@@ -51,7 +79,19 @@ var _ = Describe("Recycler Controller", func() {
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					// TODO(user): Specify other spec details if needed.
+					Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+						ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+							Kind:       "Deployment",
+							Name:       "target-deployment",
+							APIVersion: "apps/v1",
+						},
+						AverageCpuUtilizationPercent: 50,
+						RecycleDelaySeconds:          300,
+						PollingIntervalSeconds:       60,
+						PodMetricsHistory:            10,
+						GracePeriodSeconds:           30,
+						MetricStorageLocation:        "memory",
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
