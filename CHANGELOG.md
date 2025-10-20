@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-10-20
+### :sparkles: New Features
+- [`a3c871f`](https://github.com/theonlyway/recycler/commit/a3c871fbcf253d06a0b9b9dfdcfd96c7900046ce) - working on tests and updated recycler namespace *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`bdf6f7c`](https://github.com/theonlyway/recycler/commit/bdf6f7c8f59e1331fc005ca1b0b4d8ec05193aed) - fixed tests for pipeline *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`56417cc`](https://github.com/theonlyway/recycler/commit/56417cca4956839e2d4d9ebb92b8fc907148eb6a) - fixed docker-build *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`96b3d9b`](https://github.com/theonlyway/recycler/commit/96b3d9b49182e01575379aa77b0563af4018615c) - removed platform *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`4a37081`](https://github.com/theonlyway/recycler/commit/4a370812bbe1ca6523005eebeb76bf5151aa7383) - updated go version to match docker image *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`e021800`](https://github.com/theonlyway/recycler/commit/e021800a6fb8e410cf4eb39b880375e7b759c3ca) - updated go *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5621c4a`](https://github.com/theonlyway/recycler/commit/5621c4a8629f8fecff9e6ac9b3130c04ee141074) - that shouldn't be missing apparently? *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`0a1572e`](https://github.com/theonlyway/recycler/commit/0a1572e27e9b7e51878e13399a95ee00a1af903d) - updated go packages *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`536cac9`](https://github.com/theonlyway/recycler/commit/536cac9b639aee7a21a1f1a327189948e9c6e043) - updated buildx command *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a83e3ac`](https://github.com/theonlyway/recycler/commit/a83e3acb8755d7cf5e9038361736b1bcf53f5be7) - updated controller gen *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a3450bd`](https://github.com/theonlyway/recycler/commit/a3450bde8caa3c7f2b4cc78be79c4738dc7b2796) - testing in pipeline *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`c7c5077`](https://github.com/theonlyway/recycler/commit/c7c5077344a91685996f84fadc247e93fbe80563) - updated tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`f92cf1e`](https://github.com/theonlyway/recycler/commit/f92cf1e29bc36fbb0eae6a5675df4bae74d42959) - added coverage artifact *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`1e933c4`](https://github.com/theonlyway/recycler/commit/1e933c4f28b2defc48cafaf2b571847f55a01a1a) - test version upgrade *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`ac47855`](https://github.com/theonlyway/recycler/commit/ac47855e3cb7142e9c59d13a08b6c7b244b00b2e) - resolved linting errors *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`ed985a1`](https://github.com/theonlyway/recycler/commit/ed985a1c58c00e5bb824fc4f6690547f04a4a39a) - import in wrong spot *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`4e931fb`](https://github.com/theonlyway/recycler/commit/4e931fb31b89ef1ec38505447ecefd786292e23f) - fix formatting *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`85762c6`](https://github.com/theonlyway/recycler/commit/85762c6ac3a2165a526be05bc9903e89ef2a0e0e) - added extra workflows *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a10faac`](https://github.com/theonlyway/recycler/commit/a10faac6608f39296807b7e0f8cc89f3f6511cbc) - added other badges [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`cff7cea`](https://github.com/theonlyway/recycler/commit/cff7cea9f609fc624f68536905e5441c7c73e0e4) - **config**: migrate config renovate.json *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.0.8] - 2025-10-17
 ### :bug: Bug Fixes
 - [`8138a54`](https://github.com/theonlyway/recycler/commit/8138a54910f36fec312d30f177f14bdb22078da9) - **deps**: update module sigs.k8s.io/controller-runtime to v0.22.3 *(PR [#9](https://github.com/theonlyway/recycler/pull/9) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -61,3 +89,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.0.6]: https://github.com/theonlyway/recycler/compare/1.0.5...1.0.6
 [1.0.7]: https://github.com/theonlyway/recycler/compare/1.0.6...1.0.7
 [1.0.8]: https://github.com/theonlyway/recycler/compare/1.0.7...1.0.8
+[1.1.0]: https://github.com/theonlyway/recycler/compare/1.0.8...1.1.0
