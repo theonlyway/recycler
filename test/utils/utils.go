@@ -1,5 +1,4 @@
-  Error: test/utils/utils.go:25:2: ST1001: should not use dot imports (staticcheck)
-  	. "github.com/onsi/ginkgo/v2" //nolint:golint,revive/*
+/*
 Copyright 2025.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +22,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/onsi/ginkgo/v2/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 )
 
 const (
