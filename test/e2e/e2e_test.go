@@ -60,7 +60,7 @@ var _ = Describe("controller", Ordered, func() {
 			var err error
 
 			// projectimage stores the name of the image used in the example
-			var projectimage = "example.com/recycler:v0.0.1"
+			var projectimage = "ghcr.io/theonlyway/recycler:latest"
 			var platform = "linux/amd64"
 
 			By("building the manager(Operator) image")
