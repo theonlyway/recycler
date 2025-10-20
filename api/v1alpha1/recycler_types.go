@@ -26,17 +26,17 @@ import (
 // CrossVersionObjectReference contains enough information to let you identify the referred resource.
 type CrossVersionObjectReference struct {
 	// kind is the kind of the referent; More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-	//+default="Deployment"
-	//+kubebuilder:validation:Enum=Deployment
-	//+optional
+	// +default="Deployment"
+	// +kubebuilder:validation:Enum=Deployment
+	// +optional
 	Kind string `json:"kind" protobuf:"bytes,1,opt,name=kind"`
 
 	// name is the name of the referent; More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
 	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
 
 	// apiVersion is the API version of the referent
-	//+default="apps/v1"
-	//+optional
+	// +default="apps/v1"
+	// +optional
 	APIVersion string `json:"apiVersion,omitempty" protobuf:"bytes,3,opt,name=apiVersion"`
 }
 
@@ -50,20 +50,20 @@ type RecyclerSpec struct {
 	// Average CPU utilization percent of the target resource
 	AverageCpuUtilizationPercent int32 `json:"averageCpuUtilizationPercent"`
 	// Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold
-	//+default=300
+	// +default=300
 	RecycleDelaySeconds int32 `json:"recycleDelaySeconds"`
 	// Polling duration in seonds between metric fetches
-	//+default=60
+	// +default=60
 	PollingIntervalSeconds int32 `json:"pollingIntervalSeconds"`
 	// Number of datapoints to keep in the pod metrics history
-	//+default=10
+	// +default=10
 	PodMetricsHistory int32 `json:"podMetricsHistory"`
 	// Termination grace period in seconds
-	//+default=30
+	// +default=30
 	GracePeriodSeconds int32 `json:"gracePeriodSeconds"`
 	// Location to store metric data. Certain options are bad based on the number of datapoints and frequency
-	//+kubebuilder:validation:Enum=memory;annotation
-	//+kubebuilder:default=memory
+	// +kubebuilder:validation:Enum=memory;annotation
+	// +kubebuilder:default=memory
 	MetricStorageLocation string `json:"metricStorageLocation"`
 }
 
