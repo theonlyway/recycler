@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2025-10-20
+### :wrench: Chores
+- [`79be8e1`](https://github.com/theonlyway/recycler/commit/79be8e1da2ee00b0edaf550d9a6fb26c5059a2fa) - updated default values for helm chart [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`3111ab8`](https://github.com/theonlyway/recycler/commit/3111ab8e62a4734c994f61702b8d3c21a556a722) - updated kustomization to make renovate happy *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.1.6] - 2025-10-20
 ### :wrench: Chores
 - [`bcd469f`](https://github.com/theonlyway/recycler/commit/bcd469f4bd0b0b299a7e5bcd54ecd648c275a3d7) - **deps**: testing pipeline changes *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -139,3 +145,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.4]: https://github.com/theonlyway/recycler/compare/1.1.3...1.1.4
 [1.1.5]: https://github.com/theonlyway/recycler/compare/1.1.4...1.1.5
 [1.1.6]: https://github.com/theonlyway/recycler/compare/1.1.5...1.1.6
+[1.1.7]: https://github.com/theonlyway/recycler/compare/1.1.6...1.1.7
