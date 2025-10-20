@@ -1,4 +1,10 @@
 {{/*
+Return the namespace for the deployment, defaulting to 'recycler-system' if not set in values.yaml
+*/}}
+{{- define "recycler.namespace" -}}
+{{- default "recycler-system" .Values.namespace -}}
+{{- end }}
+{{/*
 Expand the name of the chart.
 */}}
 {{- define "recycler.name" -}}
