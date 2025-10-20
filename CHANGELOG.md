@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2025-10-20
+### :bug: Bug Fixes
+- [`aa1bd4c`](https://github.com/theonlyway/recycler/commit/aa1bd4ccb403e4fef8adf904371b5f88ec6b4d89) - fixed helm charts *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`3e16a24`](https://github.com/theonlyway/recycler/commit/3e16a24878f2153f43b1f8182c3832f727612823) - **deps**: update actions/checkout action to v5 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`fc9d08d`](https://github.com/theonlyway/recycler/commit/fc9d08d9a1dfb5e2df2e218386d7ee6bfa1da177) - **deps**: update actions/setup-go action to v6 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.1.2] - 2025-10-20
 ### :bug: Bug Fixes
 - [`20d82e1`](https://github.com/theonlyway/recycler/commit/20d82e104a54cab7586413b18153ff723809aa9a) - fixed indenting *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -102,3 +111,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.0]: https://github.com/theonlyway/recycler/compare/1.0.8...1.1.0
 [1.1.1]: https://github.com/theonlyway/recycler/compare/1.1.0...1.1.1
 [1.1.2]: https://github.com/theonlyway/recycler/compare/1.1.1...1.1.2
+[1.1.3]: https://github.com/theonlyway/recycler/compare/1.1.2...1.1.3
