@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2025-10-20
+### :wrench: Chores
+- [`bcd469f`](https://github.com/theonlyway/recycler/commit/bcd469f4bd0b0b299a7e5bcd54ecd648c275a3d7) - **deps**: testing pipeline changes *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`e70c152`](https://github.com/theonlyway/recycler/commit/e70c152fa8ced7ed26e46100d873e6aa35b6b36d) - **deps**: removed executing on pr *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`7e7a9bf`](https://github.com/theonlyway/recycler/commit/7e7a9bf39ed59805a73264dd3a81dc2c25291536) - **deps**: updated pipeline formatting *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`108f5e4`](https://github.com/theonlyway/recycler/commit/108f5e4b402b5d94cffd5dda7f342c1a4fab6e52) - **deps**: allowing pipeline to be manually executed *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`44d56fb`](https://github.com/theonlyway/recycler/commit/44d56fbf32ec2b455edbb388f44f49e03e16aec2) - **deps**: renamed workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`fcbb65c`](https://github.com/theonlyway/recycler/commit/fcbb65cffbb291f2bc10475ee9af2959b64075c3) - **deps**: working on build workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`7c00063`](https://github.com/theonlyway/recycler/commit/7c000636ad6c6874b51fc6cfd92ea4f55e01d9b7) - **deps**: to slow for testing *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`222b62d`](https://github.com/theonlyway/recycler/commit/222b62d0e1c8a8d9ebc821114cd0c96e4c3d2d5c) - **deps**: working on release *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`b7102e5`](https://github.com/theonlyway/recycler/commit/b7102e53be65245c5837caa5094245edcd554278) - updated readme [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5bfc807`](https://github.com/theonlyway/recycler/commit/5bfc807d1e9245f2f8fb41921efb8625df949ba8) - Update workflow dependencies for builds and releases *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.1.5] - 2025-10-20
 ### :bug: Bug Fixes
 - [`8c0c472`](https://github.com/theonlyway/recycler/commit/8c0c472f996ab5496a85b6999b4ff9b79092f5a0) - always the little things *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -124,3 +138,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.3]: https://github.com/theonlyway/recycler/compare/1.1.2...1.1.3
 [1.1.4]: https://github.com/theonlyway/recycler/compare/1.1.3...1.1.4
 [1.1.5]: https://github.com/theonlyway/recycler/compare/1.1.4...1.1.5
+[1.1.6]: https://github.com/theonlyway/recycler/compare/1.1.5...1.1.6
