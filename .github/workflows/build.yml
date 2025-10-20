@@ -1,15 +1,13 @@
 name: Build and Push Recycler Operator image
 
 on:
-  workflow_dispatch:
-  push:
-    tags:
-      - "v*"
+  workflow_run:
+    workflows: ["Tests", "Lint", "E2E Tests"]
+    types:
+      - completed
     branches:
-        - main
-    paths-ignore:
-      - '.github/**'
-      - 'README.md'
+      - main
+  workflow_dispatch:
   release:
     types: [published]
 
