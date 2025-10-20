@@ -51,7 +51,19 @@ var _ = Describe("Recycler Controller", func() {
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					// TODO(user): Specify other spec details if needed.
+					Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+						ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+							Kind:       "Deployment",
+							Name:       "target-deployment",
+							APIVersion: "apps/v1",
+						},
+						AverageCpuUtilizationPercent: 50,
+						RecycleDelaySeconds:          300,
+						PollingIntervalSeconds:       60,
+						PodMetricsHistory:            10,
+						GracePeriodSeconds:           30,
+						MetricStorageLocation:        "memory",
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
