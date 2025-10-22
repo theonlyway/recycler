@@ -3,7 +3,7 @@ module github.com/theonlyway/recycler
 go 1.25.0
 
 require (
-	github.com/onsi/ginkgo/v2 v2.26.0
+	github.com/onsi/ginkgo/v2 v2.27.1
 	github.com/onsi/gomega v1.38.2
 	k8s.io/apimachinery v0.34.1
 	k8s.io/client-go v0.34.1
