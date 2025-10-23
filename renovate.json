@@ -16,7 +16,7 @@
         "patch"
       ],
       "automerge": true,
-      "automergeType": "branch",
+      "automergeType": "pr",
       "ignoreTests": false
     }
   ]
