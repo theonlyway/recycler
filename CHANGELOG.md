@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.12] - 2025-11-13
+### :bug: Bug Fixes
+- [`79a178e`](https://github.com/theonlyway/recycler/commit/79a178edb008c99c83b243a29a2e8d69c1561570) - **deps**: update kubernetes packages to v0.34.2 *(PR [#24](https://github.com/theonlyway/recycler/pull/24) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`741bf5f`](https://github.com/theonlyway/recycler/commit/741bf5fc9b4901501fcd794a15b01cbb84d723b3) - **deps**: update golangci/golangci-lint-action action to v9 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.1.11] - 2025-11-03
 ### :bug: Bug Fixes
 - [`0d0a612`](https://github.com/theonlyway/recycler/commit/0d0a61281e6bade575eff49c12af388bac6bba4f) - **deps**: update module sigs.k8s.io/controller-runtime to v0.22.4 *(PR [#22](https://github.com/theonlyway/recycler/pull/22) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -176,3 +184,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.9]: https://github.com/theonlyway/recycler/compare/1.1.8...1.1.9
 [1.1.10]: https://github.com/theonlyway/recycler/compare/1.1.9...1.1.10
 [1.1.11]: https://github.com/theonlyway/recycler/compare/1.1.10...1.1.11
+[1.1.12]: https://github.com/theonlyway/recycler/compare/1.1.11...1.1.12
