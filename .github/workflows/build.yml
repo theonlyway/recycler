@@ -28,7 +28,7 @@ jobs:
             next_version: ${{ steps.semver.outputs.nextStrict }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Get Next Version
               id: semver
@@ -47,7 +47,7 @@ jobs:
             contents: write
         steps:
             - name: Clone the code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Setup Go
               uses: actions/setup-go@v6
               with:
@@ -65,7 +65,7 @@ jobs:
             contents: read
         steps:
             - name: Clone the code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Setup Go
               uses: actions/setup-go@v6
               with:
@@ -90,7 +90,7 @@ jobs:
             contents: read
         steps:
             - name: Clone the code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Setup Go
               uses: actions/setup-go@v6
               with:
@@ -117,7 +117,7 @@ jobs:
             IMAGE_NAME: recycler
         steps:
             - name: Checkout code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Set up Go
               uses: actions/setup-go@v6
               with:
@@ -150,7 +150,7 @@ jobs:
             IMAGE_NAME: recycler
         steps:
             - name: Checkout code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: Set up Go
               uses: actions/setup-go@v6
               with:
@@ -178,7 +178,7 @@ jobs:
             id-token: write
         steps:
             - name: Checkout code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
               with:
                   ref: main
             - name: Update Chart Version
@@ -218,7 +218,7 @@ jobs:
             contents: write
         steps:
             - name: Checkout Code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
               with:
                   ref: main
             - name: Update CHANGELOG
