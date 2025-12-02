@@ -114,7 +114,7 @@ var _ = Describe("Recycler Controller", func() {
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			if err == nil {
 				Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
-				
+
 				// Reconcile to process finalizers
 				controllerReconciler := &RecyclerReconciler{
 					Client:   k8sClient,
@@ -125,7 +125,7 @@ var _ = Describe("Recycler Controller", func() {
 				_, _ = controllerReconciler.Reconcile(ctx, reconcile.Request{
 					NamespacedName: typeNamespacedName,
 				})
-				
+
 				// Wait for deletion to complete
 				Eventually(func() bool {
 					err := k8sClient.Get(ctx, typeNamespacedName, resource)
@@ -164,13 +164,13 @@ var _ = Describe("Recycler Controller", func() {
 
 		It("should add finalizer to Recycler resource", func() {
 			By("Reconciling to add finalizer")
-			
+
 			// Wait for resource to be created
 			Eventually(func() error {
 				recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 				return k8sClient.Get(ctx, typeNamespacedName, recycler)
 			}, "5s", "100ms").Should(Succeed())
-			
+
 			controllerReconciler := &RecyclerReconciler{
 				Client:   k8sClient,
 				Scheme:   k8sClient.Scheme(),
@@ -228,13 +228,13 @@ var _ = Describe("Recycler Controller", func() {
 
 		It("should return proper requeue duration", func() {
 			By("Reconciling and checking requeue")
-			
+
 			// Wait for resource to be created
 			Eventually(func() error {
 				recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 				return k8sClient.Get(ctx, typeNamespacedName, recycler)
 			}, "5s", "100ms").Should(Succeed())
-			
+
 			controllerReconciler := &RecyclerReconciler{
 				Client:   k8sClient,
 				Scheme:   k8sClient.Scheme(),
