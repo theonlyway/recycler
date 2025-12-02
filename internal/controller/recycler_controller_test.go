@@ -272,23 +272,23 @@ var _ = Describe("Recycler Controller", func() {
 					MetricStorageLocation:        "annotation",
 				},
 			}
-		Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
+			Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
 
-		controllerReconciler := &RecyclerReconciler{
-			Client:   k8sClient,
-			Scheme:   k8sClient.Scheme(),
-			Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
-			Recorder: &mockEventRecorder{},
-		}
+			controllerReconciler := &RecyclerReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
+			}
 
-		result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Name:      "annotation-recycler",
-				Namespace: "default",
-			},
-		})
-		Expect(err).NotTo(HaveOccurred())
-		Expect(result.RequeueAfter.Seconds()).To(Equal(float64(60)))
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "annotation-recycler",
+					Namespace: "default",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(60)))
 
 			// Cleanup
 			Expect(k8sClient.Delete(ctx, annotationRecycler)).To(Succeed())
@@ -315,26 +315,26 @@ var _ = Describe("Recycler Controller", func() {
 					MetricStorageLocation:        "memory",
 				},
 			}
-		Expect(k8sClient.Create(ctx, customRecycler)).To(Succeed())
+			Expect(k8sClient.Create(ctx, customRecycler)).To(Succeed())
 
-		controllerReconciler := &RecyclerReconciler{
-			Client:   k8sClient,
-			Scheme:   k8sClient.Scheme(),
-			Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
-			Recorder: &mockEventRecorder{},
-		}
+			controllerReconciler := &RecyclerReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
+			}
 
-		result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Name:      "custom-poll-recycler",
-				Namespace: "default",
-			},
-		})
-		Expect(err).NotTo(HaveOccurred())
-		Expect(result.RequeueAfter.Seconds()).To(Equal(float64(120)))
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "custom-poll-recycler",
+					Namespace: "default",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(120)))
 
-		// Cleanup
-		Expect(k8sClient.Delete(ctx, customRecycler)).To(Succeed())
+			// Cleanup
+			Expect(k8sClient.Delete(ctx, customRecycler)).To(Succeed())
 		})
 	})
 })
