@@ -120,5 +120,180 @@ var _ = Describe("Recycler Controller", func() {
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
+
+		It("should add finalizer to Recycler resource", func() {
+			By("Reconciling to add finalizer")
+			controllerReconciler := &RecyclerReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Fetch the Recycler resource
+			recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
+			err = k8sClient.Get(ctx, typeNamespacedName, recycler)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify finalizer is added
+			Expect(recycler.Finalizers).To(ContainElement("recycler.k8s.io/recycler"))
+		})
+
+		It("should update status condition to Available", func() {
+			By("Reconciling to update status")
+			controllerReconciler := &RecyclerReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Fetch the Recycler resource
+			recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
+			err = k8sClient.Get(ctx, typeNamespacedName, recycler)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify status condition
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, typeNamespacedName, recycler)
+				if err != nil {
+					return false
+				}
+				for _, condition := range recycler.Status.Conditions {
+					if condition.Type == "Available" && condition.Status == metav1.ConditionTrue {
+						return true
+					}
+				}
+				return false
+			}, "10s", "1s").Should(BeTrue())
+		})
+
+		It("should return proper requeue duration", func() {
+			By("Reconciling and checking requeue")
+			controllerReconciler := &RecyclerReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify requeue duration matches polling interval
+			recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
+			err = k8sClient.Get(ctx, typeNamespacedName, recycler)
+			Expect(err).NotTo(HaveOccurred())
+
+			expectedDuration := recycler.Spec.PollingIntervalSeconds
+			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(expectedDuration)))
+		})
+
+		It("should handle non-existent resource gracefully", func() {
+			By("Reconciling a non-existent resource")
+			controllerReconciler := &RecyclerReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+
+			nonExistentName := types.NamespacedName{
+				Name:      "non-existent",
+				Namespace: "default",
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: nonExistentName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Requeue).To(BeFalse())
+		})
+
+		It("should support annotation storage location", func() {
+			By("Creating recycler with annotation storage")
+			annotationRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "annotation-recycler",
+					Namespace: "default",
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       "Deployment",
+						Name:       "target-deployment",
+						APIVersion: "apps/v1",
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            10,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        "annotation",
+				},
+			}
+			Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
+
+			controllerReconciler := &RecyclerReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "annotation-recycler",
+					Namespace: "default",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(60)))
+
+			// Cleanup
+			Expect(k8sClient.Delete(ctx, annotationRecycler)).To(Succeed())
+		})
+
+		It("should handle different polling intervals", func() {
+			By("Creating recycler with custom polling interval")
+			customRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "custom-poll-recycler",
+					Namespace: "default",
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       "Deployment",
+						Name:       "target-deployment",
+						APIVersion: "apps/v1",
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       120,
+					PodMetricsHistory:            10,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        "memory",
+				},
+			}
+			Expect(k8sClient.Create(ctx, customRecycler)).To(Succeed())
+
+			controllerReconciler := &RecyclerReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+
+			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "custom-poll-recycler",
+					Namespace: "default",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(120)))
+
+			// Cleanup
+			Expect(k8sClient.Delete(ctx, customRecycler)).To(Succeed())
+		})
 	})
 })
