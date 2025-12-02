@@ -222,9 +222,12 @@ var _ = Describe("controller", Ordered, func() {
 			GinkgoWriter.Printf("  - gracePeriodSeconds: %d\n", gracePeriodSeconds)
 
 			// Validate that values are valid
-			ExpectWithOffset(1, recycleDelaySeconds).Should(BeNumerically(">", 0), "recycleDelaySeconds should be greater than 0")
-			ExpectWithOffset(1, pollingIntervalSeconds).Should(BeNumerically(">", 0), "pollingIntervalSeconds should be greater than 0")
-			ExpectWithOffset(1, podMetricsHistory).Should(BeNumerically(">", 0), "podMetricsHistory should be greater than 0")
+			ExpectWithOffset(1, recycleDelaySeconds).Should(BeNumerically(">", 0),
+				"recycleDelaySeconds should be greater than 0")
+			ExpectWithOffset(1, pollingIntervalSeconds).Should(BeNumerically(">", 0),
+				"pollingIntervalSeconds should be greater than 0")
+			ExpectWithOffset(1, podMetricsHistory).Should(BeNumerically(">", 0),
+				"podMetricsHistory should be greater than 0")
 
 			By("waiting for Recycler to have Available status")
 			verifyRecyclerHealthy := func() error {
