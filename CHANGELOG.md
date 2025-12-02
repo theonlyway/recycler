@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2025-12-02
+### :bug: Bug Fixes
+- [`9db7bb1`](https://github.com/theonlyway/recycler/commit/9db7bb12707f95ca48951f6fdc7c1e73d3f4a7f7) - added steps to regenerate the schema for yaml-language-server *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`b60b9ee`](https://github.com/theonlyway/recycler/commit/b60b9ee792a4ba238e88b5d71e492b142e30992b) - **deps**: update actions/checkout action to v6 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`193d00d`](https://github.com/theonlyway/recycler/commit/193d00dfd17ced976a6b8ae506d38501147d995b) - **deps**: update actions/setup-go action to v6 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.3.0] - 2025-12-02
 ### :sparkles: New Features
 - [`1285bc5`](https://github.com/theonlyway/recycler/commit/1285bc5ff84ed6a4655075c59ee27e1edf9fd106) - working on tests *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -227,3 +236,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.12]: https://github.com/theonlyway/recycler/compare/1.1.11...1.1.12
 [1.2.0]: https://github.com/theonlyway/recycler/compare/1.1.12...1.2.0
 [1.3.0]: https://github.com/theonlyway/recycler/compare/1.2.0...1.3.0
+[1.3.1]: https://github.com/theonlyway/recycler/compare/1.3.0...1.3.1
