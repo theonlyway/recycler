@@ -1,0 +1,42 @@
+name: Update VS Code Schema
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "api/**"
+            - "config/crd/**"
+
+jobs:
+    update-schema:
+        if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                  go-version-file: "go.mod"
+                  cache: true
+
+            - name: Generate VS Code schema
+              run: make vscode-schema
+
+            - name: Check for changes
+              id: git-check
+              run: |
+                  git diff --exit-code .vscode/recycler-schema.json || echo "changed=true" >> $GITHUB_OUTPUT
+
+            - name: Commit and push if changed
+              if: steps.git-check.outputs.changed == 'true'
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                  git add .vscode/recycler-schema.json
+                  git commit -m "chore: update VS Code schema [skip ci]"
+                  git push

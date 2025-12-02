@@ -108,6 +108,13 @@ help: ## Display this help.
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+.PHONY: vscode-schema
+vscode-schema: manifests yq jq ## Generate JSON schema for VS Code IntelliSense from CRD
+	@mkdir -p .vscode
+	@$(YQ) eval '.spec.versions[0].schema.openAPIV3Schema' -o=json config/crd/bases/recycler.theonlywaye.com_recyclers.yaml | \
+		$(JQ) '{"$$schema": "http://json-schema.org/draft-07/schema#"} + .' > .vscode/recycler-schema.json
+	@echo "Generated .vscode/recycler-schema.json for VS Code IntelliSense"
+
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -270,6 +277,8 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
+YQ ?= $(LOCALBIN)/yq
+JQ ?= $(LOCALBIN)/jq
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.4.3
@@ -279,6 +288,8 @@ ENVTEST_VERSION ?= $(shell go list -m -f "{{ .Version }}" sigs.k8s.io/controller
 #ENVTEST_K8S_VERSION is the version of Kubernetes to use for setting up ENVTEST binaries (i.e. 1.31)
 ENVTEST_K8S_VERSION ?= $(shell go list -m -f "{{ .Version }}" k8s.io/api | awk -F'[v.]' '{printf "1.%d", $$3}')
 GOLANGCI_LINT_VERSION ?= v2.5.0
+YQ_VERSION ?= v4.49.2
+JQ_VERSION ?= 1.8.1
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
@@ -307,6 +318,28 @@ $(ENVTEST): $(LOCALBIN)
 golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
+
+.PHONY: yq
+yq: $(YQ) ## Download yq locally if necessary.
+$(YQ): $(LOCALBIN)
+	@[ -f $(YQ) ] || { \
+		set -e ;\
+		OS=$$(go env GOOS) && ARCH=$$(go env GOARCH) ;\
+		echo "Downloading yq $(YQ_VERSION) for $${OS}/$${ARCH}..." ;\
+		curl -sSL https://github.com/mikefarah/yq/releases/download/$(YQ_VERSION)/yq_$${OS}_$${ARCH} -o $(YQ) ;\
+		chmod +x $(YQ) ;\
+	}
+
+.PHONY: jq
+jq: $(JQ) ## Download jq locally if necessary.
+$(JQ): $(LOCALBIN)
+	@[ -f $(JQ) ] || { \
+		set -e ;\
+		OS=$$(go env GOOS) && ARCH=$$(go env GOARCH) ;\
+		echo "Downloading jq $(JQ_VERSION) for $${OS}/$${ARCH}..." ;\
+		curl -sSL https://github.com/jqlang/jq/releases/download/jq-$(JQ_VERSION)/jq-$${OS}-$${ARCH} -o $(JQ) ;\
+		chmod +x $(JQ) ;\
+	}
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary
