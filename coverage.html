@@ -1,0 +1,1522 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>v1alpha1: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/theonlyway/recycler/api/v1alpha1/recycler_types.go (100.0%)</option>
+				
+				<option value="file1">github.com/theonlyway/recycler/api/v1alpha1/zz_generated.deepcopy.go (43.4%)</option>
+				
+				<option value="file2">github.com/theonlyway/recycler/cmd/main.go (0.0%)</option>
+				
+				<option value="file3">github.com/theonlyway/recycler/internal/controller/monitor_controller.go (12.8%)</option>
+				
+				<option value="file4">github.com/theonlyway/recycler/internal/controller/recycler_controller.go (44.1%)</option>
+				
+				<option value="file5">github.com/theonlyway/recycler/test/utils/utils.go (83.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package v1alpha1
+
+import (
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// CrossVersionObjectReference contains enough information to let you identify the referred resource.
+type CrossVersionObjectReference struct {
+        // kind is the kind of the referent; More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+        // +default="Deployment"
+        // +kubebuilder:validation:Enum=Deployment
+        // +optional
+        Kind string `json:"kind" protobuf:"bytes,1,opt,name=kind"`
+
+        // name is the name of the referent; More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+        Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
+
+        // apiVersion is the API version of the referent
+        // +default="apps/v1"
+        // +optional
+        APIVersion string `json:"apiVersion,omitempty" protobuf:"bytes,3,opt,name=apiVersion"`
+}
+
+// RecyclerSpec defines the desired state of Recycler
+type RecyclerSpec struct {
+        // INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+        // Important: Run "make" to regenerate code after modifying this file
+
+        // ScaleTargetRef from autoscalingv2 used by the horzontal pod autoscaler for consistency
+        ScaleTargetRef CrossVersionObjectReference `json:"scaleTargetRef"`
+        // Average CPU utilization percent of the target resource
+        AverageCpuUtilizationPercent int32 `json:"averageCpuUtilizationPercent"`
+        // Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold
+        // +optional
+        // +default=300
+        RecycleDelaySeconds int32 `json:"recycleDelaySeconds"`
+        // Polling duration in seonds between metric fetches
+        // +optional
+        // +default=60
+        PollingIntervalSeconds int32 `json:"pollingIntervalSeconds"`
+        // Number of datapoints to keep in the pod metrics history
+        // +optional
+        // +default=10
+        PodMetricsHistory int32 `json:"podMetricsHistory"`
+        // Termination grace period in seconds
+        // +optional
+        // +default=30
+        GracePeriodSeconds int32 `json:"gracePeriodSeconds"`
+        // Location to store metric data. Certain options are bad based on the number of datapoints and frequency
+        // +optional
+        // +kubebuilder:validation:Enum=memory;annotation
+        // +kubebuilder:default=memory
+        MetricStorageLocation string `json:"metricStorageLocation"`
+}
+
+// RecyclerStatus defines the observed state of Recycler
+type RecyclerStatus struct {
+        // INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+        // Important: Run "make" to regenerate code after modifying this file
+
+        Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+
+// Recycler is the Schema for the recyclers API
+type Recycler struct {
+        metav1.TypeMeta   `json:",inline"`
+        metav1.ObjectMeta `json:"metadata,omitempty"`
+
+        Spec   RecyclerSpec   `json:"spec,omitempty"`
+        Status RecyclerStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// RecyclerList contains a list of Recycler
+type RecyclerList struct {
+        metav1.TypeMeta `json:",inline"`
+        metav1.ListMeta `json:"metadata,omitempty"`
+        Items           []Recycler `json:"items"`
+}
+
+func init() <span class="cov8" title="1">{
+        SchemeBuilder.Register(&amp;Recycler{}, &amp;RecyclerList{})
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">//go:build !ignore_autogenerated
+
+/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+// Code generated by controller-gen. DO NOT EDIT.
+
+package v1alpha1
+
+import (
+        "k8s.io/apimachinery/pkg/apis/meta/v1"
+        runtime "k8s.io/apimachinery/pkg/runtime"
+)
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *CrossVersionObjectReference) DeepCopyInto(out *CrossVersionObjectReference) <span class="cov0" title="0">{
+        *out = *in
+}</span>
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new CrossVersionObjectReference.
+func (in *CrossVersionObjectReference) DeepCopy() *CrossVersionObjectReference <span class="cov0" title="0">{
+        if in == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">out := new(CrossVersionObjectReference)
+        in.DeepCopyInto(out)
+        return out</span>
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *Recycler) DeepCopyInto(out *Recycler) <span class="cov8" title="1">{
+        *out = *in
+        out.TypeMeta = in.TypeMeta
+        in.ObjectMeta.DeepCopyInto(&amp;out.ObjectMeta)
+        out.Spec = in.Spec
+        in.Status.DeepCopyInto(&amp;out.Status)
+}</span>
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new Recycler.
+func (in *Recycler) DeepCopy() *Recycler <span class="cov8" title="1">{
+        if in == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">out := new(Recycler)
+        in.DeepCopyInto(out)
+        return out</span>
+}
+
+// DeepCopyObject is an autogenerated deepcopy function, copying the receiver, creating a new runtime.Object.
+func (in *Recycler) DeepCopyObject() runtime.Object <span class="cov0" title="0">{
+        if c := in.DeepCopy(); c != nil </span><span class="cov0" title="0">{
+                return c
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *RecyclerList) DeepCopyInto(out *RecyclerList) <span class="cov8" title="1">{
+        *out = *in
+        out.TypeMeta = in.TypeMeta
+        in.ListMeta.DeepCopyInto(&amp;out.ListMeta)
+        if in.Items != nil </span><span class="cov8" title="1">{
+                in, out := &amp;in.Items, &amp;out.Items
+                *out = make([]Recycler, len(*in))
+                for i := range *in </span><span class="cov8" title="1">{
+                        (*in)[i].DeepCopyInto(&amp;(*out)[i])
+                }</span>
+        }
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new RecyclerList.
+func (in *RecyclerList) DeepCopy() *RecyclerList <span class="cov8" title="1">{
+        if in == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">out := new(RecyclerList)
+        in.DeepCopyInto(out)
+        return out</span>
+}
+
+// DeepCopyObject is an autogenerated deepcopy function, copying the receiver, creating a new runtime.Object.
+func (in *RecyclerList) DeepCopyObject() runtime.Object <span class="cov0" title="0">{
+        if c := in.DeepCopy(); c != nil </span><span class="cov0" title="0">{
+                return c
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *RecyclerSpec) DeepCopyInto(out *RecyclerSpec) <span class="cov0" title="0">{
+        *out = *in
+        out.ScaleTargetRef = in.ScaleTargetRef
+}</span>
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new RecyclerSpec.
+func (in *RecyclerSpec) DeepCopy() *RecyclerSpec <span class="cov0" title="0">{
+        if in == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">out := new(RecyclerSpec)
+        in.DeepCopyInto(out)
+        return out</span>
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *RecyclerStatus) DeepCopyInto(out *RecyclerStatus) <span class="cov8" title="1">{
+        *out = *in
+        if in.Conditions != nil </span><span class="cov0" title="0">{
+                in, out := &amp;in.Conditions, &amp;out.Conditions
+                *out = make([]v1.Condition, len(*in))
+                for i := range *in </span><span class="cov0" title="0">{
+                        (*in)[i].DeepCopyInto(&amp;(*out)[i])
+                }</span>
+        }
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new RecyclerStatus.
+func (in *RecyclerStatus) DeepCopy() *RecyclerStatus <span class="cov0" title="0">{
+        if in == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">out := new(RecyclerStatus)
+        in.DeepCopyInto(out)
+        return out</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package main
+
+import (
+        "crypto/tls"
+        "flag"
+        "os"
+
+        // Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
+        // to ensure that exec-entrypoint and run can make use of them.
+        _ "k8s.io/client-go/plugin/pkg/client/auth"
+
+        "k8s.io/apimachinery/pkg/runtime"
+        utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+        clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+        ctrl "sigs.k8s.io/controller-runtime"
+        "sigs.k8s.io/controller-runtime/pkg/healthz"
+        "sigs.k8s.io/controller-runtime/pkg/log/zap"
+        "sigs.k8s.io/controller-runtime/pkg/metrics/filters"
+        metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+        "sigs.k8s.io/controller-runtime/pkg/webhook"
+
+        recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
+        "github.com/theonlyway/recycler/internal/controller"
+        // +kubebuilder:scaffold:imports
+)
+
+var (
+        scheme   = runtime.NewScheme()
+        setupLog = ctrl.Log.WithName("setup")
+)
+
+func init() <span class="cov0" title="0">{
+        utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+
+        utilruntime.Must(recyclertheonlywayecomv1alpha1.AddToScheme(scheme))
+        // +kubebuilder:scaffold:scheme
+}</span>
+
+func main() <span class="cov0" title="0">{
+        var metricsAddr string
+        var enableLeaderElection bool
+        var probeAddr string
+        var secureMetrics bool
+        var enableHTTP2 bool
+        var tlsOpts []func(*tls.Config)
+
+        flag.StringVar(&amp;metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
+                "Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
+        flag.StringVar(&amp;probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+        flag.BoolVar(&amp;enableLeaderElection, "leader-elect", false,
+                "Enable leader election for controller manager. "+
+                        "Enabling this will ensure there is only one active controller manager.")
+        flag.BoolVar(&amp;secureMetrics, "metrics-secure", true,
+                "If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
+        flag.BoolVar(&amp;enableHTTP2, "enable-http2", false,
+                "If set, HTTP/2 will be enabled for the metrics and webhook servers")
+
+        opts := zap.Options{}
+
+        opts.BindFlags(flag.CommandLine)
+        flag.Parse()
+
+        ctrl.SetLogger(zap.New(zap.UseFlagOptions(&amp;opts)))
+
+        // if the enable-http2 flag is false (the default), http/2 should be disabled
+        // due to its vulnerabilities. More specifically, disabling http/2 will
+        // prevent from being vulnerable to the HTTP/2 Stream Cancellation and
+        // Rapid Reset CVEs. For more information see:
+        // - https://github.com/advisories/GHSA-qppj-fm5r-hxr3
+        // - https://github.com/advisories/GHSA-4374-p667-p6c8
+        disableHTTP2 := func(c *tls.Config) </span><span class="cov0" title="0">{
+                setupLog.Info("disabling http/2")
+                c.NextProtos = []string{"http/1.1"}
+        }</span>
+
+        <span class="cov0" title="0">if !enableHTTP2 </span><span class="cov0" title="0">{
+                tlsOpts = append(tlsOpts, disableHTTP2)
+        }</span>
+
+        <span class="cov0" title="0">webhookServer := webhook.NewServer(webhook.Options{
+                TLSOpts: tlsOpts,
+        })
+
+        // Metrics endpoint is enabled in 'config/default/kustomization.yaml'. The Metrics options configure the server.
+        // More info:
+        // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/metrics/server
+        // - https://book.kubebuilder.io/reference/metrics.html
+        metricsServerOptions := metricsserver.Options{
+                BindAddress:   metricsAddr,
+                SecureServing: secureMetrics,
+                // TODO(user): TLSOpts is used to allow configuring the TLS config used for the server. If certificates are
+                // not provided, self-signed certificates will be generated by default. This option is not recommended for
+                // production environments as self-signed certificates do not offer the same level of trust and security
+                // as certificates issued by a trusted Certificate Authority (CA). The primary risk is potentially allowing
+                // unauthorized access to sensitive metrics data. Consider replacing with CertDir, CertName, and KeyName
+                // to provide certificates, ensuring the server communicates using trusted and secure certificates.
+                TLSOpts: tlsOpts,
+        }
+
+        if secureMetrics </span><span class="cov0" title="0">{
+                // FilterProvider is used to protect the metrics endpoint with authn/authz.
+                // These configurations ensure that only authorized users and service accounts
+                // can access the metrics endpoint. The RBAC are configured in 'config/rbac/kustomization.yaml'. More info:
+                // https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/metrics/filters#WithAuthenticationAndAuthorization
+                metricsServerOptions.FilterProvider = filters.WithAuthenticationAndAuthorization
+        }</span>
+
+        <span class="cov0" title="0">mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+                Scheme:                 scheme,
+                Metrics:                metricsServerOptions,
+                WebhookServer:          webhookServer,
+                HealthProbeBindAddress: probeAddr,
+                LeaderElection:         enableLeaderElection,
+                LeaderElectionID:       "444e2486.recycler.theonlywaye.com",
+                // LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
+                // when the Manager ends. This requires the binary to immediately end when the
+                // Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
+                // speeds up voluntary leader transitions as the new leader don't have to wait
+                // LeaseDuration time first.
+                //
+                // In the default scaffold provided, the program ends immediately after
+                // the manager stops, so would be fine to enable this option. However,
+                // if you are doing or is intended to do any operation such as perform cleanups
+                // after the manager stops then its usage might be unsafe.
+                // LeaderElectionReleaseOnCancel: true,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                setupLog.Error(err, "unable to start manager")
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">if err = (&amp;controller.RecyclerReconciler{
+                Client: mgr.GetClient(),
+                Scheme: mgr.GetScheme(),
+                Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
+        }).SetupWithManager(mgr); err != nil </span><span class="cov0" title="0">{
+                setupLog.Error(err, "unable to create controller", "controller", "Recycler")
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">if err = (&amp;controller.MonitorReconciler{
+                Client: mgr.GetClient(),
+                Scheme: mgr.GetScheme(),
+                Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
+                Config: mgr.GetConfig(),
+        }).SetupWithManager(mgr); err != nil </span><span class="cov0" title="0">{
+                setupLog.Error(err, "unable to create controller", "controller", "Monitor")
+                os.Exit(1)
+        }</span>
+        // +kubebuilder:scaffold:builder
+
+        <span class="cov0" title="0">if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil </span><span class="cov0" title="0">{
+                setupLog.Error(err, "unable to set up health check")
+                os.Exit(1)
+        }</span>
+        <span class="cov0" title="0">if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil </span><span class="cov0" title="0">{
+                setupLog.Error(err, "unable to set up ready check")
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">setupLog.Info("starting manager")
+        if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil </span><span class="cov0" title="0">{
+                setupLog.Error(err, "problem running manager")
+                os.Exit(1)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package controller
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "math"
+        "sync"
+        "time"
+
+        appsv1 "k8s.io/api/apps/v1"
+        corev1 "k8s.io/api/core/v1"
+        apierrors "k8s.io/apimachinery/pkg/api/errors"
+        "k8s.io/apimachinery/pkg/api/resource"
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+        "k8s.io/apimachinery/pkg/labels"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/client-go/rest"
+        "k8s.io/client-go/tools/record"
+        metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
+        resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
+        ctrl "sigs.k8s.io/controller-runtime"
+        "sigs.k8s.io/controller-runtime/pkg/client"
+
+        "github.com/go-logr/logr"
+        recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
+        "k8s.io/client-go/util/retry"
+)
+
+const monitorControllerName = "monitor"
+
+const (
+        StorageMemory     string = "memory"
+        StorageAnnotation string = "annotation"
+)
+
+// Exported thread-safe in-memory storage for metrics
+var InMemoryMetricsStorage sync.Map
+
+// MonitorReconciler reconciles a Monitor object
+type MonitorReconciler struct {
+        client.Client
+        Scheme   *runtime.Scheme
+        Recorder record.EventRecorder
+        Log      logr.Logger
+        Config   *rest.Config
+}
+
+// PodCPUUsage represents the CPU usage of a pod
+type PodCPUUsage struct {
+        PodName       string
+        CPUUsage      resource.Quantity // Raw CPU usage
+        CPULimit      resource.Quantity // CPU limit
+        CPUPercentage float64           // Percentage CPU utilization
+        Timestamp     time.Time         // Timestamp of the metrics
+}
+
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;watch
+// +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
+
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+// TODO(user): Modify the Reconcile function to compare the state specified by
+// the Monitor object against the actual cluster state, and then
+// perform operations to make the cluster state reflect the state specified by
+// the user.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
+func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) <span class="cov8" title="1">{
+        log := r.Log.WithValues("monitor", req.NamespacedName)
+
+        // Fetch the Recycler instance
+        recycler := &amp;recyclertheonlywayecomv1alpha1.Recycler{}
+        err := r.Get(ctx, req.NamespacedName, recycler)
+        if err != nil </span><span class="cov8" title="1">{
+                if apierrors.IsNotFound(err) </span><span class="cov8" title="1">{
+                        log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", monitorControllerName)
+                        return ctrl.Result{}, nil
+                }</span>
+                <span class="cov0" title="0">log.Error(err, "unable to fetch Recycle", "controller", monitorControllerName)
+                return ctrl.Result{}, err</span>
+        }
+
+        // Fetch the resource type using ScaleTargetRef
+        <span class="cov8" title="1">switch kind := recycler.Spec.ScaleTargetRef.Kind; kind </span>{
+        case "Deployment":<span class="cov8" title="1">
+                // Fetch the target deployment using ScaleTargetRef
+                deployment := &amp;appsv1.Deployment{}
+                log.V(1).Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
+                deploymentKey := client.ObjectKey{
+                        Namespace: recycler.Namespace,
+                        Name:      recycler.Spec.ScaleTargetRef.Name,
+                }
+                if err := r.Get(ctx, deploymentKey, deployment); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to fetch target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
+                        return ctrl.Result{}, err
+                }</span>
+                // Fetch the pods in the deployment
+                <span class="cov8" title="1">podList := &amp;corev1.PodList{}
+                listOptions := []client.ListOption{
+                        client.InNamespace(deployment.Namespace),
+                        client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+                }
+                if err := r.List(ctx, podList, listOptions...); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to list pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
+                        return ctrl.Result{}, err
+                }</span>
+                // Fetch the metrics for the pods in the deployment
+                <span class="cov8" title="1">metricsClient := resourceclient.NewForConfigOrDie(r.Config).PodMetricses(deployment.Namespace)
+                podMetricsList, err := fetchPodMetrics(ctx, metricsClient, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
+                if err != nil </span><span class="cov8" title="1">{
+                        log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
+                        return ctrl.Result{}, err
+                }</span>
+
+                <span class="cov0" title="0">for _, podCPU := range podMetricsList </span><span class="cov0" title="0">{
+                        // Update the pod's metrics history based on storage location
+                        if err := updatePodMetricsHistory(ctx, r, podCPU.PodName, deployment.Namespace, podCPU, recycler.Spec.PodMetricsHistory, log, recycler.Spec.MetricStorageLocation); err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to update pod metrics history", "podName", podCPU.PodName)
+                        }</span>
+                }
+
+                <span class="cov0" title="0">for _, pod := range podList.Items </span><span class="cov0" title="0">{
+                        // Fetch the metrics history based on storage location
+                        metricsHistory, err := fetchPodMetricsHistory(ctx, r, &amp;pod, log, recycler.Spec.MetricStorageLocation)
+                        if err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to fetch metrics history", "podName", pod.Name)
+                                continue</span>
+                        }
+
+                        // Check if there are enough data points
+                        <span class="cov0" title="0">if len(metricsHistory) &lt; int(recycler.Spec.PodMetricsHistory) </span><span class="cov0" title="0">{
+                                log.V(1).Info("Not enough data points for pod, skipping", "podName", pod.Name)
+                                continue</span>
+                        }
+
+                        // Check threshold and annotate if breached
+                        <span class="cov0" title="0">if err := checkPodMetricsAnnotation(ctx, r, recycler, &amp;pod, metricsHistory, recycler.Spec.AverageCpuUtilizationPercent, log); err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to check threshold and annotate pod", "podName", pod.Name)
+                        }</span>
+                }
+        default:<span class="cov0" title="0">
+                log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)</span>
+        }
+
+        // Log all in-memory metrics at the end of the reconciliation loop
+        <span class="cov0" title="0">logInMemoryMetrics(r.Log)
+
+        return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil</span>
+}
+
+func logInMemoryMetrics(log logr.Logger) <span class="cov0" title="0">{
+        InMemoryMetricsStorage.Range(func(key, value interface{}) bool </span><span class="cov0" title="0">{
+                metricsHistory := value.([]PodCPUUsage)
+                for i, metric := range metricsHistory </span><span class="cov0" title="0">{
+                        log.V(1).Info("In-memory metric stored", "key", key, "index", i, "podName", metric.PodName, "CPUUsage", metric.CPUUsage.String(), "CPULimit", metric.CPULimit.String(), "CPUPercentage", metric.CPUPercentage, "Timestamp", metric.Timestamp)
+                }</span>
+                <span class="cov0" title="0">return true</span>
+        })
+}
+
+func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetricsInterface, namespace string, labelSelector map[string]string, podTemplate corev1.PodTemplateSpec, log logr.Logger) ([]PodCPUUsage, error) <span class="cov8" title="1">{
+        // Create a label selector from the provided labels
+        selector := labels.SelectorFromSet(labelSelector).String()
+
+        // Fetch the pod metrics using the Kubernetes Metrics API client
+        podMetricsList, err := metricsClient.List(ctx, metav1.ListOptions{LabelSelector: selector})
+        if err != nil </span><span class="cov8" title="1">{
+                log.Error(err, "Failed to fetch pod metrics", "namespace", namespace, "labelSelector", labelSelector)
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">if len(podMetricsList.Items) == 0 </span><span class="cov0" title="0">{
+                log.Info("No pod metrics returned", "namespace", namespace, "labelSelector", labelSelector)
+                return nil, fmt.Errorf("no pod metrics returned from resource metrics API")
+        }</span>
+
+        // Process the metrics and calculate CPU utilization for each pod
+        <span class="cov0" title="0">podCPUUsages := make([]PodCPUUsage, 0, len(podMetricsList.Items))
+        for _, podMetrics := range podMetricsList.Items </span><span class="cov0" title="0">{
+                // Sum the CPU usage across all containers in the pod
+                totalCPUUsage := resource.Quantity{}
+                for _, container := range podMetrics.Containers </span><span class="cov0" title="0">{
+                        if cpuUsage, found := container.Usage[corev1.ResourceCPU]; found </span><span class="cov0" title="0">{
+                                totalCPUUsage.Add(cpuUsage)
+                        }</span> else<span class="cov0" title="0"> {
+                                log.Info("Missing CPU usage metric for container", "containerName", container.Name, "podName", podMetrics.Name)
+                        }</span>
+                }
+
+                // Get the CPU limit from the pod template
+                <span class="cov0" title="0">totalCPULimit := resource.Quantity{}
+                for _, container := range podTemplate.Spec.Containers </span><span class="cov0" title="0">{
+                        if container.Resources.Limits != nil </span><span class="cov0" title="0">{
+                                if cpuLimit, found := container.Resources.Limits[corev1.ResourceCPU]; found </span><span class="cov0" title="0">{
+                                        totalCPULimit.Add(cpuLimit)
+                                }</span>
+                        }
+                }
+
+                // Calculate the percentage CPU utilization
+                <span class="cov0" title="0">var cpuUtilization float64
+                if totalCPULimit.MilliValue() &gt; 0 </span><span class="cov0" title="0">{
+                        // Convert millicores to cores by dividing by 1000
+                        cpuUtilization = (float64(totalCPUUsage.MilliValue()) / float64(totalCPULimit.MilliValue())) * 100
+                }</span> else<span class="cov0" title="0"> {
+                        log.Info("Pod CPU limit is 0, skipping CPU utilization calculation", "podName", podMetrics.Name)
+                        cpuUtilization = 0 // No CPU limit defined
+                }</span>
+
+                // Format the CPU utilization to two decimal places
+                <span class="cov0" title="0">cpuUtilization = math.Round(cpuUtilization*100) / 100
+
+                // Append the pod's CPU utilization to the result list, including the current timestamp
+                podCPUUsages = append(podCPUUsages, PodCPUUsage{
+                        PodName:       podMetrics.Name,
+                        CPUUsage:      totalCPUUsage,
+                        CPULimit:      totalCPULimit,
+                        CPUPercentage: cpuUtilization,
+                        Timestamp:     podMetrics.Timestamp.Time, // Use the metrics query timestamp
+                })</span>
+        }
+
+        <span class="cov0" title="0">return podCPUUsages, nil</span>
+}
+
+// UpdatePodMetricsHistory updates the pod's metrics history in memory or annotations
+func updatePodMetricsHistory(ctx context.Context, r *MonitorReconciler, podName string, namespace string, newDataPoint PodCPUUsage, maxHistory int32, log logr.Logger, storageLocation string) error <span class="cov0" title="0">{
+        switch storageLocation </span>{
+        case StorageMemory:<span class="cov0" title="0">
+                // Use thread-safe in-memory storage
+                key := fmt.Sprintf("%s/%s", namespace, podName)
+                log.V(1).Info("Working with in-memory storage", "key", key)
+                value, _ := InMemoryMetricsStorage.LoadOrStore(key, []PodCPUUsage{})
+                metricsHistory := value.([]PodCPUUsage)
+                metricsHistory = append(metricsHistory, newDataPoint)
+                if len(metricsHistory) &gt; int(maxHistory) </span><span class="cov0" title="0">{
+                        metricsHistory = metricsHistory[len(metricsHistory)-int(maxHistory):]
+                }</span>
+                <span class="cov0" title="0">InMemoryMetricsStorage.Store(key, metricsHistory)
+                log.V(1).Info("Updated in-memory metrics history", "key", key, "historySize", len(metricsHistory))
+                return nil</span>
+        case StorageAnnotation:<span class="cov0" title="0">
+                // Use annotation-based storage
+                podKey := client.ObjectKey{Namespace: namespace, Name: podName}
+                return retry.RetryOnConflict(retry.DefaultRetry, func() error </span><span class="cov0" title="0">{
+                        // Fetch the latest version of the pod
+                        pod := &amp;corev1.Pod{}
+                        if err := r.Get(ctx, podKey, pod); err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to fetch pod", "podName", podName)
+                                return err
+                        }</span>
+
+                        // Initialize or fetch existing metrics history
+                        <span class="cov0" title="0">var metricsHistory []PodCPUUsage
+                        if pod.Annotations == nil </span><span class="cov0" title="0">{
+                                pod.Annotations = make(map[string]string)
+                        }</span>
+                        <span class="cov0" title="0">if historyJSON, exists := pod.Annotations[podMetricsAnnotation]; exists </span><span class="cov0" title="0">{
+                                if err := json.Unmarshal([]byte(historyJSON), &amp;metricsHistory); err != nil </span><span class="cov0" title="0">{
+                                        log.Error(err, "Failed to deserialize existing metrics history", "podName", podName)
+                                        return err
+                                }</span>
+                        }
+
+                        // Append the new data point and trim history
+                        <span class="cov0" title="0">metricsHistory = append(metricsHistory, newDataPoint)
+                        if len(metricsHistory) &gt; int(maxHistory) </span><span class="cov0" title="0">{
+                                metricsHistory = metricsHistory[len(metricsHistory)-int(maxHistory):]
+                        }</span>
+
+                        // Serialize updated history
+                        <span class="cov0" title="0">updatedHistoryJSON, err := json.Marshal(metricsHistory)
+                        if err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to serialize updated metrics history", "podName", podName)
+                                return err
+                        }</span>
+
+                        // Update the pod annotation
+                        <span class="cov0" title="0">pod.Annotations[podMetricsAnnotation] = string(updatedHistoryJSON)
+                        if err := r.Update(ctx, pod); err != nil </span><span class="cov0" title="0">{
+                                if apierrors.IsConflict(err) </span><span class="cov0" title="0">{
+                                        log.Info("Conflict detected while updating pod, retrying", "podName", podName)
+                                }</span> else<span class="cov0" title="0"> {
+                                        log.Error(err, "Failed to update pod annotations", "podName", podName)
+                                }</span>
+                                <span class="cov0" title="0">return err</span>
+                        }
+
+                        <span class="cov0" title="0">log.V(1).Info("Updated pod metrics history", "podName", podName, "historySize", len(metricsHistory))
+                        return nil</span>
+                })
+        default:<span class="cov0" title="0">
+                log.Error(fmt.Errorf("unsupported storage location"), "Invalid storage location", "storageLocation", storageLocation)
+                return fmt.Errorf("unsupported storage location: %s", storageLocation)</span>
+        }
+}
+
+func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *corev1.Pod, log logr.Logger, storageLocation string) ([]PodCPUUsage, error) <span class="cov0" title="0">{
+        switch storageLocation </span>{
+        case StorageMemory:<span class="cov0" title="0">
+                // Use thread-safe in-memory storage
+                key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+                log.V(1).Info("Fetching from in-memory storage", "key", key)
+                value, exists := InMemoryMetricsStorage.Load(key)
+                if !exists </span><span class="cov0" title="0">{
+                        podAge := time.Since(pod.CreationTimestamp.Time)
+                        log.Info("No in-memory metrics history found", "key", key, "podAge", podAge.String())
+                        return nil, nil
+                }</span>
+                <span class="cov0" title="0">metricsHistory := value.([]PodCPUUsage)
+                log.V(1).Info("Fetched in-memory metrics history", "key", key, "historySize", len(metricsHistory))
+                return metricsHistory, nil</span>
+        case StorageAnnotation:<span class="cov0" title="0">
+                // Fetch the latest version of the pod
+                latestPod := &amp;corev1.Pod{}
+                if err := r.Get(ctx, client.ObjectKeyFromObject(pod), latestPod); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to fetch latest pod", "podName", pod.Name)
+                        return nil, err
+                }</span>
+
+                // Use annotation-based storage
+                <span class="cov0" title="0">metricsHistoryJSON, exists := latestPod.Annotations[podMetricsAnnotation]
+                if !exists </span><span class="cov0" title="0">{
+                        log.Info("Pod does not have metrics history annotation", "podName", pod.Name)
+                        return nil, nil
+                }</span>
+
+                <span class="cov0" title="0">var metricsHistory []PodCPUUsage
+                if err := json.Unmarshal([]byte(metricsHistoryJSON), &amp;metricsHistory); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to deserialize metrics history", "podName", pod.Name)
+                        return nil, err
+                }</span>
+                <span class="cov0" title="0">log.V(1).Info("Fetched annotation-based metrics history", "podName", pod.Name, "historySize", len(metricsHistory))
+                return metricsHistory, nil</span>
+        default:<span class="cov0" title="0">
+                log.Error(fmt.Errorf("unsupported storage location"), "Invalid storage location", "storageLocation", storageLocation)
+                return nil, fmt.Errorf("unsupported storage location: %s", storageLocation)</span>
+        }
+}
+
+func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error <span class="cov0" title="0">{
+        averageCPU := calculateAverageCPU(metricsHistory, log, pod.Name)
+
+        if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil </span><span class="cov0" title="0">{
+                log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+                return err
+        }</span>
+
+        <span class="cov0" title="0">if averageCPU &gt; float64(threshold) </span><span class="cov0" title="0">{
+                return handleThresholdBreach(ctx, r, recycler, pod, averageCPU, log)
+        }</span>
+
+        <span class="cov0" title="0">return handleThresholdRecovery(ctx, r, recycler, pod, averageCPU, log)</span>
+}
+
+func calculateAverageCPU(metricsHistory []PodCPUUsage, log logr.Logger, podName string) float64 <span class="cov0" title="0">{
+        var totalCPUPercentage float64
+        for _, dataPoint := range metricsHistory </span><span class="cov0" title="0">{
+                totalCPUPercentage += dataPoint.CPUPercentage
+        }</span>
+        <span class="cov0" title="0">averageCPU := totalCPUPercentage / float64(len(metricsHistory))
+        log.V(1).Info("Calculated average CPU usage", "podName", podName, "averageCPU", averageCPU)
+        return averageCPU</span>
+}
+
+func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, averageCPU float64, log logr.Logger) error <span class="cov0" title="0">{
+        if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; exists </span><span class="cov0" title="0">{
+                log.V(1).Info("Breach annotation already exists, skipping update", "podName", pod.Name)
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">return retry.RetryOnConflict(retry.DefaultRetry, func() error </span><span class="cov0" title="0">{
+                if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">if pod.Annotations == nil </span><span class="cov0" title="0">{
+                        pod.Annotations = make(map[string]string)
+                }</span>
+                <span class="cov0" title="0">breachTime := time.Now()
+                pod.Annotations[cpuBreachTimestampAnnotation] = breachTime.Format(time.RFC3339)
+                if err := r.Update(ctx, pod); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
+                        return err
+                }</span>
+
+                // Calculate termination time based on breach time and delay
+                <span class="cov0" title="0">delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
+                terminationTime := breachTime.Add(delay).Format(time.RFC3339)
+
+                // Calculate pod age
+                podAge := time.Since(pod.CreationTimestamp.Time)
+
+                // Write an event to the pod
+                r.Recorder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
+                        "CPU usage threshold breached. Average CPU: %.2f%%", averageCPU)
+                // Write an event to the CRD
+                r.Recorder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
+                        "CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
+
+                log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "podAge", podAge.String(), "breachTime", breachTime.Format(time.RFC3339), "terminationTime", terminationTime)
+                return nil</span>
+        })
+}
+
+func handleThresholdRecovery(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, averageCPU float64, log logr.Logger) error <span class="cov0" title="0">{
+        if _, exists := pod.Annotations[cpuBreachTimestampAnnotation]; !exists </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">log.Info("CPU usage recovered below threshold, removing breach annotation", "podName", pod.Name)
+
+        return retry.RetryOnConflict(retry.DefaultRetry, func() error </span><span class="cov0" title="0">{
+                if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to fetch pod", "podName", pod.Name)
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">delete(pod.Annotations, cpuBreachTimestampAnnotation)
+                if err := r.Update(ctx, pod); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to update pod to remove breach annotation", "podName", pod.Name)
+                        return err
+                }</span>
+
+                // Write an event to the pod
+                <span class="cov0" title="0">r.Recorder.Eventf(pod, corev1.EventTypeNormal, "CPUThresholdRecovered",
+                        "CPU usage recovered below threshold. Average CPU: %.2f%%", averageCPU)
+                // Write an event to the CRD
+                r.Recorder.Eventf(recycler, corev1.EventTypeNormal, "CPUThresholdRecovered",
+                        "CPU usage recovered below threshold for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
+
+                log.Info("Breach annotation removed from pod", "podName", pod.Name)
+                return nil</span>
+        })
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error <span class="cov0" title="0">{
+        // Register the metrics.k8s.io/v1beta1 API to the scheme
+        if err := metricsapi.AddToScheme(mgr.GetScheme()); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to add metrics API to scheme: %w", err)
+        }</span>
+        <span class="cov0" title="0">r.Recorder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
+        return ctrl.NewControllerManagedBy(mgr).
+                Named("monitor").
+                For(&amp;recyclertheonlywayecomv1alpha1.Recycler{}).
+                Complete(r)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package controller
+
+import (
+        "context"
+        "fmt"
+        "time"
+
+        appsv1 "k8s.io/api/apps/v1"
+        corev1 "k8s.io/api/core/v1"
+        apierrors "k8s.io/apimachinery/pkg/api/errors"
+        "k8s.io/apimachinery/pkg/api/meta"
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+        "k8s.io/apimachinery/pkg/runtime"
+        "k8s.io/client-go/tools/record"
+        "k8s.io/client-go/util/retry"
+        ctrl "sigs.k8s.io/controller-runtime"
+        "sigs.k8s.io/controller-runtime/pkg/client"
+        "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+        "github.com/go-logr/logr"
+        recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
+)
+
+const recyclerFinalizer string = "recycler.k8s.io/recycler"
+const (
+        typeHealthyCondition         string = "Available"
+        typeUnhealthyCondition       string = "Unavailable"
+        cpuBreachTimestampAnnotation string = "recycler.theonlyway.com/cpu-breach-timestamp"
+        podMetricsAnnotation         string = "recycler.theonlyway.com/pod-metrics-history"
+)
+
+const recyclerControllerName string = "recycler"
+
+// RecyclerReconciler reconciles a Recycler object
+type RecyclerReconciler struct {
+        client.Client
+        Scheme   *runtime.Scheme
+        Recorder record.EventRecorder
+        Log      logr.Logger
+}
+
+// +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;delete;watch
+
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+// TODO(user): Modify the Reconcile function to compare the state specified by
+// the Recycler object against the actual cluster state, and then
+// perform operations to make the cluster state reflect the state specified by
+// the user.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
+func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) <span class="cov8" title="1">{
+        log := r.Log.WithValues("recycler", req.NamespacedName)
+        log.V(1).Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
+
+        // Fetch the Recycler instance
+        recycler := &amp;recyclertheonlywayecomv1alpha1.Recycler{}
+        err := r.Get(ctx, req.NamespacedName, recycler)
+        if err != nil </span><span class="cov8" title="1">{
+                if apierrors.IsNotFound(err) </span><span class="cov8" title="1">{
+                        log.Info("Recycler resource not found. Ignoring since object must be deleted", "controller", recyclerControllerName)
+                        return ctrl.Result{}, nil
+                }</span>
+                <span class="cov0" title="0">log.Error(err, "unable to fetch Recycler", "controller", recyclerControllerName)
+                return ctrl.Result{}, err</span>
+        }
+
+        // Add finalizer if not present
+        <span class="cov8" title="1">if !controllerutil.ContainsFinalizer(recycler, recyclerFinalizer) </span><span class="cov8" title="1">{
+                log.Info("Adding finalizer for Recycler", "controller", recyclerControllerName)
+                controllerutil.AddFinalizer(recycler, recyclerFinalizer)
+                if err := r.Update(ctx, recycler); err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to update Recycler with finalizer", "controller", recyclerControllerName)
+                        return ctrl.Result{}, err
+                }</span>
+        }
+
+        // Handle deletion
+        <span class="cov8" title="1">if recycler.GetDeletionTimestamp() != nil </span><span class="cov8" title="1">{
+                if controllerutil.ContainsFinalizer(recycler, recyclerFinalizer) </span><span class="cov8" title="1">{
+                        log.Info("Performing finalizer operations", "controller", recyclerControllerName)
+
+                        // Perform finalizer operations
+                        r.doFinalizerOperationsForRecycler(ctx, recycler)
+
+                        // Remove finalizer
+                        controllerutil.RemoveFinalizer(recycler, recyclerFinalizer)
+                        err := retry.RetryOnConflict(retry.DefaultRetry, func() error </span><span class="cov8" title="1">{
+                                latestRecycler := &amp;recyclertheonlywayecomv1alpha1.Recycler{}
+                                if err := r.Get(ctx, req.NamespacedName, latestRecycler); err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov8" title="1">controllerutil.RemoveFinalizer(latestRecycler, recyclerFinalizer)
+                                return r.Update(ctx, latestRecycler)</span>
+                        })
+                        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to remove finalizer", "controller", recyclerControllerName)
+                                return ctrl.Result{}, err
+                        }</span>
+                }
+                <span class="cov8" title="1">return ctrl.Result{}, nil</span>
+        }
+
+        // Update status condition
+        <span class="cov8" title="1">err = retry.RetryOnConflict(retry.DefaultRetry, func() error </span><span class="cov8" title="1">{
+                latestRecycler := &amp;recyclertheonlywayecomv1alpha1.Recycler{}
+                if err := r.Get(ctx, req.NamespacedName, latestRecycler); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">meta.SetStatusCondition(&amp;latestRecycler.Status.Conditions, metav1.Condition{
+                        Type:    typeHealthyCondition,
+                        Status:  metav1.ConditionTrue,
+                        Reason:  "Monitoring",
+                        Message: "Recycler is healthy and monitoring the target resource",
+                })
+                return r.Status().Update(ctx, latestRecycler)</span>
+        })
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                log.Error(err, "Failed to update Recycler status", "controller", recyclerControllerName)
+                return ctrl.Result{}, err
+        }</span>
+
+        <span class="cov8" title="1">if err := terminatePods(ctx, r, recycler, log); err != nil </span><span class="cov0" title="0">{
+                log.Error(err, "Failed to terminate pods", "controller", recyclerControllerName)
+                return ctrl.Result{}, err
+        }</span>
+
+        <span class="cov8" title="1">return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil</span>
+}
+
+func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, log logr.Logger) error <span class="cov8" title="1">{
+        // Fetch the target deployment using ScaleTargetRef
+        deployment := &amp;appsv1.Deployment{}
+        deploymentKey := client.ObjectKey{
+                Namespace: recycler.Namespace,
+                Name:      recycler.Spec.ScaleTargetRef.Name,
+        }
+        if err := r.Get(ctx, deploymentKey, deployment); err != nil </span><span class="cov0" title="0">{
+                log.Error(err, "Failed to fetch target deployment", "controller", recyclerControllerName)
+                return err
+        }</span>
+
+        // List all pods in the target deployment
+        <span class="cov8" title="1">podList := &amp;corev1.PodList{}
+        listOptions := []client.ListOption{
+                client.InNamespace(deployment.Namespace),
+                client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+        }
+        if err := r.List(ctx, podList, listOptions...); err != nil </span><span class="cov0" title="0">{
+                log.Error(err, "Failed to list pods for termination", "controller", recyclerControllerName)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for _, pod := range podList.Items </span><span class="cov0" title="0">{
+                // Check for the breach timestamp annotation
+                breachTimestamp, exists := pod.Annotations[cpuBreachTimestampAnnotation]
+                if !exists </span><span class="cov0" title="0">{
+                        log.V(1).Info("Pod does not have breach timestamp annotation, skipping", "podName", pod.Name)
+                        continue</span>
+                }
+
+                // Parse the breach timestamp
+                <span class="cov0" title="0">breachTime, err := time.Parse(time.RFC3339, breachTimestamp)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error(err, "Failed to parse breach timestamp", "podName", pod.Name, "breachTimestamp", breachTimestamp)
+                        continue</span>
+                }
+
+                // Calculate the time elapsed since the breach
+                <span class="cov0" title="0">elapsed := time.Since(breachTime)
+                delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second
+
+                // Calculate pod age
+                podAge := time.Since(pod.CreationTimestamp.Time)
+
+                if elapsed &gt;= delay </span><span class="cov0" title="0">{
+                        log.Info("Terminating pod due to CPU threshold breach",
+                                "podName", pod.Name,
+                                "podAge", podAge.String(),
+                                "breachTimestamp", breachTimestamp,
+                                "elapsed", elapsed,
+                                "delay", delay)
+
+                        // Set grace period for pod termination
+                        gracePeriod := int64(recycler.Spec.GracePeriodSeconds)
+                        deleteOptions := &amp;client.DeleteOptions{
+                                GracePeriodSeconds: &amp;gracePeriod,
+                        }
+
+                        // Terminate the pod
+                        if err := r.Delete(ctx, &amp;pod, deleteOptions); err != nil </span><span class="cov0" title="0">{
+                                log.Error(err, "Failed to delete pod", "podName", pod.Name)
+                        }</span> else<span class="cov0" title="0"> {
+                                // Check if in-memory storage is being used
+                                if recycler.Spec.MetricStorageLocation == "memory" </span><span class="cov0" title="0">{
+                                        // Remove the pod's entry from in-memory storage
+                                        key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+                                        InMemoryMetricsStorage.Delete(key) // Access exported variable
+                                        log.V(1).Info("Removed pod entry from in-memory storage", "podName", pod.Name, "key", key)
+                                }</span>
+
+                                // Write an event to the CRD
+                                <span class="cov0" title="0">r.Recorder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))</span>
+                        }
+                } else<span class="cov0" title="0"> {
+                        terminationTime := breachTime.Add(delay)
+                        log.V(1).Info("Pod not ready for termination yet",
+                                "podName", pod.Name,
+                                "breachTimestamp", breachTimestamp,
+                                "elapsed", elapsed,
+                                "delay", delay,
+                                "terminationTime", terminationTime)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Context, recycler *recyclertheonlywayecomv1alpha1.Recycler) <span class="cov8" title="1">{
+        r.Recorder.Event(recycler, "Warning", "Deleting", fmt.Sprintf("Custom resource %s is being deleted from namespace %s", recycler.Name, recycler.Namespace))
+
+        // Fetch the target deployment using ScaleTargetRef
+        deployment := &amp;appsv1.Deployment{}
+        deploymentKey := client.ObjectKey{
+                Namespace: recycler.Namespace,
+                Name:      recycler.Spec.ScaleTargetRef.Name,
+        }
+        if err := r.Get(ctx, deploymentKey, deployment); err != nil </span><span class="cov0" title="0">{
+                r.Recorder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to fetch deployment: %v", err))
+                return
+        }</span>
+
+        // List all pods in the target deployment
+        <span class="cov8" title="1">podList := &amp;corev1.PodList{}
+        listOptions := []client.ListOption{
+                client.InNamespace(deployment.Namespace),
+                client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+        }
+        if err := r.List(ctx, podList, listOptions...); err != nil </span><span class="cov0" title="0">{
+                r.Recorder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to list pods: %v", err))
+                return
+        }</span>
+
+        // Handle cleanup based on MetricStorageLocation
+        <span class="cov8" title="1">switch recycler.Spec.MetricStorageLocation </span>{
+        case "annotation":<span class="cov0" title="0">
+                // Remove annotations from each pod
+                for _, pod := range podList.Items </span><span class="cov0" title="0">{
+                        retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error </span><span class="cov0" title="0">{
+                                // Fetch the latest version of the pod
+                                latestPod := &amp;corev1.Pod{}
+                                if err := r.Get(ctx, client.ObjectKeyFromObject(&amp;pod), latestPod); err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+
+                                // Remove annotations
+                                <span class="cov0" title="0">if latestPod.Annotations != nil </span><span class="cov0" title="0">{
+                                        delete(latestPod.Annotations, cpuBreachTimestampAnnotation)
+                                        delete(latestPod.Annotations, podMetricsAnnotation)
+                                }</span>
+
+                                // Update the pod
+                                <span class="cov0" title="0">return r.Update(ctx, latestPod)</span>
+                        })
+
+                        <span class="cov0" title="0">if retryErr != nil </span><span class="cov0" title="0">{
+                                r.Recorder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, retryErr))
+                        }</span> else<span class="cov0" title="0"> {
+                                r.Recorder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
+                        }</span>
+                }
+        case "memory":<span class="cov8" title="1">
+                // Clear in-memory metrics storage for each pod
+                for _, pod := range podList.Items </span><span class="cov0" title="0">{
+                        key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+                        InMemoryMetricsStorage.Delete(key)
+                        r.Log.V(1).Info("Cleared in-memory metrics storage for pod", "podName", pod.Name, "key", key)
+                }</span>
+        default:<span class="cov0" title="0">
+                r.Log.Error(fmt.Errorf("unsupported storage location"), "Invalid MetricStorageLocation", "MetricStorageLocation", recycler.Spec.MetricStorageLocation)</span>
+        }
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *RecyclerReconciler) SetupWithManager(mgr ctrl.Manager) error <span class="cov0" title="0">{
+        r.Recorder = mgr.GetEventRecorderFor("recycler-controller") // Initialize the EventRecorder
+        return ctrl.NewControllerManagedBy(mgr).
+                Named("recycler").
+                For(&amp;recyclertheonlywayecomv1alpha1.Recycler{}).
+                Complete(r)
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">/*
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package utils
+
+import (
+        "fmt"
+        "io"
+        "os"
+        "os/exec"
+        "strings"
+
+        "github.com/onsi/ginkgo/v2"
+)
+
+const (
+        prometheusOperatorVersion = "v0.86.0"
+        prometheusOperatorURL     = "https://github.com/prometheus-operator/prometheus-operator/" +
+                "releases/download/%s/bundle.yaml"
+
+        certmanagerVersion = "v1.19.1"
+        certmanagerURLTmpl = "https://github.com/jetstack/cert-manager/releases/download/%s/cert-manager.yaml"
+
+        metricsServerVersion = "v0.8.0"
+        metricsServerURLTmpl = "https://github.com/kubernetes-sigs/metrics-server/releases/download/%s/components.yaml"
+)
+
+func warnError(err error) <span class="cov8" title="1">{
+        _, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "warning: %v\n", err)
+}</span>
+
+// InstallPrometheusOperator installs the prometheus Operator to be used to export the enabled metrics.
+func InstallPrometheusOperator() error <span class="cov8" title="1">{
+        url := fmt.Sprintf(prometheusOperatorURL, prometheusOperatorVersion)
+        cmd := exec.Command("kubectl", "create", "-f", url)
+        _, err := Run(cmd)
+        return err
+}</span>
+
+// Run executes the provided command within this context
+func Run(cmd *exec.Cmd) ([]byte, error) <span class="cov8" title="1">{
+        dir, _ := GetProjectDir()
+        cmd.Dir = dir
+
+        if err := os.Chdir(cmd.Dir); err != nil </span><span class="cov0" title="0">{
+                _, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "chdir dir: %s\n", err)
+        }</span>
+
+        <span class="cov8" title="1">cmd.Env = append(os.Environ(), "GO111MODULE=on")
+        command := strings.Join(cmd.Args, " ")
+        _, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "running: %s\n", command)
+        output, err := cmd.CombinedOutput()
+        if err != nil </span><span class="cov8" title="1">{
+                return output, fmt.Errorf("%s failed with error: (%v) %s", command, err, string(output))
+        }</span>
+
+        <span class="cov8" title="1">return output, nil</span>
+}
+
+// UninstallPrometheusOperator uninstalls the prometheus
+func UninstallPrometheusOperator() <span class="cov8" title="1">{
+        url := fmt.Sprintf(prometheusOperatorURL, prometheusOperatorVersion)
+        cmd := exec.Command("kubectl", "delete", "-f", url)
+        if _, err := Run(cmd); err != nil </span><span class="cov8" title="1">{
+                warnError(err)
+        }</span>
+}
+
+// UninstallCertManager uninstalls the cert manager
+func UninstallCertManager() <span class="cov8" title="1">{
+        url := fmt.Sprintf(certmanagerURLTmpl, certmanagerVersion)
+        cmd := exec.Command("kubectl", "delete", "-f", url)
+        if _, err := Run(cmd); err != nil </span><span class="cov8" title="1">{
+                warnError(err)
+        }</span>
+}
+
+// InstallCertManager installs the cert manager bundle.
+func InstallCertManager() error <span class="cov8" title="1">{
+        url := fmt.Sprintf(certmanagerURLTmpl, certmanagerVersion)
+        cmd := exec.Command("kubectl", "apply", "-f", url)
+        if _, err := Run(cmd); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        // Wait for cert-manager-webhook to be ready, which can take time if cert-manager
+        // was re-installed after uninstalling on a cluster.
+        <span class="cov0" title="0">cmd = exec.Command("kubectl", "wait", "deployment.apps/cert-manager-webhook",
+                "--for", "condition=Available",
+                "--namespace", "cert-manager",
+                "--timeout", "5m",
+        )
+
+        _, err := Run(cmd)
+        return err</span>
+}
+
+// InstallMetricsServer installs the metrics-server for CPU/memory metrics.
+func InstallMetricsServer() error <span class="cov8" title="1">{
+        url := fmt.Sprintf(metricsServerURLTmpl, metricsServerVersion)
+        cmd := exec.Command("kubectl", "apply", "-f", url)
+        if _, err := Run(cmd); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // Patch metrics-server to work in Kind (disable TLS verification)
+        <span class="cov0" title="0">cmd = exec.Command("kubectl", "patch", "deployment", "metrics-server",
+                "-n", "kube-system",
+                "--type=json",
+                "-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]`,
+        )
+        if _, err := Run(cmd); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Wait for metrics-server to be ready
+        <span class="cov0" title="0">cmd = exec.Command("kubectl", "wait", "deployment/metrics-server",
+                "--for", "condition=Available",
+                "--namespace", "kube-system",
+                "--timeout", "5m",
+        )
+
+        _, err := Run(cmd)
+        return err</span>
+}
+
+// UninstallMetricsServer uninstalls the metrics-server
+func UninstallMetricsServer() <span class="cov8" title="1">{
+        url := fmt.Sprintf(metricsServerURLTmpl, metricsServerVersion)
+        cmd := exec.Command("kubectl", "delete", "-f", url)
+        if _, err := Run(cmd); err != nil </span><span class="cov8" title="1">{
+                warnError(err)
+        }</span>
+}
+
+// LoadImageToKindClusterWithName loads a local docker image to the kind cluster
+func LoadImageToKindClusterWithName(name string) error <span class="cov8" title="1">{
+        cluster := "kind"
+        if v, ok := os.LookupEnv("KIND_CLUSTER"); ok </span><span class="cov8" title="1">{
+                cluster = v
+        }</span>
+        <span class="cov8" title="1">kindOptions := []string{"load", "docker-image", name, "--name", cluster}
+        cmd := exec.Command("kind", kindOptions...)
+        _, err := Run(cmd)
+        return err</span>
+}
+
+// GetNonEmptyLines converts given command output string into individual objects
+// according to line breakers, and ignores the empty elements in it.
+func GetNonEmptyLines(output string) []string <span class="cov8" title="1">{
+        var res []string
+        elements := strings.Split(output, "\n")
+        for _, element := range elements </span><span class="cov8" title="1">{
+                if element != "" </span><span class="cov8" title="1">{
+                        res = append(res, element)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return res</span>
+}
+
+// GetProjectDir will return the directory where the project is
+func GetProjectDir() (string, error) <span class="cov8" title="1">{
+        wd, err := os.Getwd()
+        if err != nil </span><span class="cov0" title="0">{
+                return wd, err
+        }</span>
+        <span class="cov8" title="1">wd = strings.ReplaceAll(wd, "/test/e2e", "")
+        return wd, nil</span>
+}
+
+// StringReader creates an io.Reader from a string
+func StringReader(s string) io.Reader <span class="cov8" title="1">{
+        return strings.NewReader(s)
+}</span>
+
+// ContainsString checks if a string contains a substring
+func ContainsString(s, substr string) bool <span class="cov8" title="1">{
+        return strings.Contains(s, substr)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

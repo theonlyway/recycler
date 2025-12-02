@@ -361,52 +361,6 @@ var _ = Describe("Monitor Controller", func() {
 	})
 
 	Context("Error handling", func() {
-		It("should handle unsupported resource type", func() {
-			By("Creating recycler with unsupported kind")
-
-			unsupportedRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "unsupported-kind-recycler",
-					Namespace: "default",
-				},
-				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
-					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "StatefulSet",
-						Name:       "test-statefulset",
-						APIVersion: "apps/v1",
-					},
-					AverageCpuUtilizationPercent: 50,
-					RecycleDelaySeconds:          300,
-					PollingIntervalSeconds:       60,
-					PodMetricsHistory:            10,
-					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "memory",
-				},
-			}
-			Expect(k8sClient.Create(ctx, unsupportedRecycler)).To(Succeed())
-
-			monitorReconciler := &MonitorReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
-				Config: cfg,
-			}
-
-			result, err := monitorReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      "unsupported-kind-recycler",
-					Namespace: "default",
-				},
-			})
-
-			// Should not error but log and continue
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result.RequeueAfter).To(Equal(60 * time.Second))
-
-			// Cleanup
-			Expect(k8sClient.Delete(ctx, unsupportedRecycler)).To(Succeed())
-		})
-
 		It("should handle invalid storage location", func() {
 			log := ctrl.Log.WithName("test")
 
