@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -32,6 +33,15 @@ import (
 
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
+
+// mockEventRecorder is a mock implementation of record.EventRecorder for testing
+type mockEventRecorder struct{}
+
+func (m *mockEventRecorder) Event(object runtime.Object, eventtype, reason, message string) {}
+func (m *mockEventRecorder) Eventf(object runtime.Object, eventtype, reason, messageFmt string, args ...interface{}) {
+}
+func (m *mockEventRecorder) AnnotatedEventf(object runtime.Object, annotations map[string]string, eventtype, reason, messageFmt string, args ...interface{}) {
+}
 
 var _ = Describe("Recycler Controller", func() {
 	Context("When reconciling a resource", func() {
@@ -126,9 +136,10 @@ var _ = Describe("Recycler Controller", func() {
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
 			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -142,9 +153,10 @@ var _ = Describe("Recycler Controller", func() {
 		It("should add finalizer to Recycler resource", func() {
 			By("Reconciling to add finalizer")
 			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -164,9 +176,10 @@ var _ = Describe("Recycler Controller", func() {
 		It("should update status condition to Available", func() {
 			By("Reconciling to update status")
 			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -197,9 +210,10 @@ var _ = Describe("Recycler Controller", func() {
 		It("should return proper requeue duration", func() {
 			By("Reconciling and checking requeue")
 			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -219,9 +233,10 @@ var _ = Describe("Recycler Controller", func() {
 		It("should handle non-existent resource gracefully", func() {
 			By("Reconciling a non-existent resource")
 			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
 			}
 
 			nonExistentName := types.NamespacedName{
@@ -257,22 +272,23 @@ var _ = Describe("Recycler Controller", func() {
 					MetricStorageLocation:        "annotation",
 				},
 			}
-			Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
+		Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
 
-			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
-			}
+		controllerReconciler := &RecyclerReconciler{
+			Client:   k8sClient,
+			Scheme:   k8sClient.Scheme(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+			Recorder: &mockEventRecorder{},
+		}
 
-			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      "annotation-recycler",
-					Namespace: "default",
-				},
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(60)))
+		result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      "annotation-recycler",
+				Namespace: "default",
+			},
+		})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result.RequeueAfter.Seconds()).To(Equal(float64(60)))
 
 			// Cleanup
 			Expect(k8sClient.Delete(ctx, annotationRecycler)).To(Succeed())
@@ -299,25 +315,26 @@ var _ = Describe("Recycler Controller", func() {
 					MetricStorageLocation:        "memory",
 				},
 			}
-			Expect(k8sClient.Create(ctx, customRecycler)).To(Succeed())
+		Expect(k8sClient.Create(ctx, customRecycler)).To(Succeed())
 
-			controllerReconciler := &RecyclerReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
-			}
+		controllerReconciler := &RecyclerReconciler{
+			Client:   k8sClient,
+			Scheme:   k8sClient.Scheme(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+			Recorder: &mockEventRecorder{},
+		}
 
-			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      "custom-poll-recycler",
-					Namespace: "default",
-				},
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result.RequeueAfter.Seconds()).To(Equal(float64(120)))
+		result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      "custom-poll-recycler",
+				Namespace: "default",
+			},
+		})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result.RequeueAfter.Seconds()).To(Equal(float64(120)))
 
-			// Cleanup
-			Expect(k8sClient.Delete(ctx, customRecycler)).To(Succeed())
+		// Cleanup
+		Expect(k8sClient.Delete(ctx, customRecycler)).To(Succeed())
 		})
 	})
 })

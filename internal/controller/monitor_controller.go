@@ -55,9 +55,9 @@ var InMemoryMetricsStorage sync.Map
 // MonitorReconciler reconciles a Monitor object
 type MonitorReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Recoder record.EventRecorder
-	Log     logr.Logger
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
+	Log      logr.Logger
 }
 
 // PodCPUUsage represents the CPU usage of a pod
@@ -411,10 +411,10 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		podAge := time.Since(pod.CreationTimestamp.Time)
 
 		// Write an event to the pod
-		r.Recoder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
+		r.Recorder.Eventf(pod, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached. Average CPU: %.2f%%", averageCPU)
 		// Write an event to the CRD
-		r.Recoder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
+		r.Recorder.Eventf(recycler, corev1.EventTypeWarning, "CPUThresholdBreached",
 			"CPU usage threshold breached for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
 		log.Info("Breach timestamp annotation added to pod", "podName", pod.Name, "podAge", podAge.String(), "breachTime", breachTime.Format(time.RFC3339), "terminationTime", terminationTime)
@@ -442,10 +442,10 @@ func handleThresholdRecovery(ctx context.Context, r *MonitorReconciler, recycler
 		}
 
 		// Write an event to the pod
-		r.Recoder.Eventf(pod, corev1.EventTypeNormal, "CPUThresholdRecovered",
+		r.Recorder.Eventf(pod, corev1.EventTypeNormal, "CPUThresholdRecovered",
 			"CPU usage recovered below threshold. Average CPU: %.2f%%", averageCPU)
 		// Write an event to the CRD
-		r.Recoder.Eventf(recycler, corev1.EventTypeNormal, "CPUThresholdRecovered",
+		r.Recorder.Eventf(recycler, corev1.EventTypeNormal, "CPUThresholdRecovered",
 			"CPU usage recovered below threshold for pod %s. Average CPU: %.2f%%", pod.Name, averageCPU)
 
 		log.Info("Breach annotation removed from pod", "podName", pod.Name)
@@ -459,7 +459,7 @@ func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := metricsapi.AddToScheme(mgr.GetScheme()); err != nil {
 		return fmt.Errorf("failed to add metrics API to scheme: %w", err)
 	}
-	r.Recoder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
+	r.Recorder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("monitor").
 		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
