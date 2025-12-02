@@ -211,7 +211,7 @@ var _ = Describe("Recycler Controller", func() {
 				NamespacedName: nonExistentName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Requeue).To(BeFalse())
+			Expect(result.RequeueAfter).To(BeZero())
 		})
 
 		It("should support annotation storage location", func() {

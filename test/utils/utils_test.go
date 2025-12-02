@@ -44,7 +44,7 @@ var _ = Describe("Utils", func() {
 
 		It("should remove /test/e2e from path if present", func() {
 			originalWd, _ := os.Getwd()
-			defer os.Chdir(originalWd)
+			defer func() { _ = os.Chdir(originalWd) }()
 
 			// Create a temporary directory structure
 			tmpDir := GinkgoT().TempDir()
@@ -71,7 +71,7 @@ var _ = Describe("Utils", func() {
 			// Read from the reader
 			buf := make([]byte, len(testString))
 			n, err := reader.Read(buf)
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(HaveOccurred())
 			Expect(n).To(Equal(len(testString)))
 			Expect(string(buf)).To(Equal(testString))
 		})
@@ -184,7 +184,8 @@ var _ = Describe("Utils", func() {
 		})
 
 		It("should handle kubectl-style output", func() {
-			output := "NAME                READY   STATUS\npod-1               1/1     Running\npod-2               1/1     Running\n"
+			output := "NAME                READY   STATUS\n" +
+				"pod-1               1/1     Running\npod-2               1/1     Running\n"
 			lines := GetNonEmptyLines(output)
 
 			Expect(lines).To(HaveLen(3))
@@ -267,13 +268,13 @@ var _ = Describe("Utils", func() {
 			originalCluster := os.Getenv("KIND_CLUSTER")
 			defer func() {
 				if originalCluster != "" {
-					os.Setenv("KIND_CLUSTER", originalCluster)
+					_ = os.Setenv("KIND_CLUSTER", originalCluster)
 				} else {
-					os.Unsetenv("KIND_CLUSTER")
+					_ = os.Unsetenv("KIND_CLUSTER")
 				}
 			}()
 
-			os.Setenv("KIND_CLUSTER", "custom-cluster")
+			_ = os.Setenv("KIND_CLUSTER", "custom-cluster")
 
 			// Just verify the function can be called with env var set
 			err := LoadImageToKindClusterWithName("test-image:latest")

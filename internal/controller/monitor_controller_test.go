@@ -157,7 +157,7 @@ var _ = Describe("Monitor Controller", func() {
 				NamespacedName: nonExistentName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Requeue).To(BeFalse())
+			Expect(result.RequeueAfter).To(BeZero())
 		})
 
 		It("should work with annotation storage location", func() {
