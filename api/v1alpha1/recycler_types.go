@@ -50,18 +50,23 @@ type RecyclerSpec struct {
 	// Average CPU utilization percent of the target resource
 	AverageCpuUtilizationPercent int32 `json:"averageCpuUtilizationPercent"`
 	// Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold
+	// +optional
 	// +default=300
 	RecycleDelaySeconds int32 `json:"recycleDelaySeconds"`
 	// Polling duration in seonds between metric fetches
+	// +optional
 	// +default=60
 	PollingIntervalSeconds int32 `json:"pollingIntervalSeconds"`
 	// Number of datapoints to keep in the pod metrics history
+	// +optional
 	// +default=10
 	PodMetricsHistory int32 `json:"podMetricsHistory"`
 	// Termination grace period in seconds
+	// +optional
 	// +default=30
 	GracePeriodSeconds int32 `json:"gracePeriodSeconds"`
 	// Location to store metric data. Certain options are bad based on the number of datapoints and frequency
+	// +optional
 	// +kubebuilder:validation:Enum=memory;annotation
 	// +kubebuilder:default=memory
 	MetricStorageLocation string `json:"metricStorageLocation"`

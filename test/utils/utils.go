@@ -18,6 +18,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -32,6 +33,9 @@ const (
 
 	certmanagerVersion = "v1.19.1"
 	certmanagerURLTmpl = "https://github.com/jetstack/cert-manager/releases/download/%s/cert-manager.yaml"
+
+	metricsServerVersion = "v0.8.0"
+	metricsServerURLTmpl = "https://github.com/kubernetes-sigs/metrics-server/releases/download/%s/components.yaml"
 )
 
 func warnError(err error) {
@@ -103,6 +107,44 @@ func InstallCertManager() error {
 	return err
 }
 
+// InstallMetricsServer installs the metrics-server for CPU/memory metrics.
+func InstallMetricsServer() error {
+	url := fmt.Sprintf(metricsServerURLTmpl, metricsServerVersion)
+	cmd := exec.Command("kubectl", "apply", "-f", url)
+	if _, err := Run(cmd); err != nil {
+		return err
+	}
+
+	// Patch metrics-server to work in Kind (disable TLS verification)
+	cmd = exec.Command("kubectl", "patch", "deployment", "metrics-server",
+		"-n", "kube-system",
+		"--type=json",
+		"-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]`,
+	)
+	if _, err := Run(cmd); err != nil {
+		return err
+	}
+
+	// Wait for metrics-server to be ready
+	cmd = exec.Command("kubectl", "wait", "deployment/metrics-server",
+		"--for", "condition=Available",
+		"--namespace", "kube-system",
+		"--timeout", "5m",
+	)
+
+	_, err := Run(cmd)
+	return err
+}
+
+// UninstallMetricsServer uninstalls the metrics-server
+func UninstallMetricsServer() {
+	url := fmt.Sprintf(metricsServerURLTmpl, metricsServerVersion)
+	cmd := exec.Command("kubectl", "delete", "-f", url)
+	if _, err := Run(cmd); err != nil {
+		warnError(err)
+	}
+}
+
 // LoadImageToKindClusterWithName loads a local docker image to the kind cluster
 func LoadImageToKindClusterWithName(name string) error {
 	cluster := "kind"
@@ -137,4 +179,14 @@ func GetProjectDir() (string, error) {
 	}
 	wd = strings.ReplaceAll(wd, "/test/e2e", "")
 	return wd, nil
+}
+
+// StringReader creates an io.Reader from a string
+func StringReader(s string) io.Reader {
+	return strings.NewReader(s)
+}
+
+// ContainsString checks if a string contains a substring
+func ContainsString(s, substr string) bool {
+	return strings.Contains(s, substr)
 }

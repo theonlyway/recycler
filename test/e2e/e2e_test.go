@@ -17,6 +17,8 @@ limitations under the License.
 package e2e
 
 import (
+	_ "embed"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"time"
@@ -24,10 +26,18 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 	"github.com/theonlyway/recycler/test/utils"
 )
 
+//go:embed testdata/cpu-stress-deployment.yaml
+var cpuStressDeploymentYAML string
+
+//go:embed testdata/cpu-stress-recycler.yaml
+var cpuStressRecyclerYAML string
+
 const namespace = "recycler-system"
+const podStatusRunning = "Running"
 
 var _ = Describe("controller", Ordered, func() {
 	BeforeAll(func() {
@@ -36,6 +46,9 @@ var _ = Describe("controller", Ordered, func() {
 
 		By("installing the cert-manager")
 		Expect(utils.InstallCertManager()).To(Succeed())
+
+		By("installing metrics-server")
+		Expect(utils.InstallMetricsServer()).To(Succeed())
 
 		By("creating manager namespace")
 		cmd := exec.Command("kubectl", "create", "ns", namespace)
@@ -48,6 +61,9 @@ var _ = Describe("controller", Ordered, func() {
 
 		By("uninstalling the cert-manager bundle")
 		utils.UninstallCertManager()
+
+		By("uninstalling metrics-server")
+		utils.UninstallMetricsServer()
 
 		By("removing manager namespace")
 		cmd := exec.Command("kubectl", "delete", "ns", namespace)
@@ -83,7 +99,7 @@ var _ = Describe("controller", Ordered, func() {
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
 			By("deploying the controller-manager")
-			cmd = exec.Command("make", "deploy", fmt.Sprintf("IMG=%s", projectimage))
+			cmd = exec.Command("make", "deploy-debug", fmt.Sprintf("IMG=%s", projectimage))
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
@@ -116,13 +132,247 @@ var _ = Describe("controller", Ordered, func() {
 				)
 				status, err := utils.Run(cmd)
 				ExpectWithOffset(2, err).NotTo(HaveOccurred())
-				if string(status) != "Running" {
+				if string(status) != podStatusRunning {
 					return fmt.Errorf("controller pod in %s status", status)
 				}
 				return nil
 			}
 			EventuallyWithOffset(1, verifyControllerUp, time.Minute, time.Second).Should(Succeed())
 
+		})
+
+		It("should terminate pod when CPU threshold is exceeded", func() {
+			const testNamespace = "cpu-test"
+			const deploymentName = "cpu-stress"
+			const recyclerName = "cpu-stress-recycler"
+			var err error
+
+			By("creating test namespace")
+			cmd := exec.Command("kubectl", "create", "ns", testNamespace)
+			_, err = utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("deploying a CPU stress test deployment")
+			cmd = exec.Command("kubectl", "apply", "-f", "-")
+			cmd.Stdin = utils.StringReader(cpuStressDeploymentYAML)
+			_, err = utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("waiting for CPU stress pod to be running")
+			verifyStressPodRunning := func() error {
+				cmd = exec.Command("kubectl", "get", "pods",
+					"-n", testNamespace,
+					"-l", "app=cpu-stress",
+					"-o", "jsonpath={.items[0].status.phase}",
+				)
+				status, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+				if string(status) != podStatusRunning {
+					return fmt.Errorf("stress pod in %s status", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyStressPodRunning, 2*time.Minute, 2*time.Second).Should(Succeed())
+
+			// Get the initial pod name
+			var initialPodName string
+			By("getting initial stress pod name")
+			cmd = exec.Command("kubectl", "get", "pods",
+				"-n", testNamespace,
+				"-l", "app=cpu-stress",
+				"-o", "jsonpath={.items[0].metadata.name}",
+			)
+			podNameOutput, err := utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			initialPodName = string(podNameOutput)
+			ExpectWithOffset(1, initialPodName).ShouldNot(BeEmpty())
+
+			By("creating a Recycler CR to monitor the CPU stress deployment")
+			cmd = exec.Command("kubectl", "apply", "-f", "-")
+			cmd.Stdin = utils.StringReader(cpuStressRecyclerYAML)
+			_, err = utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("fetching the created Recycler CR to get actual configuration values")
+			cmd = exec.Command("kubectl", "get", "recycler", recyclerName,
+				"-n", testNamespace,
+				"-o", "json",
+			)
+			recyclerJSON, err := utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			// Parse the actual Recycler CR from the cluster
+			var recyclerConfig recyclertheonlywayecomv1alpha1.Recycler
+			err = json.Unmarshal(recyclerJSON, &recyclerConfig)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			// Extract configuration values from the live CR
+			recycleDelaySeconds := recyclerConfig.Spec.RecycleDelaySeconds
+			pollingIntervalSeconds := recyclerConfig.Spec.PollingIntervalSeconds
+			podMetricsHistory := recyclerConfig.Spec.PodMetricsHistory
+			gracePeriodSeconds := recyclerConfig.Spec.GracePeriodSeconds
+
+			// Log the actual configuration values being used
+			GinkgoWriter.Printf("Recycler CR configuration from cluster:\n")
+			GinkgoWriter.Printf("  - recycleDelaySeconds: %d\n", recycleDelaySeconds)
+			GinkgoWriter.Printf("  - pollingIntervalSeconds: %d\n", pollingIntervalSeconds)
+			GinkgoWriter.Printf("  - podMetricsHistory: %d\n", podMetricsHistory)
+			GinkgoWriter.Printf("  - gracePeriodSeconds: %d\n", gracePeriodSeconds)
+
+			// Validate that values are valid
+			ExpectWithOffset(1, recycleDelaySeconds).Should(BeNumerically(">", 0),
+				"recycleDelaySeconds should be greater than 0")
+			ExpectWithOffset(1, pollingIntervalSeconds).Should(BeNumerically(">", 0),
+				"pollingIntervalSeconds should be greater than 0")
+			ExpectWithOffset(1, podMetricsHistory).Should(BeNumerically(">", 0),
+				"podMetricsHistory should be greater than 0")
+
+			By("waiting for Recycler to have Available status")
+			verifyRecyclerHealthy := func() error {
+				cmd = exec.Command("kubectl", "get", "recycler",
+					recyclerName,
+					"-n", testNamespace,
+					"-o", "jsonpath={.status.conditions[?(@.type=='Available')].status}",
+				)
+				status, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+				if string(status) != "True" {
+					return fmt.Errorf("recycler not yet available, status: %s", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyRecyclerHealthy, 30*time.Second, 2*time.Second).Should(Succeed())
+
+			By("waiting for the pod to be terminated due to high CPU usage")
+			verifyPodTerminated := func() error {
+				// Check if the original pod still exists
+				cmd = exec.Command("kubectl", "get", "pod",
+					initialPodName,
+					"-n", testNamespace,
+					"--ignore-not-found",
+				)
+				output, _ := utils.Run(cmd)
+
+				// If the pod no longer exists, it was terminated
+				if len(output) == 0 {
+					return nil
+				}
+
+				// Check if pod has deletion timestamp
+				cmd = exec.Command("kubectl", "get", "pod",
+					initialPodName,
+					"-n", testNamespace,
+					"-o", "jsonpath={.metadata.deletionTimestamp}",
+				)
+				deletionTimestamp, _ := utils.Run(cmd)
+				if len(deletionTimestamp) > 0 {
+					return nil
+				}
+
+				return fmt.Errorf("pod %s has not been terminated yet", initialPodName)
+			}
+			// Calculate timeout: time to collect enough metrics + recycle delay + grace period + reconcile + buffer
+			metricsCollectionTime := time.Duration(pollingIntervalSeconds*podMetricsHistory) * time.Second
+			reconcileInterval := 10 * time.Second // Recycler controller reconciles every ~10s
+			terminationTimeout := metricsCollectionTime +
+				time.Duration(recycleDelaySeconds)*time.Second +
+				time.Duration(gracePeriodSeconds)*time.Second +
+				reconcileInterval + // Wait for reconciliation cycle after termination time
+				60*time.Second // buffer for overhead and Kubernetes operations
+
+			By(fmt.Sprintf("waiting for the pod to be terminated due to high CPU usage (timeout: %s)", terminationTimeout))
+			GinkgoWriter.Printf("Termination timeout breakdown:\n")
+			GinkgoWriter.Printf("  - Metrics collection: %s (%ds polling × %d datapoints)\n",
+				metricsCollectionTime, pollingIntervalSeconds, podMetricsHistory)
+			GinkgoWriter.Printf("  - Recycle delay: %ds\n", recycleDelaySeconds)
+			GinkgoWriter.Printf("  - Grace period: %ds\n", gracePeriodSeconds)
+			GinkgoWriter.Printf("  - Reconcile interval: %s (wait for next cycle)\n", reconcileInterval)
+			GinkgoWriter.Printf("  - Overhead buffer: 1m0s\n")
+			GinkgoWriter.Printf("  - Total timeout: %s\n", terminationTimeout)
+
+			// Capture operator logs for debugging
+			defer func() {
+				By("capturing operator logs")
+				cmd = exec.Command("kubectl", "logs",
+					"-l", "control-plane=controller-manager",
+					"-n", namespace,
+					"--tail=100",
+					"--all-containers=true",
+				)
+				logs, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Operator Logs ===\n%s\n", string(logs))
+				}
+			}()
+
+			EventuallyWithOffset(1, verifyPodTerminated, terminationTimeout, 5*time.Second).Should(Succeed())
+
+			By("verifying PodTerminated event was recorded on Recycler CR")
+			verifyTerminationEvent := func() error {
+				cmd = exec.Command("kubectl", "get", "events",
+					"-n", testNamespace,
+					"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Recycler", recyclerName),
+					"-o", "jsonpath={.items[*].reason}",
+				)
+				events, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+
+				eventsList := string(events)
+				if !utils.ContainsString(eventsList, "PodTerminated") {
+					return fmt.Errorf("PodTerminated event not found, got events: %s", eventsList)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyTerminationEvent, 30*time.Second, 2*time.Second).Should(Succeed())
+
+			By("verifying new pod was created by deployment")
+			verifyNewPodCreated := func() error {
+				cmd = exec.Command("kubectl", "get", "pods",
+					"-n", testNamespace,
+					"-l", "app=cpu-stress",
+					"-o", "jsonpath={.items[0].metadata.name}",
+				)
+				newPodName, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+
+				if string(newPodName) == initialPodName {
+					return fmt.Errorf("pod name hasn't changed yet")
+				}
+
+				// Verify new pod is running
+				cmd = exec.Command("kubectl", "get", "pod",
+					string(newPodName),
+					"-n", testNamespace,
+					"-o", "jsonpath={.status.phase}",
+				)
+				status, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+				if string(status) != podStatusRunning {
+					return fmt.Errorf("new pod not running yet, status: %s", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyNewPodCreated, 2*time.Minute, 5*time.Second).Should(Succeed())
+
+			By("cleaning up test resources")
+			cmd = exec.Command("kubectl", "delete", "recycler", recyclerName, "-n", testNamespace)
+			_, _ = utils.Run(cmd)
+
+			cmd = exec.Command("kubectl", "delete", "deployment", deploymentName, "-n", testNamespace)
+			_, _ = utils.Run(cmd)
+
+			cmd = exec.Command("kubectl", "delete", "ns", testNamespace)
+			_, _ = utils.Run(cmd)
 		})
 	})
 })
