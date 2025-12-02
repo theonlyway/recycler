@@ -24,7 +24,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gopkg.in/yaml.v3"
 
+	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 	"github.com/theonlyway/recycler/test/utils"
 )
 
@@ -33,6 +35,15 @@ var cpuStressDeploymentYAML string
 
 //go:embed testdata/cpu-stress-recycler.yaml
 var cpuStressRecyclerYAML string
+
+// parseRecyclerYAML extracts the spec values from the embedded YAML
+func parseRecyclerYAML(yamlContent string) (*recyclertheonlywayecomv1alpha1.Recycler, error) {
+	var recycler recyclertheonlywayecomv1alpha1.Recycler
+	if err := yaml.Unmarshal([]byte(yamlContent), &recycler); err != nil {
+		return nil, err
+	}
+	return &recycler, nil
+}
 
 const namespace = "recycler-system"
 
@@ -138,6 +149,16 @@ var _ = Describe("controller", Ordered, func() {
 			const recyclerName = "cpu-stress-recycler"
 			var err error
 
+			// Parse the recycler configuration from the YAML
+			recyclerConfig, err := parseRecyclerYAML(cpuStressRecyclerYAML)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			// Extract configuration values
+			recycleDelaySeconds := recyclerConfig.Spec.RecycleDelaySeconds
+			pollingIntervalSeconds := recyclerConfig.Spec.PollingIntervalSeconds
+			podMetricsHistory := recyclerConfig.Spec.PodMetricsHistory
+			gracePeriodSeconds := recyclerConfig.Spec.GracePeriodSeconds
+
 			By("creating test namespace")
 			cmd := exec.Command("kubectl", "create", "ns", testNamespace)
 			_, err = utils.Run(cmd)
@@ -232,8 +253,14 @@ var _ = Describe("controller", Ordered, func() {
 
 				return fmt.Errorf("pod %s has not been terminated yet", initialPodName)
 			}
-			// Wait up to 3 minutes for termination (60s delay + metrics collection + buffer)
-			EventuallyWithOffset(1, verifyPodTerminated, 3*time.Minute, 5*time.Second).Should(Succeed())
+			// Calculate timeout: time to collect enough metrics + recycle delay + grace period + buffer
+			// Metrics collection: pollingIntervalSeconds * podMetricsHistory
+			metricsCollectionTime := time.Duration(pollingIntervalSeconds*podMetricsHistory) * time.Second
+			terminationTimeout := metricsCollectionTime +
+				time.Duration(recycleDelaySeconds)*time.Second +
+				time.Duration(gracePeriodSeconds)*time.Second +
+				30*time.Second // buffer for overhead
+			EventuallyWithOffset(1, verifyPodTerminated, terminationTimeout, 5*time.Second).Should(Succeed())
 
 			By("verifying PodTerminated event was recorded on Recycler CR")
 			verifyTerminationEvent := func() error {
