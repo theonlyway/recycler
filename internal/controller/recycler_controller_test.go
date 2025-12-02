@@ -99,13 +99,29 @@ var _ = Describe("Recycler Controller", func() {
 		})
 
 		AfterEach(func() {
-			// TODO(user): Cleanup logic after each test, like removing the resource instance.
+			By("Cleanup the specific resource instance Recycler")
 			resource := &recyclertheonlywayecomv1alpha1.Recycler{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
+			if err == nil {
+				Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+				// Wait for deletion to complete
+				Eventually(func() bool {
+					err := k8sClient.Get(ctx, typeNamespacedName, resource)
+					return errors.IsNotFound(err)
+				}, "10s", "100ms").Should(BeTrue())
+			}
 
-			By("Cleanup the specific resource instance Recycler")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+			By("Cleanup the target deployment")
+			deployment := &appsv1.Deployment{}
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: "target-deployment", Namespace: "default"}, deployment)
+			if err == nil {
+				Expect(k8sClient.Delete(ctx, deployment)).To(Succeed())
+				// Wait for deletion to complete
+				Eventually(func() bool {
+					err := k8sClient.Get(ctx, types.NamespacedName{Name: "target-deployment", Namespace: "default"}, deployment)
+					return errors.IsNotFound(err)
+				}, "10s", "100ms").Should(BeTrue())
+			}
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")

@@ -111,6 +111,11 @@ var _ = Describe("Monitor Controller", func() {
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			if err == nil {
 				Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+				// Wait for deletion to complete
+				Eventually(func() bool {
+					err := k8sClient.Get(ctx, typeNamespacedName, resource)
+					return errors.IsNotFound(err)
+				}, "10s", "100ms").Should(BeTrue())
 			}
 
 			By("Cleaning up the deployment")
@@ -122,6 +127,11 @@ var _ = Describe("Monitor Controller", func() {
 			err = k8sClient.Get(ctx, deploymentKey, deployment)
 			if err == nil {
 				Expect(k8sClient.Delete(ctx, deployment)).To(Succeed())
+				// Wait for deletion to complete
+				Eventually(func() bool {
+					err := k8sClient.Get(ctx, deploymentKey, deployment)
+					return errors.IsNotFound(err)
+				}, "10s", "100ms").Should(BeTrue())
 			}
 		})
 
