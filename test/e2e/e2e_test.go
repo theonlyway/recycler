@@ -46,6 +46,7 @@ func parseRecyclerYAML(yamlContent string) (*recyclertheonlywayecomv1alpha1.Recy
 }
 
 const namespace = "recycler-system"
+const podStatusRunning = "Running"
 
 var _ = Describe("controller", Ordered, func() {
 	BeforeAll(func() {
@@ -134,7 +135,7 @@ var _ = Describe("controller", Ordered, func() {
 				)
 				status, err := utils.Run(cmd)
 				ExpectWithOffset(2, err).NotTo(HaveOccurred())
-				if string(status) != "Running" {
+				if string(status) != podStatusRunning {
 					return fmt.Errorf("controller pod in %s status", status)
 				}
 				return nil
@@ -181,7 +182,7 @@ var _ = Describe("controller", Ordered, func() {
 				if err != nil {
 					return err
 				}
-				if string(status) != "Running" {
+				if string(status) != podStatusRunning {
 					return fmt.Errorf("stress pod in %s status", status)
 				}
 				return nil
@@ -333,7 +334,7 @@ var _ = Describe("controller", Ordered, func() {
 				if err != nil {
 					return err
 				}
-				if string(status) != "Running" {
+				if string(status) != podStatusRunning {
 					return fmt.Errorf("new pod not running yet, status: %s", status)
 				}
 				return nil
