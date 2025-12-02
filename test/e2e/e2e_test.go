@@ -261,6 +261,15 @@ var _ = Describe("controller", Ordered, func() {
 				time.Duration(gracePeriodSeconds)*time.Second +
 				30*time.Second // buffer for overhead
 
+			By(fmt.Sprintf("waiting for the pod to be terminated due to high CPU usage (timeout: %s)", terminationTimeout))
+			GinkgoWriter.Printf("Termination timeout breakdown:\n")
+			GinkgoWriter.Printf("  - Metrics collection: %s (%ds polling × %d datapoints)\n",
+				metricsCollectionTime, pollingIntervalSeconds, podMetricsHistory)
+			GinkgoWriter.Printf("  - Recycle delay: %ds\n", recycleDelaySeconds)
+			GinkgoWriter.Printf("  - Grace period: %ds\n", gracePeriodSeconds)
+			GinkgoWriter.Printf("  - Overhead buffer: 30s\n")
+			GinkgoWriter.Printf("  - Total timeout: %s\n", terminationTimeout)
+
 			// Capture operator logs for debugging
 			defer func() {
 				By("capturing operator logs")
