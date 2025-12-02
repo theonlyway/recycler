@@ -99,7 +99,7 @@ var _ = Describe("controller", Ordered, func() {
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
 			By("deploying the controller-manager")
-			cmd = exec.Command("make", "deploy", fmt.Sprintf("IMG=%s", projectimage))
+			cmd = exec.Command("make", "deploy-debug", fmt.Sprintf("IMG=%s", projectimage))
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
@@ -275,13 +275,14 @@ var _ = Describe("controller", Ordered, func() {
 
 				return fmt.Errorf("pod %s has not been terminated yet", initialPodName)
 			}
-			// Calculate timeout: time to collect enough metrics + recycle delay + grace period + buffer
-			// Metrics collection: pollingIntervalSeconds * podMetricsHistory
+			// Calculate timeout: time to collect enough metrics + recycle delay + grace period + reconcile + buffer
 			metricsCollectionTime := time.Duration(pollingIntervalSeconds*podMetricsHistory) * time.Second
+			reconcileInterval := 10 * time.Second // Recycler controller reconciles every ~10s
 			terminationTimeout := metricsCollectionTime +
 				time.Duration(recycleDelaySeconds)*time.Second +
 				time.Duration(gracePeriodSeconds)*time.Second +
-				30*time.Second // buffer for overhead
+				reconcileInterval + // Wait for reconciliation cycle after termination time
+				60*time.Second      // buffer for overhead and Kubernetes operations
 
 			By(fmt.Sprintf("waiting for the pod to be terminated due to high CPU usage (timeout: %s)", terminationTimeout))
 			GinkgoWriter.Printf("Termination timeout breakdown:\n")
@@ -289,7 +290,8 @@ var _ = Describe("controller", Ordered, func() {
 				metricsCollectionTime, pollingIntervalSeconds, podMetricsHistory)
 			GinkgoWriter.Printf("  - Recycle delay: %ds\n", recycleDelaySeconds)
 			GinkgoWriter.Printf("  - Grace period: %ds\n", gracePeriodSeconds)
-			GinkgoWriter.Printf("  - Overhead buffer: 30s\n")
+			GinkgoWriter.Printf("  - Reconcile interval: %s (wait for next cycle)\n", reconcileInterval)
+			GinkgoWriter.Printf("  - Overhead buffer: 1m0s\n")
 			GinkgoWriter.Printf("  - Total timeout: %s\n", terminationTimeout)
 
 			// Capture operator logs for debugging
