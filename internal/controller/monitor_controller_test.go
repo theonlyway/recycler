@@ -137,13 +137,14 @@ var _ = Describe("Monitor Controller", func() {
 
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
-			controllerReconciler := &MonitorReconciler{
+			monitorReconciler := &MonitorReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
+				Config: cfg,
 			}
 
-			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+			result, err := monitorReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 

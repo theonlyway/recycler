@@ -31,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/record"
 	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
@@ -58,6 +59,7 @@ type MonitorReconciler struct {
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
 	Log      logr.Logger
+	Config   *rest.Config
 }
 
 // PodCPUUsage represents the CPU usage of a pod
@@ -122,8 +124,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 		// Fetch the metrics for the pods in the deployment
-		config := ctrl.GetConfigOrDie() // Get the Kubernetes configuration
-		metricsClient := resourceclient.NewForConfigOrDie(config).PodMetricses(deployment.Namespace)
+		metricsClient := resourceclient.NewForConfigOrDie(r.Config).PodMetricses(deployment.Namespace)
 		podMetricsList, err := fetchPodMetrics(ctx, metricsClient, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
 		if err != nil {
 			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
