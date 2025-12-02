@@ -18,6 +18,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -137,4 +138,14 @@ func GetProjectDir() (string, error) {
 	}
 	wd = strings.ReplaceAll(wd, "/test/e2e", "")
 	return wd, nil
+}
+
+// StringReader creates an io.Reader from a string
+func StringReader(s string) io.Reader {
+	return strings.NewReader(s)
+}
+
+// ContainsString checks if a string contains a substring
+func ContainsString(s, substr string) bool {
+	return strings.Contains(s, substr)
 }

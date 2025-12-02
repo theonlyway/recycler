@@ -17,6 +17,7 @@ limitations under the License.
 package e2e
 
 import (
+	_ "embed"
 	"fmt"
 	"os/exec"
 	"time"
@@ -26,6 +27,12 @@ import (
 
 	"github.com/theonlyway/recycler/test/utils"
 )
+
+//go:embed testdata/cpu-stress-deployment.yaml
+var cpuStressDeploymentYAML string
+
+//go:embed testdata/cpu-stress-recycler.yaml
+var cpuStressRecyclerYAML string
 
 const namespace = "recycler-system"
 
@@ -123,6 +130,173 @@ var _ = Describe("controller", Ordered, func() {
 			}
 			EventuallyWithOffset(1, verifyControllerUp, time.Minute, time.Second).Should(Succeed())
 
+		})
+
+		It("should terminate pod when CPU threshold is exceeded", func() {
+			const testNamespace = "cpu-test"
+			const deploymentName = "cpu-stress"
+			const recyclerName = "cpu-stress-recycler"
+			var err error
+
+			By("creating test namespace")
+			cmd := exec.Command("kubectl", "create", "ns", testNamespace)
+			_, err = utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("deploying a CPU stress test deployment")
+			cmd = exec.Command("kubectl", "apply", "-f", "-")
+			cmd.Stdin = utils.StringReader(cpuStressDeploymentYAML)
+			_, err = utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("waiting for CPU stress pod to be running")
+			verifyStressPodRunning := func() error {
+				cmd = exec.Command("kubectl", "get", "pods",
+					"-n", testNamespace,
+					"-l", "app=cpu-stress",
+					"-o", "jsonpath={.items[0].status.phase}",
+				)
+				status, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+				if string(status) != "Running" {
+					return fmt.Errorf("stress pod in %s status", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyStressPodRunning, 2*time.Minute, 2*time.Second).Should(Succeed())
+
+			// Get the initial pod name
+			var initialPodName string
+			By("getting initial stress pod name")
+			cmd = exec.Command("kubectl", "get", "pods",
+				"-n", testNamespace,
+				"-l", "app=cpu-stress",
+				"-o", "jsonpath={.items[0].metadata.name}",
+			)
+			podNameOutput, err := utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			initialPodName = string(podNameOutput)
+			ExpectWithOffset(1, initialPodName).ShouldNot(BeEmpty())
+
+			By("creating a Recycler CR to monitor the CPU stress deployment")
+			cmd = exec.Command("kubectl", "apply", "-f", "-")
+			cmd.Stdin = utils.StringReader(cpuStressRecyclerYAML)
+			_, err = utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("waiting for Recycler to have Available status")
+			verifyRecyclerHealthy := func() error {
+				cmd = exec.Command("kubectl", "get", "recycler",
+					recyclerName,
+					"-n", testNamespace,
+					"-o", "jsonpath={.status.conditions[?(@.type=='Available')].status}",
+				)
+				status, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+				if string(status) != "True" {
+					return fmt.Errorf("recycler not yet available, status: %s", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyRecyclerHealthy, 30*time.Second, 2*time.Second).Should(Succeed())
+
+			By("waiting for the pod to be terminated due to high CPU usage")
+			verifyPodTerminated := func() error {
+				// Check if the original pod still exists
+				cmd = exec.Command("kubectl", "get", "pod",
+					initialPodName,
+					"-n", testNamespace,
+					"--ignore-not-found",
+				)
+				output, _ := utils.Run(cmd)
+
+				// If the pod no longer exists, it was terminated
+				if len(output) == 0 {
+					return nil
+				}
+
+				// Check if pod has deletion timestamp
+				cmd = exec.Command("kubectl", "get", "pod",
+					initialPodName,
+					"-n", testNamespace,
+					"-o", "jsonpath={.metadata.deletionTimestamp}",
+				)
+				deletionTimestamp, _ := utils.Run(cmd)
+				if len(deletionTimestamp) > 0 {
+					return nil
+				}
+
+				return fmt.Errorf("pod %s has not been terminated yet", initialPodName)
+			}
+			// Wait up to 3 minutes for termination (60s delay + metrics collection + buffer)
+			EventuallyWithOffset(1, verifyPodTerminated, 3*time.Minute, 5*time.Second).Should(Succeed())
+
+			By("verifying PodTerminated event was recorded on Recycler CR")
+			verifyTerminationEvent := func() error {
+				cmd = exec.Command("kubectl", "get", "events",
+					"-n", testNamespace,
+					"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Recycler", recyclerName),
+					"-o", "jsonpath={.items[*].reason}",
+				)
+				events, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+
+				eventsList := string(events)
+				if !utils.ContainsString(eventsList, "PodTerminated") {
+					return fmt.Errorf("PodTerminated event not found, got events: %s", eventsList)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyTerminationEvent, 30*time.Second, 2*time.Second).Should(Succeed())
+
+			By("verifying new pod was created by deployment")
+			verifyNewPodCreated := func() error {
+				cmd = exec.Command("kubectl", "get", "pods",
+					"-n", testNamespace,
+					"-l", "app=cpu-stress",
+					"-o", "jsonpath={.items[0].metadata.name}",
+				)
+				newPodName, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+
+				if string(newPodName) == initialPodName {
+					return fmt.Errorf("pod name hasn't changed yet")
+				}
+
+				// Verify new pod is running
+				cmd = exec.Command("kubectl", "get", "pod",
+					string(newPodName),
+					"-n", testNamespace,
+					"-o", "jsonpath={.status.phase}",
+				)
+				status, err := utils.Run(cmd)
+				if err != nil {
+					return err
+				}
+				if string(status) != "Running" {
+					return fmt.Errorf("new pod not running yet, status: %s", status)
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyNewPodCreated, 2*time.Minute, 5*time.Second).Should(Succeed())
+
+			By("cleaning up test resources")
+			cmd = exec.Command("kubectl", "delete", "recycler", recyclerName, "-n", testNamespace)
+			_, _ = utils.Run(cmd)
+
+			cmd = exec.Command("kubectl", "delete", "deployment", deploymentName, "-n", testNamespace)
+			_, _ = utils.Run(cmd)
+
+			cmd = exec.Command("kubectl", "delete", "ns", testNamespace)
+			_, _ = utils.Run(cmd)
 		})
 	})
 })

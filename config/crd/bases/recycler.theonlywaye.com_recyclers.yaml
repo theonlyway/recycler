@@ -94,11 +94,6 @@ spec:
                 type: object
             required:
             - averageCpuUtilizationPercent
-            - gracePeriodSeconds
-            - metricStorageLocation
-            - podMetricsHistory
-            - pollingIntervalSeconds
-            - recycleDelaySeconds
             - scaleTargetRef
             type: object
           status:
