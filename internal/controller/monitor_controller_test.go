@@ -201,6 +201,7 @@ var _ = Describe("Monitor Controller", func() {
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
+				Config: cfg,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
