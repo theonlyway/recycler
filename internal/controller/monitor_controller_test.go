@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -129,6 +130,7 @@ var _ = Describe("Monitor Controller", func() {
 			controllerReconciler := &MonitorReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -146,6 +148,7 @@ var _ = Describe("Monitor Controller", func() {
 			controllerReconciler := &MonitorReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
 			}
 
 			nonExistentName := types.NamespacedName{
@@ -186,6 +189,7 @@ var _ = Describe("Monitor Controller", func() {
 			controllerReconciler := &MonitorReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{

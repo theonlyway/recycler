@@ -23,6 +23,7 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -111,6 +112,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -126,6 +128,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -147,6 +150,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -179,6 +183,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -200,6 +205,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			nonExistentName := types.NamespacedName{
@@ -240,6 +246,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -281,6 +288,7 @@ var _ = Describe("Recycler Controller", func() {
 			controllerReconciler := &RecyclerReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Recycler"),
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
