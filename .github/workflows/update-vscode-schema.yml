@@ -1,6 +1,7 @@
 name: Update VS Code Schema
 
 on:
+    workflow_dispatch:
     push:
         branches:
             - main

@@ -2,6 +2,7 @@
 [![Lint](https://github.com/theonlyway/recycler/actions/workflows/lint.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/lint.yml)
 [![Tests](https://github.com/theonlyway/recycler/actions/workflows/test.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/test.yml)
 [![E2E Tests](https://github.com/theonlyway/recycler/actions/workflows/test-e2e.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/test-e2e.yml)
+[![Update VS Code Schema](https://github.com/theonlyway/recycler/actions/workflows/update-vscode-schema.yml/badge.svg)](https://github.com/theonlyway/recycler/actions/workflows/update-vscode-schema.yml)
 # recycler
 
 A Kubernetes controller that monitors pods CPU utilisation inside a deployment, replicaset, or statefulset and terminates the pod if it exceeds a specified threshold.
