@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../config/crd/bases/recycler.theonlywaye.com_recyclers.yaml
+# yaml-language-server: $schema=../../../.vscode/recycler-schema.json
 apiVersion: recycler.theonlywaye.com/v1alpha1
 kind: Recycler
 metadata:
