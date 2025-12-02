@@ -260,6 +260,22 @@ var _ = Describe("controller", Ordered, func() {
 				time.Duration(recycleDelaySeconds)*time.Second +
 				time.Duration(gracePeriodSeconds)*time.Second +
 				30*time.Second // buffer for overhead
+
+			// Capture operator logs for debugging
+			defer func() {
+				By("capturing operator logs")
+				cmd = exec.Command("kubectl", "logs",
+					"-l", "control-plane=controller-manager",
+					"-n", namespace,
+					"--tail=100",
+					"--all-containers=true",
+				)
+				logs, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Operator Logs ===\n%s\n", string(logs))
+				}
+			}()
+
 			EventuallyWithOffset(1, verifyPodTerminated, terminationTimeout, 5*time.Second).Should(Succeed())
 
 			By("verifying PodTerminated event was recorded on Recycler CR")
