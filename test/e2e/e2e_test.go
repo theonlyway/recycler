@@ -166,6 +166,17 @@ var _ = Describe("controller", Ordered, func() {
 			podMetricsHistory := recyclerConfig.Spec.PodMetricsHistory
 			gracePeriodSeconds := recyclerConfig.Spec.GracePeriodSeconds
 
+			// Validate that values were parsed correctly
+			GinkgoWriter.Printf("Parsed Recycler config values:\n")
+			GinkgoWriter.Printf("  - recycleDelaySeconds: %d\n", recycleDelaySeconds)
+			GinkgoWriter.Printf("  - pollingIntervalSeconds: %d\n", pollingIntervalSeconds)
+			GinkgoWriter.Printf("  - podMetricsHistory: %d\n", podMetricsHistory)
+			GinkgoWriter.Printf("  - gracePeriodSeconds: %d\n", gracePeriodSeconds)
+
+			ExpectWithOffset(1, recycleDelaySeconds).Should(BeNumerically(">", 0), "recycleDelaySeconds should be greater than 0")
+			ExpectWithOffset(1, pollingIntervalSeconds).Should(BeNumerically(">", 0), "pollingIntervalSeconds should be greater than 0")
+			ExpectWithOffset(1, podMetricsHistory).Should(BeNumerically(">", 0), "podMetricsHistory should be greater than 0")
+
 			By("creating test namespace")
 			cmd := exec.Command("kubectl", "create", "ns", testNamespace)
 			_, err = utils.Run(cmd)
