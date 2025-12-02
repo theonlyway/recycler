@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-12-02
+### :sparkles: New Features
+- [`1285bc5`](https://github.com/theonlyway/recycler/commit/1285bc5ff84ed6a4655075c59ee27e1edf9fd106) - working on tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`7a857b9`](https://github.com/theonlyway/recycler/commit/7a857b91913644f82596b872ca41e7c5a89e2ba3) - fixed linter errors *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`ea0a953`](https://github.com/theonlyway/recycler/commit/ea0a953a9d8bd5deb604b6777faad1825d798001) - added logging *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`136432b`](https://github.com/theonlyway/recycler/commit/136432b2975b963834b0973a305df6132e4bac5e) - testing tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`cd0b147`](https://github.com/theonlyway/recycler/commit/cd0b1473ea156bfc81035fe772781ac7cff6ace1) - fixed tests and a typo *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`9b6810e`](https://github.com/theonlyway/recycler/commit/9b6810ede42228197907c93b0999c7ad46ff3c63) - added config *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5cf4e94`](https://github.com/theonlyway/recycler/commit/5cf4e94a059330c9b0d8c3cea528e43a600cca75) - testing test changes *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`eefe57b`](https://github.com/theonlyway/recycler/commit/eefe57b60201af769f844f525e0d8a9fcc832f3b) - testing coverage *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`0b872fe`](https://github.com/theonlyway/recycler/commit/0b872fe301517d641df0fb037e8bbbde7b12f052) - don't validate crd *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`c758e79`](https://github.com/theonlyway/recycler/commit/c758e79bb8760b386f738a565059f84801f66c3c) - removed coverage html *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`fa02b7f`](https://github.com/theonlyway/recycler/commit/fa02b7fee5258caa87712becc7febb2c4343a09b) - go fmt [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`8902726`](https://github.com/theonlyway/recycler/commit/8902726fb4381896b8accafb0fc61e5688be2068) - go fmt [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.2.0] - 2025-12-02
 ### :sparkles: New Features
 - [`ad6f9d2`](https://github.com/theonlyway/recycler/commit/ad6f9d2dcafc6d8b0146f982087d9d5a46268169) - **tests**: e2e tests actually testing pod usage *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -206,3 +226,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.11]: https://github.com/theonlyway/recycler/compare/1.1.10...1.1.11
 [1.1.12]: https://github.com/theonlyway/recycler/compare/1.1.11...1.1.12
 [1.2.0]: https://github.com/theonlyway/recycler/compare/1.1.12...1.2.0
+[1.3.0]: https://github.com/theonlyway/recycler/compare/1.2.0...1.3.0
