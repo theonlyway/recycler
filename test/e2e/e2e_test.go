@@ -282,7 +282,7 @@ var _ = Describe("controller", Ordered, func() {
 				time.Duration(recycleDelaySeconds)*time.Second +
 				time.Duration(gracePeriodSeconds)*time.Second +
 				reconcileInterval + // Wait for reconciliation cycle after termination time
-				60*time.Second      // buffer for overhead and Kubernetes operations
+				60*time.Second // buffer for overhead and Kubernetes operations
 
 			By(fmt.Sprintf("waiting for the pod to be terminated due to high CPU usage (timeout: %s)", terminationTimeout))
 			GinkgoWriter.Printf("Termination timeout breakdown:\n")
