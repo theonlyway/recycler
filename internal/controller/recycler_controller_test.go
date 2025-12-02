@@ -362,5 +362,111 @@ var _ = Describe("Recycler Controller", func() {
 			// Cleanup
 			Expect(k8sClient.Delete(ctx, customRecycler)).To(Succeed())
 		})
+
+		It("should handle deployment not found error", func() {
+			By("Creating recycler pointing to non-existent deployment")
+
+			nonExistentRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "no-deployment-recycler",
+					Namespace: "default",
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       "Deployment",
+						Name:       "non-existent-deployment",
+						APIVersion: "apps/v1",
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            10,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        "memory",
+				},
+			}
+			Expect(k8sClient.Create(ctx, nonExistentRecycler)).To(Succeed())
+
+			controllerReconciler := &RecyclerReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "no-deployment-recycler",
+					Namespace: "default",
+				},
+			})
+			// Should return error when deployment not found
+			Expect(err).To(HaveOccurred())
+
+			// Cleanup
+			Expect(k8sClient.Delete(ctx, nonExistentRecycler)).To(Succeed())
+		})
+
+		It("should process finalizer operations on deletion", func() {
+			By("Creating and deleting a recycler to test finalizer cleanup")
+
+			finalizerRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "finalizer-test-recycler",
+					Namespace: "default",
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       "Deployment",
+						Name:       "target-deployment",
+						APIVersion: "apps/v1",
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            10,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        "memory",
+				},
+			}
+			Expect(k8sClient.Create(ctx, finalizerRecycler)).To(Succeed())
+
+			controllerReconciler := &RecyclerReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("controllers").WithName("Recycler"),
+				Recorder: &mockEventRecorder{},
+			}
+
+			// First reconcile to add finalizer
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "finalizer-test-recycler",
+					Namespace: "default",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Delete the resource
+			Expect(k8sClient.Delete(ctx, finalizerRecycler)).To(Succeed())
+
+			// Reconcile again to process finalizer
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "finalizer-test-recycler",
+					Namespace: "default",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify resource is eventually deleted
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, types.NamespacedName{
+					Name:      "finalizer-test-recycler",
+					Namespace: "default",
+				}, finalizerRecycler)
+				return errors.IsNotFound(err)
+			}, "10s", "100ms").Should(BeTrue())
+		})
 	})
 })

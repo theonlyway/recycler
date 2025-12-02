@@ -317,6 +317,158 @@ var _ = Describe("Monitor Controller", func() {
 			Expect(StorageAnnotation).To(Equal("annotation"))
 		})
 	})
+
+	Context("Helper functions", func() {
+		It("should calculate average CPU correctly", func() {
+			log := ctrl.Log.WithName("test")
+			metricsHistory := []PodCPUUsage{
+				{PodName: "test-pod", CPUPercentage: 10.0},
+				{PodName: "test-pod", CPUPercentage: 20.0},
+				{PodName: "test-pod", CPUPercentage: 30.0},
+			}
+
+			avg := calculateAverageCPU(metricsHistory, log, "test-pod")
+			Expect(avg).To(Equal(20.0))
+		})
+
+		It("should handle empty metrics history in average calculation", func() {
+			log := ctrl.Log.WithName("test")
+			metricsHistory := []PodCPUUsage{
+				{PodName: "test-pod", CPUPercentage: 50.0},
+			}
+
+			avg := calculateAverageCPU(metricsHistory, log, "test-pod")
+			Expect(avg).To(Equal(50.0))
+		})
+
+		It("should log in-memory metrics", func() {
+			// Store some test metrics
+			InMemoryMetricsStorage.Store("default/test-pod", []PodCPUUsage{
+				{
+					PodName:       "test-pod",
+					CPUPercentage: 25.5,
+					Timestamp:     time.Now(),
+				},
+			})
+
+			log := ctrl.Log.WithName("test")
+			// Should not panic
+			logInMemoryMetrics(log)
+
+			// Cleanup
+			InMemoryMetricsStorage.Delete("default/test-pod")
+		})
+	})
+
+	Context("Error handling", func() {
+		It("should handle unsupported resource type", func() {
+			By("Creating recycler with unsupported kind")
+
+			unsupportedRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "unsupported-kind-recycler",
+					Namespace: "default",
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       "StatefulSet",
+						Name:       "test-statefulset",
+						APIVersion: "apps/v1",
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            10,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        "memory",
+				},
+			}
+			Expect(k8sClient.Create(ctx, unsupportedRecycler)).To(Succeed())
+
+			monitorReconciler := &MonitorReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
+				Config: cfg,
+			}
+
+			result, err := monitorReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "unsupported-kind-recycler",
+					Namespace: "default",
+				},
+			})
+
+			// Should not error but log and continue
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).To(Equal(60 * time.Second))
+
+			// Cleanup
+			Expect(k8sClient.Delete(ctx, unsupportedRecycler)).To(Succeed())
+		})
+
+		It("should handle invalid storage location", func() {
+			log := ctrl.Log.WithName("test")
+
+			// Test updatePodMetricsHistory with invalid storage
+			err := updatePodMetricsHistory(ctx, &MonitorReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+				Log:    log,
+			}, "test-pod", "default", PodCPUUsage{
+				PodName:       "test-pod",
+				CPUPercentage: 50.0,
+			}, 10, log, "invalid-storage")
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("unsupported storage location"))
+		})
+
+		It("should handle deployment not found in monitor", func() {
+			By("Creating recycler pointing to non-existent deployment")
+
+			nonExistentRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "no-deploy-monitor",
+					Namespace: "default",
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       "Deployment",
+						Name:       "non-existent-deployment",
+						APIVersion: "apps/v1",
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            10,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        "memory",
+				},
+			}
+			Expect(k8sClient.Create(ctx, nonExistentRecycler)).To(Succeed())
+
+			monitorReconciler := &MonitorReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+				Log:    ctrl.Log.WithName("controllers").WithName("Monitor"),
+				Config: cfg,
+			}
+
+			_, err := monitorReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "no-deploy-monitor",
+					Namespace: "default",
+				},
+			})
+
+			// Should return error when deployment not found
+			Expect(err).To(HaveOccurred())
+
+			// Cleanup
+			Expect(k8sClient.Delete(ctx, nonExistentRecycler)).To(Succeed())
+		})
+	})
 })
 
 func int32Ptr(i int32) *int32 {
