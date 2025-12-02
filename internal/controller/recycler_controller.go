@@ -50,9 +50,9 @@ const recyclerControllerName string = "recycler"
 // RecyclerReconciler reconciles a Recycler object
 type RecyclerReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Recoder record.EventRecorder
-	Log     logr.Logger
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
+	Log      logr.Logger
 }
 
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers,verbs=get;list;watch;create;update;patch;delete
@@ -222,7 +222,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				}
 
 				// Write an event to the CRD
-				r.Recoder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))
+				r.Recorder.Event(recycler, corev1.EventTypeNormal, "PodTerminated", fmt.Sprintf("Pod %s terminated due to CPU threshold breach", pod.Name))
 			}
 		} else {
 			terminationTime := breachTime.Add(delay)
@@ -239,7 +239,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 }
 
 func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Context, recycler *recyclertheonlywayecomv1alpha1.Recycler) {
-	r.Recoder.Event(recycler, "Warning", "Deleting", fmt.Sprintf("Custom resource %s is being deleted from namespace %s", recycler.Name, recycler.Namespace))
+	r.Recorder.Event(recycler, "Warning", "Deleting", fmt.Sprintf("Custom resource %s is being deleted from namespace %s", recycler.Name, recycler.Namespace))
 
 	// Fetch the target deployment using ScaleTargetRef
 	deployment := &appsv1.Deployment{}
@@ -248,7 +248,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 		Name:      recycler.Spec.ScaleTargetRef.Name,
 	}
 	if err := r.Get(ctx, deploymentKey, deployment); err != nil {
-		r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to fetch deployment: %v", err))
+		r.Recorder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to fetch deployment: %v", err))
 		return
 	}
 
@@ -259,7 +259,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 		client.MatchingLabels(deployment.Spec.Selector.MatchLabels),
 	}
 	if err := r.List(ctx, podList, listOptions...); err != nil {
-		r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to list pods: %v", err))
+		r.Recorder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to list pods: %v", err))
 		return
 	}
 
@@ -286,9 +286,9 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 			})
 
 			if retryErr != nil {
-				r.Recoder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, retryErr))
+				r.Recorder.Event(recycler, "Warning", "FinalizerError", fmt.Sprintf("Failed to remove annotations from pod %s: %v", pod.Name, retryErr))
 			} else {
-				r.Recoder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
+				r.Recorder.Event(recycler, "Normal", "AnnotationsRemoved", fmt.Sprintf("Removed annotations from pod %s", pod.Name))
 			}
 		}
 	case "memory":
@@ -305,7 +305,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *RecyclerReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	r.Recoder = mgr.GetEventRecorderFor("recycler-controller") // Initialize the EventRecorder
+	r.Recorder = mgr.GetEventRecorderFor("recycler-controller") // Initialize the EventRecorder
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("recycler").
 		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
