@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-02
+### :sparkles: New Features
+- [`ad6f9d2`](https://github.com/theonlyway/recycler/commit/ad6f9d2dcafc6d8b0146f982087d9d5a46268169) - **tests**: e2e tests actually testing pod usage *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`04d2670`](https://github.com/theonlyway/recycler/commit/04d2670fa5c67c478fa5ed15eac4c56b07aa816f) - **test**: updated test cases *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`cc25094`](https://github.com/theonlyway/recycler/commit/cc2509422b69974eb62a177cbda64402f7e4d02f) - **tests**: enabled logs *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`fe7418d`](https://github.com/theonlyway/recycler/commit/fe7418df4c62e4f1f48cf39021058ff8306b2b28) - added some verbose logging around timeout *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`6637e30`](https://github.com/theonlyway/recycler/commit/6637e300ae970fac305e683896440eba3ac6096e) - fixed linting error *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`33ab1c8`](https://github.com/theonlyway/recycler/commit/33ab1c8774dcbdd4c16e0eb82fae685e6e2a97f7) - added metrics server since kind doesn't have it by default *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`f3c834a`](https://github.com/theonlyway/recycler/commit/f3c834af9738dbf9fe1c66691f62110bd078d4d5) - additional debug *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`68af2c0`](https://github.com/theonlyway/recycler/commit/68af2c0f688e0f24573274f987d4bcfb932efa38) - changed where we fetch the CR values from *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`b47399a`](https://github.com/theonlyway/recycler/commit/b47399a3676feb90aa3accf24e8fd63df546cec2) - stupid linter max characters on a line *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`f3c13e0`](https://github.com/theonlyway/recycler/commit/f3c13e0076e8f94ee0a71f6fb36898237de3966e) - updated collection time and some kustomize overlays *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`56897ae`](https://github.com/theonlyway/recycler/commit/56897ae94310513aebd37dc5b1bd723db0cf5983) - **deps**: update actions/checkout action to v6 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1ba8cfb`](https://github.com/theonlyway/recycler/commit/1ba8cfb93a4c7f949afac798afdaf9b416e413a2) - go fmt [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.1.12] - 2025-11-13
 ### :bug: Bug Fixes
 - [`79a178e`](https://github.com/theonlyway/recycler/commit/79a178edb008c99c83b243a29a2e8d69c1561570) - **deps**: update kubernetes packages to v0.34.2 *(PR [#24](https://github.com/theonlyway/recycler/pull/24) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -185,3 +205,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.10]: https://github.com/theonlyway/recycler/compare/1.1.9...1.1.10
 [1.1.11]: https://github.com/theonlyway/recycler/compare/1.1.10...1.1.11
 [1.1.12]: https://github.com/theonlyway/recycler/compare/1.1.11...1.1.12
+[1.2.0]: https://github.com/theonlyway/recycler/compare/1.1.12...1.2.0
