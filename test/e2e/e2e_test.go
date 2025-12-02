@@ -18,13 +18,13 @@ package e2e
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"gopkg.in/yaml.v3"
 
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 	"github.com/theonlyway/recycler/test/utils"
@@ -35,15 +35,6 @@ var cpuStressDeploymentYAML string
 
 //go:embed testdata/cpu-stress-recycler.yaml
 var cpuStressRecyclerYAML string
-
-// parseRecyclerYAML extracts the spec values from the embedded YAML
-func parseRecyclerYAML(yamlContent string) (*recyclertheonlywayecomv1alpha1.Recycler, error) {
-	var recycler recyclertheonlywayecomv1alpha1.Recycler
-	if err := yaml.Unmarshal([]byte(yamlContent), &recycler); err != nil {
-		return nil, err
-	}
-	return &recycler, nil
-}
 
 const namespace = "recycler-system"
 const podStatusRunning = "Running"
@@ -156,27 +147,6 @@ var _ = Describe("controller", Ordered, func() {
 			const recyclerName = "cpu-stress-recycler"
 			var err error
 
-			// Parse the recycler configuration from the YAML
-			recyclerConfig, err := parseRecyclerYAML(cpuStressRecyclerYAML)
-			ExpectWithOffset(1, err).NotTo(HaveOccurred())
-
-			// Extract configuration values
-			recycleDelaySeconds := recyclerConfig.Spec.RecycleDelaySeconds
-			pollingIntervalSeconds := recyclerConfig.Spec.PollingIntervalSeconds
-			podMetricsHistory := recyclerConfig.Spec.PodMetricsHistory
-			gracePeriodSeconds := recyclerConfig.Spec.GracePeriodSeconds
-
-			// Validate that values were parsed correctly
-			GinkgoWriter.Printf("Parsed Recycler config values:\n")
-			GinkgoWriter.Printf("  - recycleDelaySeconds: %d\n", recycleDelaySeconds)
-			GinkgoWriter.Printf("  - pollingIntervalSeconds: %d\n", pollingIntervalSeconds)
-			GinkgoWriter.Printf("  - podMetricsHistory: %d\n", podMetricsHistory)
-			GinkgoWriter.Printf("  - gracePeriodSeconds: %d\n", gracePeriodSeconds)
-
-			ExpectWithOffset(1, recycleDelaySeconds).Should(BeNumerically(">", 0), "recycleDelaySeconds should be greater than 0")
-			ExpectWithOffset(1, pollingIntervalSeconds).Should(BeNumerically(">", 0), "pollingIntervalSeconds should be greater than 0")
-			ExpectWithOffset(1, podMetricsHistory).Should(BeNumerically(">", 0), "podMetricsHistory should be greater than 0")
-
 			By("creating test namespace")
 			cmd := exec.Command("kubectl", "create", "ns", testNamespace)
 			_, err = utils.Run(cmd)
@@ -224,6 +194,37 @@ var _ = Describe("controller", Ordered, func() {
 			cmd.Stdin = utils.StringReader(cpuStressRecyclerYAML)
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			By("fetching the created Recycler CR to get actual configuration values")
+			cmd = exec.Command("kubectl", "get", "recycler", recyclerName,
+				"-n", testNamespace,
+				"-o", "json",
+			)
+			recyclerJSON, err := utils.Run(cmd)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			// Parse the actual Recycler CR from the cluster
+			var recyclerConfig recyclertheonlywayecomv1alpha1.Recycler
+			err = json.Unmarshal(recyclerJSON, &recyclerConfig)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			// Extract configuration values from the live CR
+			recycleDelaySeconds := recyclerConfig.Spec.RecycleDelaySeconds
+			pollingIntervalSeconds := recyclerConfig.Spec.PollingIntervalSeconds
+			podMetricsHistory := recyclerConfig.Spec.PodMetricsHistory
+			gracePeriodSeconds := recyclerConfig.Spec.GracePeriodSeconds
+
+			// Log the actual configuration values being used
+			GinkgoWriter.Printf("Recycler CR configuration from cluster:\n")
+			GinkgoWriter.Printf("  - recycleDelaySeconds: %d\n", recycleDelaySeconds)
+			GinkgoWriter.Printf("  - pollingIntervalSeconds: %d\n", pollingIntervalSeconds)
+			GinkgoWriter.Printf("  - podMetricsHistory: %d\n", podMetricsHistory)
+			GinkgoWriter.Printf("  - gracePeriodSeconds: %d\n", gracePeriodSeconds)
+
+			// Validate that values are valid
+			ExpectWithOffset(1, recycleDelaySeconds).Should(BeNumerically(">", 0), "recycleDelaySeconds should be greater than 0")
+			ExpectWithOffset(1, pollingIntervalSeconds).Should(BeNumerically(">", 0), "pollingIntervalSeconds should be greater than 0")
+			ExpectWithOffset(1, podMetricsHistory).Should(BeNumerically(">", 0), "podMetricsHistory should be greater than 0")
 
 			By("waiting for Recycler to have Available status")
 			verifyRecyclerHealthy := func() error {
