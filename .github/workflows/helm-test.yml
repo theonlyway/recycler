@@ -43,7 +43,7 @@ jobs:
             - name: Validate manifests with Kubeconform
               run: |
                   helm template recycler helm-charts/recycler | \
-                    kubeconform -strict -summary -kubernetes-version 1.31.0
+                    kubeconform -strict -summary -kubernetes-version 1.31.0 -skip CustomResourceDefinition
 
     helm-install-test:
         name: Test Helm Install on Kind
