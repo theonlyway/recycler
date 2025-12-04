@@ -21,9 +21,15 @@ spec:
         kubectl.kubernetes.io/default-container: recycler
     spec:
       containers:
-      - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
-        command:
+      - command:
         - /manager
+        args:
+        - --leader-elect
+        - --health-probe-bind-address=:8081
+        {{- if .Values.controllerManager.manager.debug }}
+        - --zap-log-level=1
+        - --zap-devel=true
+        {{- end }}
         env:
         {{- with .Values.controllerManager.manager.env }}
         {{- toYaml . | nindent 8 }}
