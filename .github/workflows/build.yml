@@ -190,6 +190,10 @@ jobs:
             - name: Verify kind installation
               run: kind version
 
+            - name: Create Kind cluster
+              run: |
+                  kind create cluster --name helm-test --wait 30s
+
             - name: Install Helm chart
               run: |
                   helm install recycler helm-charts/recycler --wait --timeout 2m
