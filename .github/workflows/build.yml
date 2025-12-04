@@ -141,7 +141,7 @@ jobs:
     helm-lint-test:
         name: Lint and Test Helm Chart
         runs-on: ubuntu-latest
-        needs: [semver, lint, test, test-e2e]
+        needs: [semver, build-ghcr, build-dockerhub]
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
@@ -173,7 +173,7 @@ jobs:
     helm-install-test:
         name: Test Helm Install on Kind
         runs-on: ubuntu-latest
-        needs: [semver, lint, test, test-e2e]
+        needs: [semver, build-ghcr, build-dockerhub]
         steps:
             - name: Checkout code
               uses: actions/checkout@v6
@@ -253,7 +253,7 @@ jobs:
     helm:
         name: Helm Chart Release
         runs-on: ubuntu-latest
-        needs: [semver, build-ghcr, build-dockerhub, helm-lint-test, helm-install-test]
+        needs: [semver, helm-lint-test, helm-install-test]
         permissions:
             packages: write
             contents: write
