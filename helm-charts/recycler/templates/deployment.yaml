@@ -25,6 +25,7 @@ spec:
         - /manager
         args:
         - --leader-elect
+        - --metrics-bind-address=:8443
         - --health-probe-bind-address=:8081
         {{- if .Values.controllerManager.manager.debug }}
         - --zap-log-level=1
