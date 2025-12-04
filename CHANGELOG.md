@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-12-04
+### :bug: Bug Fixes
+- [`a1c83e4`](https://github.com/theonlyway/recycler/commit/a1c83e4ebadf52ef504be27af61a5180174b3330) - added test for helm charts *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5ea5fdd`](https://github.com/theonlyway/recycler/commit/5ea5fdd61dd081a3c69790b8537720c63f542db0) - skip crd *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`8f343ee`](https://github.com/theonlyway/recycler/commit/8f343ee2f78c9e7be4154fb34c86efb6b9c99811) - added missing step to setup kind *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`77a1c10`](https://github.com/theonlyway/recycler/commit/77a1c107db4dac83ce40a7b9d80ba13904b04fdf) - fixed missing arg *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`e93872f`](https://github.com/theonlyway/recycler/commit/e93872f148ff6c82d2475e8272e0ed36f4564b8f) - fixed job order *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.4.0] - 2025-12-04
 ### :sparkles: New Features
 - [`ee83051`](https://github.com/theonlyway/recycler/commit/ee83051c54321824b3f500c96558895442167fbb) - added debug condition *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -246,3 +255,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.3.0]: https://github.com/theonlyway/recycler/compare/1.2.0...1.3.0
 [1.3.1]: https://github.com/theonlyway/recycler/compare/1.3.0...1.3.1
 [1.4.0]: https://github.com/theonlyway/recycler/compare/1.3.1...1.4.0
+[1.4.1]: https://github.com/theonlyway/recycler/compare/1.4.0...1.4.1
