@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-12-04
+### :sparkles: New Features
+- [`ee83051`](https://github.com/theonlyway/recycler/commit/ee83051c54321824b3f500c96558895442167fbb) - added debug condition *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`88c2787`](https://github.com/theonlyway/recycler/commit/88c2787854e0792e033cc876cb04fac40b455f65) - added badge to readme and allowed for manual trigger of schema workflow [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.3.1] - 2025-12-02
 ### :bug: Bug Fixes
 - [`9db7bb1`](https://github.com/theonlyway/recycler/commit/9db7bb12707f95ca48951f6fdc7c1e73d3f4a7f7) - added steps to regenerate the schema for yaml-language-server *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -237,3 +245,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/theonlyway/recycler/compare/1.1.12...1.2.0
 [1.3.0]: https://github.com/theonlyway/recycler/compare/1.2.0...1.3.0
 [1.3.1]: https://github.com/theonlyway/recycler/compare/1.3.0...1.3.1
+[1.4.0]: https://github.com/theonlyway/recycler/compare/1.3.1...1.4.0
