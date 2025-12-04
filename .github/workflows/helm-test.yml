@@ -1,0 +1,96 @@
+name: Helm Chart CI
+
+on:
+    workflow_dispatch:
+    push:
+        branches-ignore:
+            - main
+        paths:
+            - "helm-charts/**"
+            - ".github/workflows/helm-test.yml"
+    pull_request:
+        paths:
+            - "helm-charts/**"
+            - ".github/workflows/helm-test.yml"
+
+jobs:
+    helm-lint-test:
+        name: Lint and Test Helm Chart
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Set up Helm
+              uses: azure/setup-helm@v4
+              with:
+                  version: "latest"
+
+            - name: Helm Lint
+              run: |
+                  helm lint helm-charts/recycler
+
+            - name: Helm Template
+              run: |
+                  helm template recycler helm-charts/recycler --debug
+
+            - name: Install Kubeconform
+              run: |
+                  curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+                  sudo mv kubeconform /usr/local/bin/
+                  chmod +x /usr/local/bin/kubeconform
+
+            - name: Validate manifests with Kubeconform
+              run: |
+                  helm template recycler helm-charts/recycler | \
+                    kubeconform -strict -summary -kubernetes-version 1.31.0 -skip CustomResourceDefinition
+
+    helm-install-test:
+        name: Test Helm Install on Kind
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Set up Helm
+              uses: azure/setup-helm@v4
+              with:
+                  version: "latest"
+
+            - name: Install the latest version of kind
+              run: |
+                  make install-kind
+
+            - name: Verify kind installation
+              run: kind version
+
+            - name: Create Kind cluster
+              run: |
+                  kind create cluster --name helm-test --wait 30s
+
+            - name: Install Helm chart
+              run: |
+                  helm install recycler helm-charts/recycler --wait --timeout 2m
+
+            - name: Verify deployment exists
+              run: |
+                  kubectl get deployment recycler-controller-manager -n recycler-system
+
+            - name: Wait for controller to be ready
+              run: |
+                  kubectl rollout status deployment/recycler-controller-manager -n recycler-system --timeout=2m
+
+            - name: Check controller pod status
+              run: |
+                  kubectl get pods -n recycler-system -l control-plane=controller-manager
+                  kubectl wait --for=condition=ready pod -l control-plane=controller-manager -n recycler-system --timeout=2m
+
+            - name: Verify controller is running
+              run: |
+                  kubectl get pods -n recycler-system -l control-plane=controller-manager -o jsonpath='{.items[0].status.phase}' | grep -q "Running"
+                  echo "✓ Controller is running successfully"
+
+            - name: Cleanup
+              if: always()
+              run: |
+                  helm uninstall recycler || true
