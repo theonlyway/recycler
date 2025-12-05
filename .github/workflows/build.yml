@@ -196,7 +196,9 @@ jobs:
 
             - name: Install Helm chart
               run: |
-                  helm install recycler helm-charts/recycler --wait --timeout 2m
+                  helm install recycler helm-charts/recycler \
+                    --set controllerManager.manager.image.tag=${{ needs.semver.outputs.next_version }} \
+                    --wait --timeout 2m
 
             - name: Verify deployment exists
               run: |
