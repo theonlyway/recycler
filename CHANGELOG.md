@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2025-12-05
+### :bug: Bug Fixes
+- [`9aa13ea`](https://github.com/theonlyway/recycler/commit/9aa13eaa0d28cabc05d5d83622f07a86cf27af8a) - using image tag value from semver step *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`bb6bc3a`](https://github.com/theonlyway/recycler/commit/bb6bc3aed8a577eb62dcbf358e92d4fcf6f27ae4) - added step to cleanup docker images if helm chart tests fail *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.4.1] - 2025-12-04
 ### :bug: Bug Fixes
 - [`a1c83e4`](https://github.com/theonlyway/recycler/commit/a1c83e4ebadf52ef504be27af61a5180174b3330) - added test for helm charts *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -256,3 +262,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.3.1]: https://github.com/theonlyway/recycler/compare/1.3.0...1.3.1
 [1.4.0]: https://github.com/theonlyway/recycler/compare/1.3.1...1.4.0
 [1.4.1]: https://github.com/theonlyway/recycler/compare/1.4.0...1.4.1
+[1.4.2]: https://github.com/theonlyway/recycler/compare/1.4.1...1.4.2
