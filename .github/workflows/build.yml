@@ -325,3 +325,64 @@ jobs:
                   branch: main
                   commit_message: "docs: update CHANGELOG.md for ${{ needs.semver.outputs.next_version }} [skip ci]"
                   file_pattern: CHANGELOG.md
+
+    cleanup-images-on-failure:
+        name: Cleanup Images on Helm Test Failure
+        runs-on: ubuntu-latest
+        needs: [semver, helm-lint-test, helm-install-test]
+        if: failure()
+        permissions:
+            packages: write
+        steps:
+            - name: Delete GHCR Image
+              continue-on-error: true
+              run: |
+                  TOKEN=$(echo ${{ github.token }} | base64)
+                  PACKAGE_NAME="recycler"
+                  VERSION="${{ needs.semver.outputs.next_version }}"
+
+                  # Get all versions of the package
+                  VERSIONS=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+                    -H "Accept: application/vnd.github+json" \
+                    "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
+
+                  # Find and delete the specific version
+                  VERSION_ID=$(echo "$VERSIONS" | jq -r ".[] | select(.metadata.container.tags[] | contains(\"${VERSION}\")) | .id")
+
+                  if [ -n "$VERSION_ID" ]; then
+                    echo "Deleting GHCR image version ${VERSION} (ID: ${VERSION_ID})"
+                    curl -X DELETE \
+                      -H "Authorization: Bearer ${{ github.token }}" \
+                      -H "Accept: application/vnd.github+json" \
+                      "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
+                    echo "✓ Deleted GHCR image"
+                  else
+                    echo "Version ${VERSION} not found in GHCR"
+                  fi
+
+            - name: Delete Docker Hub Image
+              continue-on-error: true
+              run: |
+                  VERSION="${{ needs.semver.outputs.next_version }}"
+                  REPO="${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}"
+
+                  # Get Docker Hub token
+                  HUB_TOKEN=$(curl -s -H "Content-Type: application/json" \
+                    -X POST \
+                    -d "{\"username\": \"${{ vars.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
+                    https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+                  if [ -n "$HUB_TOKEN" ] && [ "$HUB_TOKEN" != "null" ]; then
+                    echo "Deleting Docker Hub image tag ${VERSION}"
+                    DELETE_RESPONSE=$(curl -s -X DELETE \
+                      -H "Authorization: JWT ${HUB_TOKEN}" \
+                      "https://hub.docker.com/v2/repositories/${REPO}/tags/${VERSION}/")
+
+                    if [ $? -eq 0 ]; then
+                      echo "✓ Deleted Docker Hub image tag ${VERSION}"
+                    else
+                      echo "⚠ Failed to delete Docker Hub image tag ${VERSION}"
+                    fi
+                  else
+                    echo "⚠ Failed to authenticate with Docker Hub"
+                  fi
