@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2025-12-08
+### :bug: Bug Fixes
+- [`c8c4a51`](https://github.com/theonlyway/recycler/commit/c8c4a518be324bda3c51850d2d479dac7b6d6056) - **deps**: update module github.com/onsi/ginkgo/v2 to v2.27.3 *(PR [#32](https://github.com/theonlyway/recycler/pull/32) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.4.2] - 2025-12-05
 ### :bug: Bug Fixes
 - [`9aa13ea`](https://github.com/theonlyway/recycler/commit/9aa13eaa0d28cabc05d5d83622f07a86cf27af8a) - using image tag value from semver step *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -263,3 +268,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.0]: https://github.com/theonlyway/recycler/compare/1.3.1...1.4.0
 [1.4.1]: https://github.com/theonlyway/recycler/compare/1.4.0...1.4.1
 [1.4.2]: https://github.com/theonlyway/recycler/compare/1.4.1...1.4.2
+[1.4.3]: https://github.com/theonlyway/recycler/compare/1.4.2...1.4.3
