@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5] - 2025-12-10
+### :bug: Bug Fixes
+- [`c0757f3`](https://github.com/theonlyway/recycler/commit/c0757f3914d1482c1a1d963d92c9fd8f878b299d) - **deps**: update kubernetes packages to v0.34.3 *(PR [#34](https://github.com/theonlyway/recycler/pull/34) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.4.4] - 2025-12-09
 ### :bug: Bug Fixes
 - [`7e2b1a8`](https://github.com/theonlyway/recycler/commit/7e2b1a8f081fc6b596ba231b5e6f1a7e41911671) - **deps**: update module github.com/onsi/gomega to v1.38.3 *(PR [#33](https://github.com/theonlyway/recycler/pull/33) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -275,3 +280,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.2]: https://github.com/theonlyway/recycler/compare/1.4.1...1.4.2
 [1.4.3]: https://github.com/theonlyway/recycler/compare/1.4.2...1.4.3
 [1.4.4]: https://github.com/theonlyway/recycler/compare/1.4.3...1.4.4
+[1.4.5]: https://github.com/theonlyway/recycler/compare/1.4.4...1.4.5
