@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.7] - 2026-01-05
+### :bug: Bug Fixes
+- [`01c0e03`](https://github.com/theonlyway/recycler/commit/01c0e03e32f90b14a3f474c0ca34435ec6d87448) - add gomodTidy to postUpdateOptions in Renovate configuration [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`e17f602`](https://github.com/theonlyway/recycler/commit/e17f6023d653257fe0857fd73916e31f940d8810) - enable dependency dashboard in Renovate configuration [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`2259b27`](https://github.com/theonlyway/recycler/commit/2259b27535fa8189b07069f9a5f8ea1455c62ff8) - **deps**: pin dependencies *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.4.6] - 2026-01-05
 ### :bug: Bug Fixes
 - [`4dedab6`](https://github.com/theonlyway/recycler/commit/4dedab65fe3f21f3c3b1e1de11d0711d92814eda) - **deps**: update kubernetes packages to v0.35.0 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -296,3 +305,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.4]: https://github.com/theonlyway/recycler/compare/1.4.3...1.4.4
 [1.4.5]: https://github.com/theonlyway/recycler/compare/1.4.4...1.4.5
 [1.4.6]: https://github.com/theonlyway/recycler/compare/1.4.5...1.4.6
+[1.4.7]: https://github.com/theonlyway/recycler/compare/1.4.6...1.4.7
