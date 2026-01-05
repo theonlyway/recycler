@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: ghcr.io/theonlyway/recycler
-  newTag: latest
+  newTag: latest@sha256:76f0ba7da3e09199aed9c721429b1f5c326d67fa1e8563ae8cda2ee821a8f839

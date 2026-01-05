@@ -8,7 +8,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/theonlyway/recycler
-      tag: latest
+      tag: latest@sha256:76f0ba7da3e09199aed9c721429b1f5c326d67fa1e8563ae8cda2ee821a8f839
     resources:
       limits:
         cpu: 500m
