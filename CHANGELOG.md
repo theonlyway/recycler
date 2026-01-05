@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6] - 2026-01-05
+### :bug: Bug Fixes
+- [`4dedab6`](https://github.com/theonlyway/recycler/commit/4dedab65fe3f21f3c3b1e1de11d0711d92814eda) - **deps**: update kubernetes packages to v0.35.0 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1881eb7`](https://github.com/theonlyway/recycler/commit/1881eb731d4be2d1f35b8798064429fa64dc0afe) - add rule to ignore digest updates for recycler image [skip ci[ *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`e40300c`](https://github.com/theonlyway/recycler/commit/e40300cc5af8f84931ee57a5aafe85cc1cb3357a) - update rule to ignore all updates for recycler image [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :recycle: Refactors
+- [`9719c79`](https://github.com/theonlyway/recycler/commit/9719c79d80df356510245840dbb523531f112d22) - update Renovate configuration to enhance security and dependency management [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`19c987d`](https://github.com/theonlyway/recycler/commit/19c987d2599d56b3c57e676cc741080ab3a22c37) - **deps**: update actions/upload-artifact action to v6 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1486e6e`](https://github.com/theonlyway/recycler/commit/1486e6e8bc2137fc0cd11df298c6ed1933af70b5) - **deps**: update dependency go to v1.25.5 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.4.5] - 2025-12-10
 ### :bug: Bug Fixes
 - [`c0757f3`](https://github.com/theonlyway/recycler/commit/c0757f3914d1482c1a1d963d92c9fd8f878b299d) - **deps**: update kubernetes packages to v0.34.3 *(PR [#34](https://github.com/theonlyway/recycler/pull/34) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -281,3 +295,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.3]: https://github.com/theonlyway/recycler/compare/1.4.2...1.4.3
 [1.4.4]: https://github.com/theonlyway/recycler/compare/1.4.3...1.4.4
 [1.4.5]: https://github.com/theonlyway/recycler/compare/1.4.4...1.4.5
+[1.4.6]: https://github.com/theonlyway/recycler/compare/1.4.5...1.4.6
