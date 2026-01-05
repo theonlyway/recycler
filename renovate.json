@@ -8,6 +8,9 @@
     "main"
   ],
   "ignoreDeps": [],
+  "golang": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "description": "Automatically merge minor and patch-level updates",
@@ -18,6 +21,12 @@
       "automerge": true,
       "automergeType": "pr",
       "ignoreTests": false
+    },
+    {
+      "description": "Go version updates",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["golang"],
+      "enabled": true
     }
   ]
 }
