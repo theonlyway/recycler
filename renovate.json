@@ -11,6 +11,9 @@
   "separateMinorPatch": false,
   "rangeStrategy": "bump",
   "semanticCommits": "enabled",
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "packageRules": [
     {
       "description": "Automatically merge non-major updates",
