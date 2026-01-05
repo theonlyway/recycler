@@ -26,7 +26,11 @@
       "description": "Go version updates",
       "matchManagers": ["gomod"],
       "matchDepTypes": ["golang"],
-      "enabled": true
+      "enabled": true,
+      "rangeStrategy": "bump",
+      "semanticCommits": "enabled",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
     }
   ]
 }
