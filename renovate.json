@@ -57,6 +57,16 @@
       "labels": [
         "major-update"
       ]
+    },
+    {
+      "description": "Ignore digest updates for recycler image",
+      "matchPackageNames": [
+        "ghcr.io/theonlyway/recycler"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "enabled": false
     }
   ]
 }
