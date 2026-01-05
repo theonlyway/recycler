@@ -59,12 +59,9 @@
       ]
     },
     {
-      "description": "Ignore digest updates for recycler image",
+      "description": "Ignore all updates for recycler image",
       "matchPackageNames": [
         "ghcr.io/theonlyway/recycler"
-      ],
-      "matchUpdateTypes": [
-        "digest"
       ],
       "enabled": false
     }
