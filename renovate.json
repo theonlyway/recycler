@@ -1,23 +1,62 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:best-practices"
+    "config:best-practices",
+    ":enableVulnerabilityAlertsWithLabel(security)"
   ],
   "timezone": "Australia/Brisbane",
-  "baseBranchPatterns": [
-    "main"
-  ],
-  "ignoreDeps": [],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
   "packageRules": [
     {
-      "description": "Automatically merge minor and patch-level updates",
+      "description": "Automatically merge non-major updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Security updates - high priority, separate PRs",
+      "matchDatasources": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "vulnerabilityAlerts": {
+        "enabled": true
+      },
+      "prPriority": 10,
+      "groupName": null
+    },
+    {
+      "description": "Group Go dependencies",
+      "matchManagers": [
+        "gomod"
+      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
       ],
-      "automerge": true,
-      "automergeType": "pr",
-      "ignoreTests": false
+      "groupName": "Go dependencies"
+    },
+    {
+      "description": "Pin major versions for review",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "labels": [
+        "major-update"
+      ]
     }
   ]
 }
