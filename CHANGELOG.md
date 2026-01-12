@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.9] - 2026-01-12
+### :wrench: Chores
+- [`abdc721`](https://github.com/theonlyway/recycler/commit/abdc72121e1f9f5774eec50740b639b5bdf9b815) - **deps**: update gcr.io/distroless/static:nonroot docker digest to cba10d7 *(PR [#45](https://github.com/theonlyway/recycler/pull/45) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.4.8] - 2026-01-08
 ### :bug: Bug Fixes
 - [`6098a40`](https://github.com/theonlyway/recycler/commit/6098a40c7990b578acc25f18136b285113f1815b) - **deps**: update go dependencies *(PR [#44](https://github.com/theonlyway/recycler/pull/44) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -312,3 +317,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.6]: https://github.com/theonlyway/recycler/compare/1.4.5...1.4.6
 [1.4.7]: https://github.com/theonlyway/recycler/compare/1.4.6...1.4.7
 [1.4.8]: https://github.com/theonlyway/recycler/compare/1.4.7...1.4.8
+[1.4.9]: https://github.com/theonlyway/recycler/compare/1.4.8...1.4.9
