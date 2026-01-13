@@ -134,20 +134,19 @@ jobs:
                   registry: ${{ env.GHCR_REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ github.token }}
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
             - name: Build and Push Operator to GHCR
-              id: push
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  push: true
-                  tags: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
-                  cache-from: type=registry,ref=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache
-                  cache-to: type=registry,ref=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache,mode=max
-                  platforms: linux/amd64,linux/arm64
-                  build-args: |
-                      VERSION=${{ needs.semver.outputs.next_version }}
+              run: |
+                  FULL_IMAGE=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
+                  CACHE_PATH=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache
+                  make docker-buildx BUILD_MODE=push IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${CACHE_PATH}
+            - name: Get Image Digest
+              id: digest
+              run: |
+                  FULL_IMAGE=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  # Pull the manifest to get the digest
+                  DIGEST=$(docker buildx imagetools inspect ${FULL_IMAGE} --format '{{json .Manifest}}' | jq -r '.digest')
+                  echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+                  echo "Image digest: ${DIGEST}"
             - name: Generate SBOM
               uses: anchore/sbom-action@v0
               with:
@@ -158,13 +157,13 @@ jobs:
               uses: actions/attest-build-provenance@v2
               with:
                   subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
-                  subject-digest: ${{ steps.push.outputs.digest }}
+                  subject-digest: ${{ steps.digest.outputs.digest }}
                   push-to-registry: true
             - name: Attest SBOM
               uses: actions/attest-sbom@v2
               with:
                   subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
-                  subject-digest: ${{ steps.push.outputs.digest }}
+                  subject-digest: ${{ steps.digest.outputs.digest }}
                   sbom-path: sbom-ghcr.spdx.json
                   push-to-registry: true
             - name: Upload SBOM as artifact
@@ -284,20 +283,18 @@ jobs:
               with:
                 username: ${{ vars.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
             - name: Build and Push Operator to Docker Hub
-              id: push
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  push: true
-                  tags: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
-                  cache-from: type=registry,ref=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:cache
-                  cache-to: type=registry,ref=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:cache,mode=max
-                  platforms: linux/amd64,linux/arm64
-                  build-args: |
-                      VERSION=${{ needs.semver.outputs.next_version }}
+              run: |
+                  FULL_IMAGE=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
+                  make docker-buildx BUILD_MODE=push IMAGE_TAG_BASE=${FULL_IMAGE} IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${FULL_IMAGE}
+            - name: Get Image Digest
+              id: digest
+              run: |
+                  FULL_IMAGE=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  # Pull the manifest to get the digest
+                  DIGEST=$(docker buildx imagetools inspect ${FULL_IMAGE} --format '{{json .Manifest}}' | jq -r '.digest')
+                  echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+                  echo "Image digest: ${DIGEST}"
             - name: Generate SBOM for Docker Hub
               uses: anchore/sbom-action@v0
               with:
@@ -308,13 +305,13 @@ jobs:
               uses: actions/attest-build-provenance@v2
               with:
                   subject-name: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
-                  subject-digest: ${{ steps.push.outputs.digest }}
+                  subject-digest: ${{ steps.digest.outputs.digest }}
                   push-to-registry: false
             - name: Attest SBOM
               uses: actions/attest-sbom@v2
               with:
                   subject-name: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
-                  subject-digest: ${{ steps.push.outputs.digest }}
+                  subject-digest: ${{ steps.digest.outputs.digest }}
                   sbom-path: sbom-dockerhub.spdx.json
                   push-to-registry: false
             - name: Upload SBOM as artifact
