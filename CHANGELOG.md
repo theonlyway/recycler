@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-01-13
+### :sparkles: New Features
+- [`2589fd3`](https://github.com/theonlyway/recycler/commit/2589fd3aabcd9c39cc13d4c1f8025be6dcb889b6) - add support for CycloneDX SBOM generation alongside SPDX in build workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`319cd2a`](https://github.com/theonlyway/recycler/commit/319cd2a803002b7b9c1a1ca801e249b2165f2056) - **deps**: update module github.com/onsi/ginkgo/v2 to v2.27.5 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`510b917`](https://github.com/theonlyway/recycler/commit/510b9178635a52c4f51a694e48b626b577f6b027) - **deps**: pin dependencies *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`26edfd1`](https://github.com/theonlyway/recycler/commit/26edfd17352f3b83c249ac660881b52e412ad5d5) - **deps**: update actions/attest-build-provenance action to v3 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`fc53a96`](https://github.com/theonlyway/recycler/commit/fc53a964a1c345ef92cf962ca3241d7fd736b77b) - **deps**: update actions/setup-go digest to 7a3fe6c *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`216dba0`](https://github.com/theonlyway/recycler/commit/216dba09003aa961078a96603c23406c42794565) - **deps**: update actions/attest-sbom action to v3 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`ae4add0`](https://github.com/theonlyway/recycler/commit/ae4add00417ced96f50273fdada78cfca6f36011) - add concurrency settings to workflow files [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.5.1] - 2026-01-13
 ### :bug: Bug Fixes
 - [`e58f4d2`](https://github.com/theonlyway/recycler/commit/e58f4d2db4cb9027b129fab3dcc8bd5675548d30) - rename Helm chart package for clarity and update references in workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -333,3 +348,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.9]: https://github.com/theonlyway/recycler/compare/1.4.8...1.4.9
 [1.5.0]: https://github.com/theonlyway/recycler/compare/1.4.9...1.5.0
 [1.5.1]: https://github.com/theonlyway/recycler/compare/1.5.0...1.5.1
+[1.6.0]: https://github.com/theonlyway/recycler/compare/1.5.1...1.6.0
