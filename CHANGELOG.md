@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2026-01-13
+### :wrench: Chores
+- [`eafbc08`](https://github.com/theonlyway/recycler/commit/eafbc08a5534efb8daaa35f29a2f9f5489ea6267) - **deps**: update golang:1.25 docker digest to 0f406d3 *(PR [#51](https://github.com/theonlyway/recycler/pull/51) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.6.1] - 2026-01-13
 ### :bug: Bug Fixes
 - [`f2702a0`](https://github.com/theonlyway/recycler/commit/f2702a0e698fddf6038ebbd584cc16eaef9100f0) - enhance SBOM file handling in release process *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -355,3 +360,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.5.1]: https://github.com/theonlyway/recycler/compare/1.5.0...1.5.1
 [1.6.0]: https://github.com/theonlyway/recycler/compare/1.5.1...1.6.0
 [1.6.1]: https://github.com/theonlyway/recycler/compare/1.6.0...1.6.1
+[1.6.2]: https://github.com/theonlyway/recycler/compare/1.6.1...1.6.2
