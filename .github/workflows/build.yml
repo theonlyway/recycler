@@ -166,7 +166,7 @@ jobs:
                   subject-digest: ${{ steps.digest.outputs.digest }}
                   push-to-registry: true
             - name: Attest SBOM
-              uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # v2
+              uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3
               with:
                   subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
                   subject-digest: ${{ steps.digest.outputs.digest }}
@@ -322,7 +322,7 @@ jobs:
                   subject-digest: ${{ steps.digest.outputs.digest }}
                   push-to-registry: false
             - name: Attest SBOM
-              uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # v2
+              uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3
               with:
                   subject-name: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
                   subject-digest: ${{ steps.digest.outputs.digest }}
