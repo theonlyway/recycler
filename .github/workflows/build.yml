@@ -112,6 +112,8 @@ jobs:
         permissions:
             contents: write
             packages: write
+            id-token: write
+            attestations: write
         env:
             GHCR_REGISTRY: ghcr.io
             IMAGE_NAME: recycler
@@ -132,11 +134,44 @@ jobs:
                   registry: ${{ env.GHCR_REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ github.token }}
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
             - name: Build and Push Operator to GHCR
-              run: |
-                  FULL_IMAGE=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
-                  CACHE_PATH=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache
-                  make docker-buildx BUILD_MODE=push IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${CACHE_PATH}
+              id: push
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  cache-from: type=registry,ref=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache
+                  cache-to: type=registry,ref=${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/cache,mode=max
+                  platforms: linux/amd64,linux/arm64
+                  build-args: |
+                      VERSION=${{ needs.semver.outputs.next_version }}
+            - name: Generate SBOM
+              uses: anchore/sbom-action@v0
+              with:
+                  image: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  format: spdx-json
+                  output-file: sbom-ghcr.spdx.json
+            - name: Attest Build Provenance
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
+                  subject-digest: ${{ steps.push.outputs.digest }}
+                  push-to-registry: true
+            - name: Attest SBOM
+              uses: actions/attest-sbom@v2
+              with:
+                  subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
+                  subject-digest: ${{ steps.push.outputs.digest }}
+                  sbom-path: sbom-ghcr.spdx.json
+                  push-to-registry: true
+            - name: Upload SBOM as artifact
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+              with:
+                  name: sbom-ghcr
+                  path: sbom-ghcr.spdx.json
 
     helm-lint-test:
         name: Lint and Test Helm Chart
@@ -230,6 +265,8 @@ jobs:
         permissions:
             contents: write
             packages: write
+            id-token: write
+            attestations: write
         env:
             DOCKERHUB_OWNER: theonlywaye
             IMAGE_NAME: recycler
@@ -247,10 +284,44 @@ jobs:
               with:
                 username: ${{ vars.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
             - name: Build and Push Operator to Docker Hub
-              run: |
-                  FULL_IMAGE=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
-                  make docker-buildx BUILD_MODE=push IMAGE_TAG_BASE=${FULL_IMAGE} IMG=${FULL_IMAGE}:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }} CACHE_PATH=${FULL_IMAGE}
+              id: push
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  cache-from: type=registry,ref=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:cache
+                  cache-to: type=registry,ref=${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:cache,mode=max
+                  platforms: linux/amd64,linux/arm64
+                  build-args: |
+                      VERSION=${{ needs.semver.outputs.next_version }}
+            - name: Generate SBOM for Docker Hub
+              uses: anchore/sbom-action@v0
+              with:
+                  image: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  format: spdx-json
+                  output-file: sbom-dockerhub.spdx.json
+            - name: Attest Build Provenance
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-name: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
+                  subject-digest: ${{ steps.push.outputs.digest }}
+                  push-to-registry: false
+            - name: Attest SBOM
+              uses: actions/attest-sbom@v2
+              with:
+                  subject-name: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
+                  subject-digest: ${{ steps.push.outputs.digest }}
+                  sbom-path: sbom-dockerhub.spdx.json
+                  push-to-registry: false
+            - name: Upload SBOM as artifact
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+              with:
+                  name: sbom-dockerhub
+                  path: sbom-dockerhub.spdx.json
 
     helm:
         name: Helm Chart Release
@@ -285,14 +356,82 @@ jobs:
                   CHART_FILE=releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
                   echo "Pushing $CHART_FILE to GHCR..."
                   helm push $CHART_FILE oci://ghcr.io/${{ github.repository_owner }}/charts
-            - name: Update Release with Changelog and Helm Chart Link
+            - name: Download SBOM artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: sbom-*
+                  path: ./sbom-reports
+                  merge-multiple: true
+            - name: Update Release with Comprehensive Package Information
               uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
               id: release
               with:
-                  name: ${{ needs.semver.outputs.next_version }}
+                  name: Release ${{ needs.semver.outputs.next_version }}
                   body: |
-                      [Helm Chart ${{ needs.semver.outputs.next_version }}](https://github.com/${{ github.repository_owner }}/recycler/pkgs/container/charts%2Frecycler)
+                      ## 📦 Packages
+
+                      ### Docker Images
+                      - **GitHub Container Registry**: [`ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }}`](https://github.com/${{ github.repository_owner }}/recycler/pkgs/container/recycler)
+                      - **Docker Hub**: [`theonlywaye/recycler:${{ needs.semver.outputs.next_version }}`](https://hub.docker.com/r/theonlywaye/recycler/tags)
+
+                      ### Helm Chart
+                      - **OCI Registry**: [`oci://ghcr.io/${{ github.repository_owner }}/charts/recycler:${{ needs.semver.outputs.next_version }}`](https://github.com/${{ github.repository_owner }}/recycler/pkgs/container/charts%2Frecycler)
+
+                      ## 📝 Installation
+
+                      ### Using Helm (Recommended)
+                      ```bash
+                      # Install from OCI registry
+                      helm install recycler oci://ghcr.io/${{ github.repository_owner }}/charts/recycler --version ${{ needs.semver.outputs.next_version }}
+
+                      # Or download the chart package and install
+                      helm install recycler ./recycler-${{ needs.semver.outputs.next_version }}.tgz
+                      ```
+
+                      ### Using Docker
+                      ```bash
+                      # Pull from GitHub Container Registry
+                      docker pull ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }}
+
+                      # Or pull from Docker Hub
+                      docker pull theonlywaye/recycler:${{ needs.semver.outputs.next_version }}
+                      ```
+
+                      ## 🔒 Security & Verification
+
+                      This release includes cryptographically signed attestations and SBOMs:
+                      - ✅ **Build Provenance**: Cryptographically signed attestations proving where and how the images were built
+                      - ✅ **SBOM Attestations**: Signed Software Bill of Materials in SPDX format
+                      - ✅ **Multi-architecture**: Supports linux/amd64 and linux/arm64
+
+                      ### Verify Attestations
+
+                      Verify build provenance and authenticity using the GitHub CLI:
+
+                      ```bash
+                      # Install GitHub CLI if needed
+                      # https://cli.github.com/
+
+                      # Verify build provenance for GHCR image
+                      gh attestation verify oci://ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }} \
+                        --repo ${{ github.repository }}
+
+                      # Verify SBOM attestation
+                      gh attestation verify oci://ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }} \
+                        --repo ${{ github.repository }} \
+                        --predicate-type https://spdx.dev/Document/v2.3
+
+                      # View full attestation details
+                      gh attestation verify oci://ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }} \
+                        --repo ${{ github.repository }} \
+                        --format json | jq
+                      ```
+
+                      SBOM files are also available as release assets below for offline review.
                   tag_name: ${{ needs.semver.outputs.next_version }}
+                  files: |
+                      releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
+                      sbom-reports/*.spdx.json
                   append_body: true
 
     changelog:
