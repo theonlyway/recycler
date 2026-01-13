@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-01-13
+### :sparkles: New Features
+- [`e880f98`](https://github.com/theonlyway/recycler/commit/e880f98fdbcff4888c7d04fd16da1bea513a8330) - enhance Docker build process with SBOM generation and attestations *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :recycle: Refactors
+- [`b2cfeae`](https://github.com/theonlyway/recycler/commit/b2cfeaec620ed5fa3fac2cdc783b498837972aec) - streamline Docker build process by replacing build-push-action with make commands and adding image digest retrieval *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.4.9] - 2026-01-12
 ### :wrench: Chores
 - [`abdc721`](https://github.com/theonlyway/recycler/commit/abdc72121e1f9f5774eec50740b639b5bdf9b815) - **deps**: update gcr.io/distroless/static:nonroot docker digest to cba10d7 *(PR [#45](https://github.com/theonlyway/recycler/pull/45) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -318,3 +326,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.7]: https://github.com/theonlyway/recycler/compare/1.4.6...1.4.7
 [1.4.8]: https://github.com/theonlyway/recycler/compare/1.4.7...1.4.8
 [1.4.9]: https://github.com/theonlyway/recycler/compare/1.4.8...1.4.9
+[1.5.0]: https://github.com/theonlyway/recycler/compare/1.4.9...1.5.0
