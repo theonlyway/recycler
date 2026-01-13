@@ -147,12 +147,18 @@ jobs:
                   DIGEST=$(docker buildx imagetools inspect ${FULL_IMAGE} --format '{{json .Manifest}}' | jq -r '.digest')
                   echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
                   echo "Image digest: ${DIGEST}"
-            - name: Generate SBOM
+            - name: Generate SBOM (SPDX)
               uses: anchore/sbom-action@v0
               with:
                   image: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
                   format: spdx-json
                   output-file: sbom-ghcr.spdx.json
+            - name: Generate SBOM (CycloneDX)
+              uses: anchore/sbom-action@v0
+              with:
+                  image: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  format: cyclonedx-json
+                  output-file: sbom-ghcr.cyclonedx.json
             - name: Attest Build Provenance
               uses: actions/attest-build-provenance@v2
               with:
@@ -166,11 +172,13 @@ jobs:
                   subject-digest: ${{ steps.digest.outputs.digest }}
                   sbom-path: sbom-ghcr.spdx.json
                   push-to-registry: true
-            - name: Upload SBOM as artifact
+            - name: Upload SBOM artifacts
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
               with:
                   name: sbom-ghcr
-                  path: sbom-ghcr.spdx.json
+                  path: |
+                      sbom-ghcr.spdx.json
+                      sbom-ghcr.cyclonedx.json
 
     helm-lint-test:
         name: Lint and Test Helm Chart
@@ -295,12 +303,18 @@ jobs:
                   DIGEST=$(docker buildx imagetools inspect ${FULL_IMAGE} --format '{{json .Manifest}}' | jq -r '.digest')
                   echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
                   echo "Image digest: ${DIGEST}"
-            - name: Generate SBOM for Docker Hub
+            - name: Generate SBOM (SPDX)
               uses: anchore/sbom-action@v0
               with:
                   image: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
                   format: spdx-json
                   output-file: sbom-dockerhub.spdx.json
+            - name: Generate SBOM (CycloneDX)
+              uses: anchore/sbom-action@v0
+              with:
+                  image: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
+                  format: cyclonedx-json
+                  output-file: sbom-dockerhub.cyclonedx.json
             - name: Attest Build Provenance
               uses: actions/attest-build-provenance@v2
               with:
@@ -314,11 +328,13 @@ jobs:
                   subject-digest: ${{ steps.digest.outputs.digest }}
                   sbom-path: sbom-dockerhub.spdx.json
                   push-to-registry: false
-            - name: Upload SBOM as artifact
+            - name: Upload SBOM artifacts
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
               with:
                   name: sbom-dockerhub
-                  path: sbom-dockerhub.spdx.json
+                  path: |
+                      sbom-dockerhub.spdx.json
+                      sbom-dockerhub.cyclonedx.json
 
     helm:
         name: Helm Chart Release
@@ -426,7 +442,13 @@ jobs:
                         --format json | jq
                       ```
 
-                      SBOM files are also available as release assets below for offline review.
+                      ### SBOM Formats Available
+
+                      Both **SPDX** (for compliance/licensing) and **CycloneDX** (for security scanning) formats are provided as release assets:
+                      - `sbom-ghcr.spdx.json` - SPDX 2.3 format (ISO standard)
+                      - `sbom-ghcr.cyclonedx.json` - CycloneDX format (OWASP)
+                      - `sbom-dockerhub.spdx.json` - SPDX for Docker Hub image
+                      - `sbom-dockerhub.cyclonedx.json` - CycloneDX for Docker Hub image
                   tag_name: ${{ needs.semver.outputs.next_version }}
                   files: |
                       releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
