@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-01-13
+### :bug: Bug Fixes
+- [`f2702a0`](https://github.com/theonlyway/recycler/commit/f2702a0e698fddf6038ebbd584cc16eaef9100f0) - enhance SBOM file handling in release process *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.6.0] - 2026-01-13
 ### :sparkles: New Features
 - [`2589fd3`](https://github.com/theonlyway/recycler/commit/2589fd3aabcd9c39cc13d4c1f8025be6dcb889b6) - add support for CycloneDX SBOM generation alongside SPDX in build workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -349,3 +354,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.5.0]: https://github.com/theonlyway/recycler/compare/1.4.9...1.5.0
 [1.5.1]: https://github.com/theonlyway/recycler/compare/1.5.0...1.5.1
 [1.6.0]: https://github.com/theonlyway/recycler/compare/1.5.1...1.6.0
+[1.6.1]: https://github.com/theonlyway/recycler/compare/1.6.0...1.6.1
