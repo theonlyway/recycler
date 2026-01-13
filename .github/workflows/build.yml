@@ -49,7 +49,7 @@ jobs:
             - name: Clone the code
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
             - name: Setup Go
-              uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
+              uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
               with:
                   go-version-file: go.mod
             - name: Run linter
@@ -67,7 +67,7 @@ jobs:
             - name: Clone the code
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
             - name: Setup Go
-              uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
+              uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
               with:
                   go-version-file: go.mod
             - name: Running Tests
@@ -92,7 +92,7 @@ jobs:
             - name: Clone the code
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
             - name: Setup Go
-              uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
+              uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
               with:
                   go-version-file: go.mod
             - name: Install the latest version of kind
@@ -121,7 +121,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
             - name: Set up Go
-              uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
+              uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
               with:
                   go-version-file: "go.mod"
             - name: Install Operator SDK
@@ -281,7 +281,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
             - name: Set up Go
-              uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
+              uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
               with:
                   go-version-file: "go.mod"
             - name: Install Operator SDK
