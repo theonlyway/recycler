@@ -380,7 +380,10 @@ jobs:
               with:
                   pattern: sbom-*
                   path: ./sbom-reports
-                  merge-multiple: true
+            - name: List downloaded files
+              run: |
+                  echo "Downloaded SBOM files:"
+                  find ./sbom-reports -type f -name "*.json"
             - name: Update Release with Comprehensive Package Information
               uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
               id: release
@@ -463,7 +466,7 @@ jobs:
                   tag_name: ${{ needs.semver.outputs.next_version }}
                   files: |
                       releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
-                      sbom-reports/*.json
+                      sbom-reports/**/*.json
                   append_body: true
 
     changelog:
