@@ -448,15 +448,22 @@ jobs:
 
                       ### SBOM Formats Available
 
-                      Both **SPDX** (for compliance/licensing) and **CycloneDX** (for security scanning) formats are provided as release assets:
-                      - `sbom-ghcr.spdx.json` - SPDX 2.3 format (ISO standard)
-                      - `sbom-ghcr.cyclonedx.json` - CycloneDX format (OWASP)
+                      Both **SPDX** (for compliance/licensing) and **CycloneDX** (for security scanning) formats are provided:
+
+                      **Attested (Cryptographically Signed):**
+                      - SPDX 2.3 format - Verifiable via `gh attestation verify` with `--predicate-type https://spdx.dev/Document/v2.3`
+
+                      **Release Assets (Download):**
+                      - `sbom-ghcr.spdx.json` - SPDX for GHCR image
+                      - `sbom-ghcr.cyclonedx.json` - CycloneDX for GHCR image
                       - `sbom-dockerhub.spdx.json` - SPDX for Docker Hub image
                       - `sbom-dockerhub.cyclonedx.json` - CycloneDX for Docker Hub image
+
+                      Use **SPDX** for attestation verification and compliance. Use **CycloneDX** with security scanning tools like Grype, Trivy, or Dependency-Track.
                   tag_name: ${{ needs.semver.outputs.next_version }}
                   files: |
                       releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
-                      sbom-reports/*.spdx.json
+                      sbom-reports/*.json
                   append_body: true
 
     changelog:
