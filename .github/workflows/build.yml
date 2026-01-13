@@ -345,12 +345,14 @@ jobs:
               run: |
                   mkdir -p ./releases
                   helm package ./helm-charts/recycler --destination ./releases
+                  # Rename to include 'helm-chart' for clarity
+                  mv releases/recycler-${{ needs.semver.outputs.next_version }}.tgz releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
             - name: Authenticate with GHCR
               run: |
                   echo "${{ github.token }}" | helm registry login ghcr.io --username ${{ github.actor }} --password-stdin
             - name: Push Helm Chart to GitHub Container Registry
               run: |
-                  CHART_FILE=releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
+                  CHART_FILE=releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
                   echo "Pushing $CHART_FILE to GHCR..."
                   helm push $CHART_FILE oci://ghcr.io/${{ github.repository_owner }}/charts
             - name: Download SBOM artifacts
@@ -382,7 +384,7 @@ jobs:
                       helm install recycler oci://ghcr.io/${{ github.repository_owner }}/charts/recycler --version ${{ needs.semver.outputs.next_version }}
 
                       # Or download the chart package and install
-                      helm install recycler ./recycler-${{ needs.semver.outputs.next_version }}.tgz
+                      helm install recycler ./recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
                       ```
 
                       ### Using Docker
@@ -427,7 +429,7 @@ jobs:
                       SBOM files are also available as release assets below for offline review.
                   tag_name: ${{ needs.semver.outputs.next_version }}
                   files: |
-                      releases/recycler-${{ needs.semver.outputs.next_version }}.tgz
+                      releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
                       sbom-reports/*.spdx.json
                   append_body: true
 
@@ -455,6 +457,7 @@ jobs:
                   name: ${{ needs.semver.outputs.next_version }}
                   body: ${{ steps.changelog.outputs.changes }}
                   tag_name: ${{ needs.semver.outputs.next_version }}
+                  append_body: true
             - name: Commit CHANGELOG.md
               uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7
               with:
