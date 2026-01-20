@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.6] - 2026-01-20
+### :wrench: Chores
+- [`7015be7`](https://github.com/theonlyway/recycler/commit/7015be77a7e9392f173857be9d47b27c7f959e0a) - **deps**: update actions/download-artifact action to v7 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`5164c4f`](https://github.com/theonlyway/recycler/commit/5164c4f58e8648e36e029d1de60567bb9ed60f87) - **deps**: update golang:1.25 docker digest to ce63a16 *(PR [#57](https://github.com/theonlyway/recycler/pull/57) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.6.5] - 2026-01-16
 ### :wrench: Chores
 - [`b2af9da`](https://github.com/theonlyway/recycler/commit/b2af9da06251395196dc9edd1e917d552d53b36d) - **deps**: update dependency go to v1.25.6 *(PR [#54](https://github.com/theonlyway/recycler/pull/54) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -379,3 +385,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.6.3]: https://github.com/theonlyway/recycler/compare/1.6.2...1.6.3
 [1.6.4]: https://github.com/theonlyway/recycler/compare/1.6.3...1.6.4
 [1.6.5]: https://github.com/theonlyway/recycler/compare/1.6.4...1.6.5
+[1.6.6]: https://github.com/theonlyway/recycler/compare/1.6.5...1.6.6
