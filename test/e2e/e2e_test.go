@@ -41,6 +41,7 @@ const podStatusRunning = "Running"
 
 var _ = Describe("controller", Ordered, func() {
 	BeforeAll(func() {
+
 		By("installing prometheus operator")
 		Expect(utils.InstallPrometheusOperator()).To(Succeed())
 
@@ -56,6 +57,7 @@ var _ = Describe("controller", Ordered, func() {
 	})
 
 	AfterAll(func() {
+
 		By("uninstalling the Prometheus manager bundle")
 		utils.UninstallPrometheusOperator()
 
@@ -322,6 +324,31 @@ var _ = Describe("controller", Ordered, func() {
 				GinkgoWriter.Printf("\n=== Pod Events ===\n%s\n", string(podEvents))
 			} else {
 				GinkgoWriter.Printf("\n=== Failed to get pod events: %v ===\n", err)
+			}
+
+			By("capturing all events related to the Recycler CR")
+			cmd = exec.Command("kubectl", "get", "events",
+				"-n", testNamespace,
+				"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Recycler", recyclerName),
+				"-o", "wide",
+			)
+			recyclerEvents, err := utils.Run(cmd)
+			if err == nil {
+				GinkgoWriter.Printf("\n=== Recycler CR Events ===\n%s\n", string(recyclerEvents))
+			} else {
+				GinkgoWriter.Printf("\n=== Failed to get Recycler events: %v ===\n", err)
+			}
+
+			By("capturing ALL events in the test namespace for debugging")
+			cmd = exec.Command("kubectl", "get", "events",
+				"-n", testNamespace,
+				"-o", "wide",
+			)
+			allEvents, err := utils.Run(cmd)
+			if err == nil {
+				GinkgoWriter.Printf("\n=== All Events in %s Namespace ===\n%s\n", testNamespace, string(allEvents))
+			} else {
+				GinkgoWriter.Printf("\n=== Failed to get all events: %v ===\n", err)
 			}
 
 			By("verifying PodTerminated event was recorded on Recycler CR")
