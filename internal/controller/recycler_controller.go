@@ -203,6 +203,10 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				"elapsed", elapsed,
 				"delay", delay)
 
+			// Write an event to the CRD BEFORE deleting the pod
+			r.Recorder.Eventf(recycler, &pod, corev1.EventTypeNormal, "PodTerminated", "Terminate",
+				"Pod %s terminated due to CPU threshold breach", pod.Name)
+
 			// Set grace period for pod termination
 			gracePeriod := int64(recycler.Spec.GracePeriodSeconds)
 			deleteOptions := &client.DeleteOptions{
@@ -220,10 +224,6 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 					InMemoryMetricsStorage.Delete(key) // Access exported variable
 					log.V(1).Info("Removed pod entry from in-memory storage", "podName", pod.Name, "key", key)
 				}
-
-				// Write an event to the CRD
-				r.Recorder.Eventf(recycler, &pod, corev1.EventTypeNormal, "PodTerminated", "Terminate",
-					"Pod %s terminated due to CPU threshold breach", pod.Name)
 			}
 		} else {
 			terminationTime := breachTime.Add(delay)
