@@ -1,53 +1,56 @@
 {
-    "name": "Go Kubernetes Controller Dev",
-    "image": "mcr.microsoft.com/devcontainers/go:1.25",
-    "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-            "version": "latest",
-            "helm": "latest",
-            "minikube": "latest"
-        },
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "lts"
-        }
+  "name": "Go Kubernetes Controller Dev",
+  "image": "mcr.microsoft.com/devcontainers/go:1.25-bookworm",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false,
+      "dockerDashComposeVersion": "v2"
     },
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "golang.go",
-                "ms-kubernetes-tools.vscode-kubernetes-tools",
-                "redhat.vscode-yaml",
-                "ms-azuretools.vscode-docker",
-                "GitHub.copilot"
-            ],
-            "settings": {
-                "go.toolsManagement.checkForUpdates": "local",
-                "go.useLanguageServer": true,
-                "go.gopath": "/go",
-                "go.goroot": "/usr/local/go",
-                "go.lintTool": "golangci-lint",
-                "go.lintOnSave": "package",
-                "go.vetOnSave": "package",
-                "editor.formatOnSave": true,
-                "[go]": {
-                    "editor.defaultFormatter": "golang.go",
-                    "editor.codeActionsOnSave": {
-                        "source.organizeImports": "explicit"
-                    }
-                }
-            }
-        }
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "latest",
+      "minikube": "latest"
     },
-    "postCreateCommand": "bash .devcontainer/post-create.sh",
-    "remoteUser": "vscode",
-    "mounts": [
-        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-    ],
-    "runArgs": [
-        "--network=host"
-    ],
-    "containerEnv": {
-        "KUBEBUILDER_ASSETS": "/usr/local/kubebuilder/bin"
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
     }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        "GitHub.copilot"
+      ],
+      "settings": {
+        "go.toolsManagement.checkForUpdates": "local",
+        "go.useLanguageServer": true,
+        "go.gopath": "/go",
+        "go.goroot": "/usr/local/go",
+        "go.lintTool": "golangci-lint",
+        "go.lintOnSave": "package",
+        "go.vetOnSave": "package",
+        "editor.formatOnSave": true,
+        "[go]": {
+          "editor.defaultFormatter": "golang.go",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        }
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "vscode",
+  "runArgs": [
+    "--network=host"
+  ],
+  "containerEnv": {
+    "KUBEBUILDER_ASSETS": "/usr/local/kubebuilder/bin"
+  }
 }
