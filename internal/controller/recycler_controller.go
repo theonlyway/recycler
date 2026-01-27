@@ -51,7 +51,7 @@ const recyclerControllerName string = "recycler"
 type RecyclerReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
-	Recorder record.EventRecorder
+	Recorder events.EventRecorder
 	Log      logr.Logger
 }
 

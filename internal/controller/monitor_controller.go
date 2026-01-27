@@ -33,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -57,7 +58,7 @@ var InMemoryMetricsStorage sync.Map
 type MonitorReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
-	Recorder record.EventRecorder
+	Recorder events.Recorder
 	Log      logr.Logger
 	Config   *rest.Config
 }
