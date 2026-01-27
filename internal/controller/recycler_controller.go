@@ -123,7 +123,36 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, nil
 	}
 
-	// Update status condition
+	// Verify the target deployment exists before proceeding
+	deployment := &appsv1.Deployment{}
+	deploymentKey := client.ObjectKey{
+		Namespace: recycler.Namespace,
+		Name:      recycler.Spec.ScaleTargetRef.Name,
+	}
+	if err := r.Get(ctx, deploymentKey, deployment); err != nil {
+		log.Error(err, "Failed to fetch target deployment", "controller", recyclerControllerName)
+
+		// Set Unavailable status
+		statusErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			latestRecycler := &recyclertheonlywayecomv1alpha1.Recycler{}
+			if err := r.Get(ctx, req.NamespacedName, latestRecycler); err != nil {
+				return err
+			}
+			meta.SetStatusCondition(&latestRecycler.Status.Conditions, metav1.Condition{
+				Type:    typeUnhealthyCondition,
+				Status:  metav1.ConditionTrue,
+				Reason:  "DeploymentNotFound",
+				Message: fmt.Sprintf("Target deployment %s not found: %v", recycler.Spec.ScaleTargetRef.Name, err),
+			})
+			return r.Status().Update(ctx, latestRecycler)
+		})
+		if statusErr != nil {
+			log.Error(statusErr, "Failed to update Recycler status to Unavailable", "controller", recyclerControllerName)
+		}
+		return ctrl.Result{}, err
+	}
+
+	// Update status condition to Available
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		latestRecycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 		if err := r.Get(ctx, req.NamespacedName, latestRecycler); err != nil {
@@ -135,6 +164,8 @@ func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			Reason:  "Monitoring",
 			Message: "Recycler is healthy and monitoring the target resource",
 		})
+		// Clear the Unavailable condition if it exists
+		meta.RemoveStatusCondition(&latestRecycler.Status.Conditions, typeUnhealthyCondition)
 		return r.Status().Update(ctx, latestRecycler)
 	})
 	if err != nil {
@@ -158,7 +189,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 		Name:      recycler.Spec.ScaleTargetRef.Name,
 	}
 	if err := r.Get(ctx, deploymentKey, deployment); err != nil {
-		log.Error(err, "Failed to fetch target deployment", "controller", recyclerControllerName)
+		// Error handled in Reconcile, just return it here
 		return err
 	}
 
