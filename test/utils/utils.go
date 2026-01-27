@@ -119,7 +119,7 @@ func InstallMetricsServer() error {
 	cmd = exec.Command("kubectl", "patch", "deployment", "metrics-server",
 		"-n", "kube-system",
 		"--type=json",
-		"-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--metric-resolution=10s"}]`,
+		"-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"replace","path":"/spec/template/spec/containers/0/args/4","value":"--metric-resolution=10s"}]`,
 	)
 	if _, err := Run(cmd); err != nil {
 		return err
