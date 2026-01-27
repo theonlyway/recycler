@@ -460,7 +460,7 @@ func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := metricsapi.AddToScheme(mgr.GetScheme()); err != nil {
 		return fmt.Errorf("failed to add metrics API to scheme: %w", err)
 	}
-	r.Recorder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
+	r.Recorder = mgr.GetEventRecorder("monitor-controller") // Initialize the EventRecorder
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("monitor").
 		For(&recyclertheonlywayecomv1alpha1.Recycler{}).

@@ -305,7 +305,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *RecyclerReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	r.Recorder = mgr.GetEventRecorderFor("recycler-controller") // Initialize the EventRecorder
+	r.Recorder = mgr.GetEventRecorder("recycler-controller") // Initialize the EventRecorder
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("recycler").
 		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
