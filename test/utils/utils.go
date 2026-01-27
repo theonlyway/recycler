@@ -134,6 +134,26 @@ func InstallMetricsServer() error {
 		return err
 	}
 
+	// Debug: Check metrics-server pod status
+	cmd = exec.Command("kubectl", "get", "pods",
+		"-n", "kube-system",
+		"-l", "k8s-app=metrics-server",
+		"-o", "wide",
+	)
+	if output, err := Run(cmd); err == nil {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Pods ===\n%s\n", string(output))
+	}
+
+	// Debug: Get metrics-server logs
+	cmd = exec.Command("kubectl", "logs",
+		"-n", "kube-system",
+		"deployment/metrics-server",
+		"--tail=50",
+	)
+	if output, err := Run(cmd); err == nil {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Logs ===\n%s\n", string(output))
+	}
+
 	// Wait for metrics-server to be ready
 	cmd = exec.Command("kubectl", "wait", "deployment/metrics-server",
 		"--for", "condition=Available",
