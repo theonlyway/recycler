@@ -2,12 +2,12 @@ name: Helm Chart CI
 
 on:
     workflow_dispatch:
-    push:
-        branches-ignore:
-            - main
-        paths:
-            - "helm-charts/**"
-            - ".github/workflows/helm-test.yml"
+    # push:
+    #     branches-ignore:
+    #         - main
+    #     paths:
+    #         - "helm-charts/**"
+    #         - ".github/workflows/helm-test.yml"
     pull_request:
         paths:
             - "helm-charts/**"
@@ -52,6 +52,7 @@ jobs:
     helm-install-test:
         name: Test Helm Install on Kind
         runs-on: ubuntu-latest
+        needs: [helm-lint-test]
         steps:
             - name: Checkout code
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
