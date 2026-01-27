@@ -125,6 +125,15 @@ func InstallMetricsServer() error {
 		return err
 	}
 
+	// Wait for the rollout to complete after patching
+	cmd = exec.Command("kubectl", "rollout", "status", "deployment/metrics-server",
+		"-n", "kube-system",
+		"--timeout=5m",
+	)
+	if _, err := Run(cmd); err != nil {
+		return err
+	}
+
 	// Wait for metrics-server to be ready
 	cmd = exec.Command("kubectl", "wait", "deployment/metrics-server",
 		"--for", "condition=Available",
