@@ -412,7 +412,7 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 		podAge := time.Since(pod.CreationTimestamp.Time)
 
 		// Write an event to the pod
-		r.Recorder.Eventf(pod, nil, corev1.EventTypeWarning, "CPUThresholdBreached", "Monitor",
+		r.Recorder.Eventf(pod, recycler, corev1.EventTypeWarning, "CPUThresholdBreached", "Monitor",
 			"CPU usage threshold breached. Average CPU: %.2f%%", averageCPU)
 		// Write an event to the CRD
 		r.Recorder.Eventf(recycler, pod, corev1.EventTypeWarning, "CPUThresholdBreached", "Monitor",
@@ -443,7 +443,7 @@ func handleThresholdRecovery(ctx context.Context, r *MonitorReconciler, recycler
 		}
 
 		// Write an event to the pod
-		r.Recorder.Eventf(pod, nil, corev1.EventTypeNormal, "CPUThresholdRecovered", "Monitor",
+		r.Recorder.Eventf(pod, recycler, corev1.EventTypeNormal, "CPUThresholdRecovered", "Monitor",
 			"CPU usage recovered below threshold. Average CPU: %.2f%%", averageCPU)
 		// Write an event to the CRD
 		r.Recorder.Eventf(recycler, pod, corev1.EventTypeNormal, "CPUThresholdRecovered", "Monitor",
