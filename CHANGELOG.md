@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-01-27
+### :bug: Bug Fixes
+- [`5265a20`](https://github.com/theonlyway/recycler/commit/5265a2039502e87c70e16446fa812d36785db246) - log pod termination events before deletion in terminatePods function *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a802c61`](https://github.com/theonlyway/recycler/commit/a802c61decffe33901bd6ac80f2c6ec69dac34a8) - verify target deployment existence and update Recycler status accordingly *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`be9208e`](https://github.com/theonlyway/recycler/commit/be9208e2740634936ff97c25841eecdeacf5ff76) - update event recording in terminatePods function to reference Recycler CR *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`7f825f2`](https://github.com/theonlyway/recycler/commit/7f825f2d1947b17a60cec3c9d3d59dcb0676e30c) - capture events related to Recycler CR in e2e tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`2486515`](https://github.com/theonlyway/recycler/commit/24865155cfb7b534483e07202eba1403ca1bcafc) - capture all events in test namespace for debugging in e2e tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`699ae7d`](https://github.com/theonlyway/recycler/commit/699ae7df92479ba729603734686b706f607898ad) - comment out Prometheus and cert-manager installation in e2e tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`3681b7f`](https://github.com/theonlyway/recycler/commit/3681b7fc346f05a5caec3558de9840f2995084e4) - update RBAC rules for events and enhance error logging in controllers *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`40df4e6`](https://github.com/theonlyway/recycler/commit/40df4e6f912247ae81ee8ef539ba6747b95f1022) - add rollout status check for metrics-server installation *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`b2aa102`](https://github.com/theonlyway/recycler/commit/b2aa1024f25b7c6aef89e7149417c663285183b4) - update metrics-server installation command to replace metric-resolution argument *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5c28718`](https://github.com/theonlyway/recycler/commit/5c28718df8129882b2aecfefda2ef5a36c51c57d) - uncomment Prometheus operator and cert-manager installation in e2e tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`4a4cfff`](https://github.com/theonlyway/recycler/commit/4a4cfff727dc3e56e49068f1becbb9420be09d2d) - add debug logs for metrics-server pod status and logs retrieval *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`dd47e61`](https://github.com/theonlyway/recycler/commit/dd47e61755c7cea4fa4f612721b95e85bf32976b) - enhance metrics-server installation with detailed deployment and pod status logging *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a94dc94`](https://github.com/theonlyway/recycler/commit/a94dc942b79f4ba86139af174217bf7bbad07bd5) - add kubelet request timeout argument to metrics-server deployment *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`c53eaf3`](https://github.com/theonlyway/recycler/commit/c53eaf36aef43bd5393c1b34f5db16182c115457) - enhance pod metrics handling and improve metrics-server patch command *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`99edf95`](https://github.com/theonlyway/recycler/commit/99edf95da59e99cdbf9dd62136f6ea51215cccf6) - update Go version in Dockerfile to 2.0-1.25-bookworm *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`618e061`](https://github.com/theonlyway/recycler/commit/618e061b58d6b582a2244433f7ce5f4f06b3088f) - update paths-ignore to exclude README.md in build workflow [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`e232f0e`](https://github.com/theonlyway/recycler/commit/e232f0e8d6db42ed5e188f41f328d005663502fc) - **deps**: pin mcr.microsoft.com/devcontainers/go docker tag to ef7d7fe *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.6.6] - 2026-01-20
 ### :wrench: Chores
 - [`7015be7`](https://github.com/theonlyway/recycler/commit/7015be77a7e9392f173857be9d47b27c7f959e0a) - **deps**: update actions/download-artifact action to v7 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -386,3 +409,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.6.4]: https://github.com/theonlyway/recycler/compare/1.6.3...1.6.4
 [1.6.5]: https://github.com/theonlyway/recycler/compare/1.6.4...1.6.5
 [1.6.6]: https://github.com/theonlyway/recycler/compare/1.6.5...1.6.6
+[1.7.1]: https://github.com/theonlyway/recycler/compare/1.7.0...1.7.1
