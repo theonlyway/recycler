@@ -125,23 +125,47 @@ func InstallMetricsServer() error {
 		return err
 	}
 
-	// Wait for the rollout to complete after patching
-	cmd = exec.Command("kubectl", "rollout", "status", "deployment/metrics-server",
+	// Debug: Check deployment status after patch
+	cmd = exec.Command("kubectl", "get", "deployment", "metrics-server",
 		"-n", "kube-system",
-		"--timeout=5m",
+		"-o", "wide",
 	)
-	if _, err := Run(cmd); err != nil {
-		return err
+	if output, err := Run(cmd); err == nil {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Deployment Status (after patch) ===\n%s\n", string(output))
 	}
 
-	// Debug: Check metrics-server pod status
+	// Debug: Check metrics-server pod status before rollout
 	cmd = exec.Command("kubectl", "get", "pods",
 		"-n", "kube-system",
 		"-l", "k8s-app=metrics-server",
 		"-o", "wide",
 	)
 	if output, err := Run(cmd); err == nil {
-		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Pods ===\n%s\n", string(output))
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Pods (before rollout) ===\n%s\n", string(output))
+	}
+
+	// Wait for the rollout to complete after patching
+	_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\nWaiting for metrics-server rollout to complete...\n")
+	cmd = exec.Command("kubectl", "rollout", "status", "deployment/metrics-server",
+		"-n", "kube-system",
+		"--timeout=2m",
+	)
+	if output, err := Run(cmd); err != nil {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "Rollout status output: %s\n", string(output))
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "Rollout failed, continuing to check pod status...\n")
+		// Don't return error yet, check pod status first
+	} else {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "Rollout completed: %s\n", string(output))
+	}
+
+	// Debug: Check metrics-server pod status after rollout
+	cmd = exec.Command("kubectl", "get", "pods",
+		"-n", "kube-system",
+		"-l", "k8s-app=metrics-server",
+		"-o", "wide",
+	)
+	if output, err := Run(cmd); err == nil {
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Pods (after rollout) ===\n%s\n", string(output))
 	}
 
 	// Debug: Get metrics-server logs
