@@ -32,7 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/events"
+	"k8s.io/client-go/tools/record"
 	metricsapi "k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	resourceclient "k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -57,7 +57,7 @@ var InMemoryMetricsStorage sync.Map
 type MonitorReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
-	Recorder events.Recorder
+	Recorder record.EventRecorder
 	Log      logr.Logger
 	Config   *rest.Config
 }
@@ -460,7 +460,7 @@ func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := metricsapi.AddToScheme(mgr.GetScheme()); err != nil {
 		return fmt.Errorf("failed to add metrics API to scheme: %w", err)
 	}
-	r.Recorder = mgr.GetEventRecorder("monitor-controller") // Initialize the EventRecorder
+	r.Recorder = mgr.GetEventRecorderFor("monitor-controller") // Initialize the EventRecorder
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("monitor").
 		For(&recyclertheonlywayecomv1alpha1.Recycler{}).

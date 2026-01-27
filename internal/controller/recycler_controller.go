@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -50,7 +51,7 @@ const recyclerControllerName string = "recycler"
 type RecyclerReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
-	Recorder events.EventRecorder
+	Recorder record.EventRecorder
 	Log      logr.Logger
 }
 
@@ -304,7 +305,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *RecyclerReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	r.Recorder = mgr.GetEventRecorder("recycler-controller") // Initialize the EventRecorder
+	r.Recorder = mgr.GetEventRecorderFor("recycler-controller") // Initialize the EventRecorder
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("recycler").
 		For(&recyclertheonlywayecomv1alpha1.Recycler{}).
