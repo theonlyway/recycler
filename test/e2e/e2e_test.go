@@ -311,6 +311,19 @@ var _ = Describe("controller", Ordered, func() {
 
 			EventuallyWithOffset(1, verifyPodTerminated, terminationTimeout, 5*time.Second).Should(Succeed())
 
+			By("capturing all events related to the test pod")
+			cmd = exec.Command("kubectl", "get", "events",
+				"-n", testNamespace,
+				"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Pod", initialPodName),
+				"-o", "wide",
+			)
+			podEvents, err := utils.Run(cmd)
+			if err == nil {
+				GinkgoWriter.Printf("\n=== Pod Events ===\n%s\n", string(podEvents))
+			} else {
+				GinkgoWriter.Printf("\n=== Failed to get pod events: %v ===\n", err)
+			}
+
 			By("verifying PodTerminated event was recorded on Recycler CR")
 			verifyTerminationEvent := func() error {
 				cmd = exec.Command("kubectl", "get", "events",
