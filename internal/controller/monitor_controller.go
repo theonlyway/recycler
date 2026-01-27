@@ -145,6 +145,12 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
 		}
 
+		// If no metrics were returned, requeue and try again later
+		if len(podMetricsList) == 0 {
+			log.Info("No pod metrics available yet, will retry", "controller", monitorControllerName, "deployment", deploymentKey)
+			return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
+		}
+
 		for _, podCPU := range podMetricsList {
 			// Update the pod's metrics history based on storage location
 			if err := updatePodMetricsHistory(ctx, r, podCPU.PodName, deployment.Namespace, podCPU, recycler.Spec.PodMetricsHistory, log, recycler.Spec.MetricStorageLocation); err != nil {
@@ -204,7 +210,7 @@ func fetchPodMetrics(ctx context.Context, metricsClient resourceclient.PodMetric
 
 	if len(podMetricsList.Items) == 0 {
 		log.Info("No pod metrics returned", "namespace", namespace, "labelSelector", labelSelector)
-		return nil, fmt.Errorf("no pod metrics returned from resource metrics API")
+		return nil, nil // Return nil error to handle gracefully
 	}
 
 	// Process the metrics and calculate CPU utilization for each pod

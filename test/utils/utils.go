@@ -116,10 +116,13 @@ func InstallMetricsServer() error {
 	}
 
 	// Patch metrics-server to work in Kind (disable TLS verification and set faster scrape interval)
+	patchJSON := `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},` +
+		`{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-request-timeout=5s"},` +
+		`{"op":"replace","path":"/spec/template/spec/containers/0/args/4","value":"--metric-resolution=10s"}]`
 	cmd = exec.Command("kubectl", "patch", "deployment", "metrics-server",
 		"-n", "kube-system",
 		"--type=json",
-		"-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-request-timeout=5s"},{"op":"replace","path":"/spec/template/spec/containers/0/args/4","value":"--metric-resolution=10s"}]`,
+		"-p", patchJSON,
 	)
 	if _, err := Run(cmd); err != nil {
 		return err
@@ -131,7 +134,8 @@ func InstallMetricsServer() error {
 		"-o", "wide",
 	)
 	if output, err := Run(cmd); err == nil {
-		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "\n=== Metrics Server Deployment Status (after patch) ===\n%s\n", string(output))
+		_, _ = fmt.Fprintf(ginkgo.GinkgoWriter,
+			"\n=== Metrics Server Deployment Status (after patch) ===\n%s\n", string(output))
 	}
 
 	// Debug: Check metrics-server pod status before rollout
