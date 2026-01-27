@@ -2,12 +2,12 @@ name: Helm Chart CI
 
 on:
     workflow_dispatch:
-    push:
-        branches-ignore:
-            - main
-        paths:
-            - "helm-charts/**"
-            - ".github/workflows/helm-test.yml"
+    # push:
+    #     branches-ignore:
+    #         - main
+    #     paths:
+    #         - "helm-charts/**"
+    #         - ".github/workflows/helm-test.yml"
     pull_request:
         paths:
             - "helm-charts/**"
