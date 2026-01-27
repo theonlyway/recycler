@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   lint:
-    name: Run golang lint
+    name: Run lint
     runs-on: ubuntu-latest
     permissions:
       contents: write
