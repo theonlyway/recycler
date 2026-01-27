@@ -34,13 +34,10 @@ import (
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
 
-// mockEventRecorder is a mock implementation of record.EventRecorder for testing
+// mockEventRecorder is a mock implementation of events.EventRecorder for testing
 type mockEventRecorder struct{}
 
-func (m *mockEventRecorder) Event(object runtime.Object, eventtype, reason, message string) {}
-func (m *mockEventRecorder) Eventf(object runtime.Object, eventtype, reason, messageFmt string, args ...interface{}) {
-}
-func (m *mockEventRecorder) AnnotatedEventf(object runtime.Object, annotations map[string]string, eventtype, reason, messageFmt string, args ...interface{}) {
+func (m *mockEventRecorder) Eventf(regarding runtime.Object, related runtime.Object, eventtype, reason, action, note string, args ...interface{}) {
 }
 
 var _ = Describe("Recycler Controller", func() {
