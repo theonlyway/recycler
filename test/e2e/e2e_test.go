@@ -324,6 +324,19 @@ var _ = Describe("controller", Ordered, func() {
 				GinkgoWriter.Printf("\n=== Failed to get pod events: %v ===\n", err)
 			}
 
+			By("capturing all events related to the Recycler CR")
+			cmd = exec.Command("kubectl", "get", "events",
+				"-n", testNamespace,
+				"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Recycler", recyclerName),
+				"-o", "wide",
+			)
+			recyclerEvents, err := utils.Run(cmd)
+			if err == nil {
+				GinkgoWriter.Printf("\n=== Recycler CR Events ===\n%s\n", string(recyclerEvents))
+			} else {
+				GinkgoWriter.Printf("\n=== Failed to get Recycler events: %v ===\n", err)
+			}
+
 			By("verifying PodTerminated event was recorded on Recycler CR")
 			verifyTerminationEvent := func() error {
 				cmd = exec.Command("kubectl", "get", "events",
