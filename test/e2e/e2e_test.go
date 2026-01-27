@@ -41,13 +41,13 @@ const podStatusRunning = "Running"
 
 var _ = Describe("controller", Ordered, func() {
 	BeforeAll(func() {
-		/*
+
 		By("installing prometheus operator")
 		Expect(utils.InstallPrometheusOperator()).To(Succeed())
 
 		By("installing the cert-manager")
 		Expect(utils.InstallCertManager()).To(Succeed())
-		*/
+
 		By("installing metrics-server")
 		Expect(utils.InstallMetricsServer()).To(Succeed())
 
@@ -57,13 +57,13 @@ var _ = Describe("controller", Ordered, func() {
 	})
 
 	AfterAll(func() {
-		/*
+
 		By("uninstalling the Prometheus manager bundle")
 		utils.UninstallPrometheusOperator()
 
 		By("uninstalling the cert-manager bundle")
 		utils.UninstallCertManager()
-		*/
+
 		By("uninstalling metrics-server")
 		utils.UninstallMetricsServer()
 
