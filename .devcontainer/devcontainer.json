@@ -1,6 +1,8 @@
 {
   "name": "Go Kubernetes Controller Dev",
-  "image": "mcr.microsoft.com/devcontainers/go:1.25-bookworm",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -11,9 +13,6 @@
       "version": "latest",
       "helm": "latest",
       "minikube": "latest"
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "lts"
     }
   },
 
