@@ -115,11 +115,11 @@ func InstallMetricsServer() error {
 		return err
 	}
 
-	// Patch metrics-server to work in Kind (disable TLS verification)
+	// Patch metrics-server to work in Kind (disable TLS verification and set faster scrape interval)
 	cmd = exec.Command("kubectl", "patch", "deployment", "metrics-server",
 		"-n", "kube-system",
 		"--type=json",
-		"-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]`,
+		"-p", `[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--metric-resolution=10s"}]`,
 	)
 	if _, err := Run(cmd); err != nil {
 		return err

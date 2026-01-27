@@ -73,6 +73,7 @@ type PodCPUUsage struct {
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;watch
+// +kubebuilder:rbac:groups=events.k8s.io,resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups=metrics.k8s.io,resources=pods,verbs=get;list
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -127,8 +128,21 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		metricsClient := resourceclient.NewForConfigOrDie(r.Config).PodMetricses(deployment.Namespace)
 		podMetricsList, err := fetchPodMetrics(ctx, metricsClient, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
 		if err != nil {
-			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
-			return ctrl.Result{}, err
+			// Calculate pod age for context
+			var oldestPodAge time.Duration
+			if len(podList.Items) > 0 {
+				oldestPod := podList.Items[0]
+				for _, pod := range podList.Items {
+					if pod.CreationTimestamp.Before(&oldestPod.CreationTimestamp) {
+						oldestPod = pod
+					}
+				}
+				oldestPodAge = time.Since(oldestPod.CreationTimestamp.Time)
+			}
+
+			// Log error without returning it to avoid stack trace
+			log.Error(err, "Failed to fetch metrics for pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey, "oldestPodAge", oldestPodAge)
+			return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
 		}
 
 		for _, podCPU := range podMetricsList {

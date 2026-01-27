@@ -58,7 +58,7 @@ type RecyclerReconciler struct {
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=recycler.theonlywaye.com,resources=recyclers/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
+// +kubebuilder:rbac:groups=events.k8s.io,resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;delete;watch
 
