@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2026-01-28
+### :bug: Bug Fixes
+- [`d9f2e58`](https://github.com/theonlyway/recycler/commit/d9f2e5846e8316543d9e93624651c309c8d2c342) - add GitHub App token generation for changelog updates and adjust checkout step *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`6125182`](https://github.com/theonlyway/recycler/commit/61251824375e5b962ef7974502f8cd69780621dd) - **deps**: update actions/create-github-app-token action to v2 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.7.1] - 2026-01-27
 ### :bug: Bug Fixes
 - [`5265a20`](https://github.com/theonlyway/recycler/commit/5265a2039502e87c70e16446fa812d36785db246) - log pod termination events before deletion in terminatePods function *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -410,3 +418,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.6.5]: https://github.com/theonlyway/recycler/compare/1.6.4...1.6.5
 [1.6.6]: https://github.com/theonlyway/recycler/compare/1.6.5...1.6.6
 [1.7.1]: https://github.com/theonlyway/recycler/compare/1.7.0...1.7.1
+[1.8.2]: https://github.com/theonlyway/recycler/compare/1.8.1...1.8.2
