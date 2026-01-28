@@ -75,11 +75,7 @@ jobs:
 
             - name: Install Helm chart
               run: |
-                  helm install recycler helm-charts/recycler --wait --timeout 2m
-
-            - name: Check all resources in namespace
-              run: |
-                  kubectl get all -n recycler-system
+                  helm install recycler helm-charts/recycler --namespace recycler-system --wait --timeout 2m
 
             - name: Verify deployment exists
               run: |
