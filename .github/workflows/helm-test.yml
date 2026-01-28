@@ -73,6 +73,14 @@ jobs:
               run: |
                   kind create cluster --name helm-test --wait 30s
 
+            - name: Build controller image
+              run: |
+                  make docker-buildx IMG=ghcr.io/theonlyway/recycler:latest PLATFORM=linux/amd64 BUILD_MODE=load
+
+            - name: Load image into Kind cluster
+              run: |
+                  kind load docker-image ghcr.io/theonlyway/recycler:latest --name helm-test
+
             - name: Install Helm chart
               run: |
                   helm install recycler helm-charts/recycler --namespace recycler-system --create-namespace --wait --timeout 2m
