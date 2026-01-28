@@ -303,7 +303,7 @@ var _ = Describe("controller", Ordered, func() {
 			}
 			EventuallyWithOffset(1, verifyRecyclerHealthy, 30*time.Second, 2*time.Second).Should(Succeed())
 
-			By("waiting for the pod to be terminated due to high CPU usage")
+			By("defining pod termination verification check")
 			verifyPodTerminated := func() error {
 				// Check if the original pod still exists
 				cmd = exec.Command("kubectl", "get", "pod",
