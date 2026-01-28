@@ -485,7 +485,7 @@ jobs:
                   ref: main
             - name: Generate GitHub App Token
               id: generate-token
-              uses: actions/create-github-app-token@v1
+              uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
               with:
                   app-id: ${{ secrets.RECYCLER_BYPASS_APP_ID }}
                   private-key: ${{ secrets.RECYCLER_BYPASS_PRIVATE_KEY }}
