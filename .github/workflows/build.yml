@@ -519,6 +519,41 @@ jobs:
         permissions:
             packages: write
         steps:
+            - name: Preserve Latest Tag for GHCR
+              continue-on-error: true
+              run: |
+                  PACKAGE_NAME="recycler"
+                  VERSION="${{ needs.semver.outputs.next_version }}"
+                  REPOSITORY_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+                  FULL_IMAGE="${{ env.GHCR_REGISTRY }}/${REPOSITORY_OWNER}/${PACKAGE_NAME}"
+
+                  echo "Checking for existing images to preserve 'latest' tag..."
+
+                  # Get all versions of the package
+                  VERSIONS=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+                    -H "Accept: application/vnd.github+json" \
+                    "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
+
+                  # Find the last successful version (excluding current failed version)
+                  LAST_VERSION=$(echo "$VERSIONS" | jq -r "[.[] | select(.metadata.container.tags[] | (. != \"${VERSION}\" and . != \"latest\"))] | sort_by(.created_at) | reverse | .[0].metadata.container.tags[] | select(. != \"latest\")" | head -n 1)
+
+                  if [ -n "$LAST_VERSION" ] && [ "$LAST_VERSION" != "null" ]; then
+                    echo "Found last successful version: ${LAST_VERSION}"
+                    echo "Re-tagging ${LAST_VERSION} as 'latest' to preserve it..."
+
+                    # Login to GHCR
+                    echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+                    # Re-tag the last successful version as latest
+                    docker buildx imagetools create \
+                      --tag ${FULL_IMAGE}:latest \
+                      ${FULL_IMAGE}:${LAST_VERSION}
+
+                    echo "✓ Successfully preserved 'latest' tag pointing to ${LAST_VERSION}"
+                  else
+                    echo "⚠ No previous successful version found to preserve 'latest' tag"
+                  fi
+
             - name: Delete GHCR Image
               continue-on-error: true
               run: |
@@ -531,8 +566,8 @@ jobs:
                     -H "Accept: application/vnd.github+json" \
                     "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
 
-                  # Find and delete the specific version
-                  VERSION_ID=$(echo "$VERSIONS" | jq -r ".[] | select(.metadata.container.tags[] | contains(\"${VERSION}\")) | .id")
+                  # Find and delete the specific version (but not latest tag)
+                  VERSION_ID=$(echo "$VERSIONS" | jq -r ".[] | select(.metadata.container.tags[] | (. == \"${VERSION}\")) | .id")
 
                   if [ -n "$VERSION_ID" ]; then
                     echo "Deleting GHCR image version ${VERSION} (ID: ${VERSION_ID})"
@@ -540,9 +575,49 @@ jobs:
                       -H "Authorization: Bearer ${{ github.token }}" \
                       -H "Accept: application/vnd.github+json" \
                       "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
-                    echo "✓ Deleted GHCR image"
+                    echo "✓ Deleted GHCR image version ${VERSION}"
                   else
                     echo "Version ${VERSION} not found in GHCR"
+                  fi
+
+            - name: Preserve Latest Tag for Docker Hub
+              continue-on-error: true
+              run: |
+                  VERSION="${{ needs.semver.outputs.next_version }}"
+                  REPO="${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}"
+
+                  echo "Checking for existing images to preserve 'latest' tag on Docker Hub..."
+
+                  # Get Docker Hub token
+                  HUB_TOKEN=$(curl -s -H "Content-Type: application/json" \
+                    -X POST \
+                    -d "{\"username\": \"${{ vars.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
+                    https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+                  if [ -n "$HUB_TOKEN" ] && [ "$HUB_TOKEN" != "null" ]; then
+                    # Get list of tags
+                    TAGS=$(curl -s -H "Authorization: JWT ${HUB_TOKEN}" \
+                      "https://hub.docker.com/v2/repositories/${REPO}/tags?page_size=100" | jq -r '.results[] | select(.name != "'${VERSION}'" and .name != "latest") | .name' | head -n 1)
+
+                    if [ -n "$TAGS" ]; then
+                      LAST_VERSION=$(echo "$TAGS" | head -n 1)
+                      echo "Found last successful version: ${LAST_VERSION}"
+                      echo "Re-tagging ${LAST_VERSION} as 'latest' to preserve it..."
+
+                      # Login to Docker Hub
+                      echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
+
+                      # Re-tag the last successful version as latest
+                      docker buildx imagetools create \
+                        --tag ${REPO}:latest \
+                        ${REPO}:${LAST_VERSION}
+
+                      echo "✓ Successfully preserved 'latest' tag pointing to ${LAST_VERSION}"
+                    else
+                      echo "⚠ No previous successful version found to preserve 'latest' tag"
+                    fi
+                  else
+                    echo "⚠ Failed to authenticate with Docker Hub"
                   fi
 
             - name: Delete Docker Hub Image
@@ -570,4 +645,31 @@ jobs:
                     fi
                   else
                     echo "⚠ Failed to authenticate with Docker Hub"
+                  fi
+
+            - name: Delete Failed Helm Chart from GHCR
+              continue-on-error: true
+              run: |
+                  PACKAGE_NAME="charts/recycler"
+                  VERSION="${{ needs.semver.outputs.next_version }}"
+
+                  echo "Attempting to delete failed Helm chart version ${VERSION}..."
+
+                  # Get all versions of the Helm chart package
+                  VERSIONS=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+                    -H "Accept: application/vnd.github+json" \
+                    "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
+
+                  # Find and delete the specific version
+                  VERSION_ID=$(echo "$VERSIONS" | jq -r ".[] | select(.metadata.container.tags[] | contains(\"${VERSION}\")) | .id")
+
+                  if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
+                    echo "Deleting Helm chart version ${VERSION} (ID: ${VERSION_ID})"
+                    curl -X DELETE \
+                      -H "Authorization: Bearer ${{ github.token }}" \
+                      -H "Accept: application/vnd.github+json" \
+                      "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
+                    echo "✓ Deleted Helm chart version ${VERSION}"
+                  else
+                    echo "Helm chart version ${VERSION} not found or already deleted"
                   fi
