@@ -108,7 +108,7 @@ var _ = Describe("controller", Ordered, func() {
 			By("listing all resources in the recycler-system namespace")
 			cmd = exec.Command("kubectl", "get", "all", "-n", namespace)
 			namespaceOutput, err := utils.Run(cmd)
-			fmt.Fprintf(GinkgoWriter, "Resources in %s namespace:\n%s\n", namespace, string(namespaceOutput))
+			_, _ = fmt.Fprintf(GinkgoWriter, "Resources in %s namespace:\n%s\n", namespace, string(namespaceOutput))
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
 			By("validating that the controller-manager pod is running as expected")
