@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/go:2.0-1.25-bookworm@sha256:ef7d7fe9f8eb237c2d6b8403bc0affceca3c349a041fb7714dfc554d9a97adca
+FROM mcr.microsoft.com/devcontainers/go:2.0-1.25-bookworm@sha256:0624dcde5d7b52a2cd0ad55de4fb8ecaf2dd32f09e564c987871dece943c7690
 
 # Fix the Yarn GPG key issue by removing the Yarn repository
 RUN rm -f /etc/apt/sources.list.d/yarn.list \
