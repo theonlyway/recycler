@@ -75,7 +75,7 @@ jobs:
 
             - name: Install Helm chart
               run: |
-                  helm install recycler helm-charts/recycler --namespace recycler-system --wait --timeout 2m
+                  helm install recycler helm-charts/recycler --namespace recycler-system --wait --timeout 2m --create-namespace
 
             - name: Verify deployment exists
               run: |
