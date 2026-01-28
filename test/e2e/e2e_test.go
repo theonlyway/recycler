@@ -145,6 +145,54 @@ var _ = Describe("controller", Ordered, func() {
 				}
 				return nil
 			}
+
+			// Capture diagnostic information if the controller fails to start
+			defer func() {
+				if controllerPodName == "" {
+					return // No pod was found, skip diagnostics
+				}
+
+				By("capturing deployment status for debugging")
+				cmd = exec.Command("kubectl", "get", "deployment",
+					"-n", namespace,
+					"-o", "wide",
+				)
+				deploymentStatus, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Deployment Status ===\n%s\n", string(deploymentStatus))
+				}
+
+				By("capturing pod details for debugging")
+				cmd = exec.Command("kubectl", "describe", "pod", controllerPodName,
+					"-n", namespace,
+				)
+				podDetails, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Pod Details ===\n%s\n", string(podDetails))
+				}
+
+				By("capturing events in namespace for debugging")
+				cmd = exec.Command("kubectl", "get", "events",
+					"-n", namespace,
+					"--sort-by=.lastTimestamp",
+				)
+				events, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Namespace Events ===\n%s\n", string(events))
+				}
+
+				By("capturing pod logs if available")
+				cmd = exec.Command("kubectl", "logs", controllerPodName,
+					"-n", namespace,
+					"--all-containers=true",
+					"--ignore-errors",
+				)
+				logs, err := utils.Run(cmd)
+				if err == nil && len(logs) > 0 {
+					GinkgoWriter.Printf("\n=== Pod Logs ===\n%s\n", string(logs))
+				}
+			}()
+
 			EventuallyWithOffset(1, verifyControllerUp, time.Minute, time.Second).Should(Succeed())
 
 		})
