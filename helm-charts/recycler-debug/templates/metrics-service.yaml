@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "recycler.fullname" . }}-controller-manager-metrics-service
+  name: {{ include "recycler-debug.fullname" . }}-controller-manager-metrics-service
   labels:
     control-plane: controller-manager
-  {{- include "recycler.labels" . | nindent 4 }}
+  {{- include "recycler-debug.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.metricsService.type }}
   selector:
     control-plane: controller-manager
-    {{- include "recycler.selectorLabels" . | nindent 4 }}
+    {{- include "recycler-debug.selectorLabels" . | nindent 4 }}
   ports:
   {{- .Values.metricsService.ports | toYaml | nindent 2 }}

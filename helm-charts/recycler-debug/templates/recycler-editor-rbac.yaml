@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "recycler-debug.fullname" . }}-recycler-editor-role
+  labels:
+  {{- include "recycler-debug.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - recycler.theonlywaye.com
+  resources:
+  - recyclers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - recycler.theonlywaye.com
+  resources:
+  - recyclers/status
+  verbs:
+  - get

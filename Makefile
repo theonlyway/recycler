@@ -371,6 +371,9 @@ $(HELMIFY): $(LOCALBIN)
 helm: manifests kustomize helmify
 	$(KUSTOMIZE) build config/default | $(HELMIFY) $(CHART_NAME)
 
+helm-debug: manifests kustomize helmify
+	$(KUSTOMIZE) build config/overlays/debug | $(HELMIFY) helm-charts/recycler-debug
+
 .PHONY: operator-sdk
 OPERATOR_SDK ?= $(LOCALBIN)/operator-sdk
 operator-sdk: ## Download operator-sdk locally if necessary.

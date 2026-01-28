@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "recycler.fullname" . }}-controller-manager
+  name: {{ include "recycler-debug.fullname" . }}-controller-manager
   labels:
     control-plane: controller-manager
-  {{- include "recycler.labels" . | nindent 4 }}
+  {{- include "recycler-debug.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
     matchLabels:
       control-plane: controller-manager
-    {{- include "recycler.selectorLabels" . | nindent 6 }}
+    {{- include "recycler-debug.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
         control-plane: controller-manager
-      {{- include "recycler.selectorLabels" . | nindent 8 }}
+      {{- include "recycler-debug.selectorLabels" . | nindent 8 }}
       annotations:
         kubectl.kubernetes.io/default-container: manager
     spec:
@@ -48,7 +48,7 @@ spec:
       nodeSelector: {{- toYaml .Values.controllerManager.nodeSelector | nindent 8 }}
       securityContext: {{- toYaml .Values.controllerManager.podSecurityContext | nindent
         8 }}
-      serviceAccountName: {{ include "recycler.serviceAccountName" . }}
+      serviceAccountName: {{ include "recycler-debug.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       tolerations: {{- toYaml .Values.controllerManager.tolerations | nindent 8 }}
       topologySpreadConstraints: {{- toYaml .Values.controllerManager.topologySpreadConstraints

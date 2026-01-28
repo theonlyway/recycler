@@ -62,9 +62,10 @@ spec:
         - /manager
         args:
           - --leader-elect
+          - --metrics-bind-address=:8443
           - --health-probe-bind-address=:8081
         image: controller:latest
-        name: manager
+        name: recycler
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
