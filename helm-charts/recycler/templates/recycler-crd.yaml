@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: recyclers.recycler.theonlywaye.com
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
   {{- include "recycler.labels" . | nindent 4 }}
 spec:
@@ -95,11 +95,6 @@ spec:
                 type: object
             required:
             - averageCpuUtilizationPercent
-            - gracePeriodSeconds
-            - metricStorageLocation
-            - podMetricsHistory
-            - pollingIntervalSeconds
-            - recycleDelaySeconds
             - scaleTargetRef
             type: object
           status:

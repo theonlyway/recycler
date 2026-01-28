@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "recycler.fullname" . }}-controller-manager
-  namespace: {{ include "recycler.namespace" . }}
   labels:
     control-plane: controller-manager
   {{- include "recycler.labels" . | nindent 4 }}
@@ -18,31 +17,24 @@ spec:
         control-plane: controller-manager
       {{- include "recycler.selectorLabels" . | nindent 8 }}
       annotations:
-        kubectl.kubernetes.io/default-container: recycler
+        kubectl.kubernetes.io/default-container: manager
     spec:
       containers:
-      - command:
+      - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
+        command:
         - /manager
-        args:
-        - --leader-elect
-        - --metrics-bind-address=:8443
-        - --health-probe-bind-address=:8081
-        {{- if .Values.controllerManager.manager.debug }}
-        - --zap-log-level=1
-        - --zap-devel=true
-        {{- end }}
         env:
-        {{- with .Values.controllerManager.manager.env }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default .Chart.AppVersion }}
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
+          | default .Chart.AppVersion }}
         livenessProbe:
           httpGet:
             path: /healthz
             port: 8081
           initialDelaySeconds: 15
           periodSeconds: 20
-        name: recycler
+        name: manager
         readinessProbe:
           httpGet:
             path: /readyz
@@ -53,7 +45,11 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+      nodeSelector: {{- toYaml .Values.controllerManager.nodeSelector | nindent 8 }}
       securityContext: {{- toYaml .Values.controllerManager.podSecurityContext | nindent
         8 }}
-      serviceAccountName: {{ include "recycler.fullname" . }}-controller-manager
+      serviceAccountName: {{ include "recycler.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
+      tolerations: {{- toYaml .Values.controllerManager.tolerations | nindent 8 }}
+      topologySpreadConstraints: {{- toYaml .Values.controllerManager.topologySpreadConstraints
+        | nindent 8 }}

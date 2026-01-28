@@ -1,6 +1,9 @@
 controllerManager:
   manager:
-    debug: false
+    args:
+    - --metrics-bind-address=:8443
+    - --leader-elect
+    - --health-probe-bind-address=:8081
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -16,14 +19,13 @@ controllerManager:
       requests:
         cpu: 10m
         memory: 64Mi
-    env:
-      - name: KUBERNETES_CLUSTER_DOMAIN
-        value: cluster.local
+  nodeSelector: {}
   podSecurityContext:
     runAsNonRoot: true
   replicas: 1
-  serviceAccount:
-    annotations: {}
+  tolerations: []
+  topologySpreadConstraints: []
+kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
   - name: https
@@ -31,3 +33,8 @@ metricsService:
     protocol: TCP
     targetPort: 8443
   type: ClusterIP
+serviceAccount:
+  annotations: {}
+  automount: true
+  create: true
+  name: ""

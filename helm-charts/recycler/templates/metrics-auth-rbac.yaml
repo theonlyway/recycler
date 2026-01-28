@@ -30,5 +30,5 @@ roleRef:
   name: '{{ include "recycler.fullname" . }}-metrics-auth-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "recycler.fullname" . }}-controller-manager'
-  namespace: {{ include "recycler.namespace" . }}
+  name: '{{ include "recycler.serviceAccountName" . }}'
+  namespace: '{{ .Release.Namespace }}'

@@ -6,21 +6,6 @@ metadata:
   {{- include "recycler.labels" . | nindent 4 }}
 rules:
 - apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
   - ""
   resources:
   - pods
@@ -31,6 +16,21 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
 - apiGroups:
   - metrics.k8s.io
   resources:
@@ -77,5 +77,5 @@ roleRef:
   name: '{{ include "recycler.fullname" . }}-manager-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "recycler.fullname" . }}-controller-manager'
-  namespace: {{ include "recycler.namespace" . }}
+  name: '{{ include "recycler.serviceAccountName" . }}'
+  namespace: '{{ .Release.Namespace }}'
