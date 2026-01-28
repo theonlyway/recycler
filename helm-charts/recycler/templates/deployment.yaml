@@ -28,6 +28,7 @@ spec:
           value: {{ quote .Values.kubernetesClusterDomain }}
         image: {{ .Values.controllerManager.recycler.image.repository }}:{{ .Values.controllerManager.recycler.image.tag
           | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.controllerManager.recycler.imagePullPolicy }}
         livenessProbe:
           httpGet:
             path: /healthz

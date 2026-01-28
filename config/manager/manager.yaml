@@ -66,6 +66,7 @@ spec:
           - --health-probe-bind-address=:8081
         image: controller:latest
         name: recycler
+        imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
