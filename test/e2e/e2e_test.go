@@ -105,6 +105,12 @@ var _ = Describe("controller", Ordered, func() {
 			_, err = utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
+			By("listing all resources in the recycler-system namespace")
+			cmd = exec.Command("kubectl", "get", "all", "-n", namespace)
+			namespaceOutput, err := utils.Run(cmd)
+			_, _ = fmt.Fprintf(GinkgoWriter, "Resources in %s namespace:\n%s\n", namespace, string(namespaceOutput))
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
 			By("validating that the controller-manager pod is running as expected")
 			verifyControllerUp := func() error {
 				// Get pod name
@@ -139,6 +145,54 @@ var _ = Describe("controller", Ordered, func() {
 				}
 				return nil
 			}
+
+			// Capture diagnostic information if the controller fails to start
+			defer func() {
+				if controllerPodName == "" {
+					return // No pod was found, skip diagnostics
+				}
+
+				By("capturing deployment status for debugging")
+				cmd = exec.Command("kubectl", "get", "deployment",
+					"-n", namespace,
+					"-o", "wide",
+				)
+				deploymentStatus, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Deployment Status ===\n%s\n", string(deploymentStatus))
+				}
+
+				By("capturing pod details for debugging")
+				cmd = exec.Command("kubectl", "describe", "pod", controllerPodName,
+					"-n", namespace,
+				)
+				podDetails, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Pod Details ===\n%s\n", string(podDetails))
+				}
+
+				By("capturing events in namespace for debugging")
+				cmd = exec.Command("kubectl", "get", "events",
+					"-n", namespace,
+					"--sort-by=.lastTimestamp",
+				)
+				events, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Namespace Events ===\n%s\n", string(events))
+				}
+
+				By("capturing pod logs if available")
+				cmd = exec.Command("kubectl", "logs", controllerPodName,
+					"-n", namespace,
+					"--all-containers=true",
+					"--ignore-errors",
+				)
+				logs, err := utils.Run(cmd)
+				if err == nil && len(logs) > 0 {
+					GinkgoWriter.Printf("\n=== Pod Logs ===\n%s\n", string(logs))
+				}
+			}()
+
 			EventuallyWithOffset(1, verifyControllerUp, time.Minute, time.Second).Should(Succeed())
 
 		})
@@ -249,7 +303,7 @@ var _ = Describe("controller", Ordered, func() {
 			}
 			EventuallyWithOffset(1, verifyRecyclerHealthy, 30*time.Second, 2*time.Second).Should(Succeed())
 
-			By("waiting for the pod to be terminated due to high CPU usage")
+			By("defining pod termination verification check")
 			verifyPodTerminated := func() error {
 				// Check if the original pod still exists
 				cmd = exec.Command("kubectl", "get", "pod",
