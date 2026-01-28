@@ -646,30 +646,3 @@ jobs:
                   else
                     echo "⚠ Failed to authenticate with Docker Hub"
                   fi
-
-            - name: Delete Failed Helm Chart from GHCR
-              continue-on-error: true
-              run: |
-                  PACKAGE_NAME="charts/recycler"
-                  VERSION="${{ needs.semver.outputs.next_version }}"
-
-                  echo "Attempting to delete failed Helm chart version ${VERSION}..."
-
-                  # Get all versions of the Helm chart package
-                  VERSIONS=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
-                    -H "Accept: application/vnd.github+json" \
-                    "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
-
-                  # Find and delete the specific version
-                  VERSION_ID=$(echo "$VERSIONS" | jq -r ".[] | select(.metadata.container.tags[] | contains(\"${VERSION}\")) | .id")
-
-                  if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
-                    echo "Deleting Helm chart version ${VERSION} (ID: ${VERSION_ID})"
-                    curl -X DELETE \
-                      -H "Authorization: Bearer ${{ github.token }}" \
-                      -H "Accept: application/vnd.github+json" \
-                      "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
-                    echo "✓ Deleted Helm chart version ${VERSION}"
-                  else
-                    echo "Helm chart version ${VERSION} not found or already deleted"
-                  fi
