@@ -483,11 +483,17 @@ jobs:
               uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
               with:
                   ref: main
+            - name: Generate GitHub App Token
+              id: generate-token
+              uses: actions/create-github-app-token@v1
+              with:
+                  app-id: ${{ secrets.RECYCLER_BYPASS_APP_ID }}
+                  private-key: ${{ secrets.RECYCLER_BYPASS_PRIVATE_KEY }}
             - name: Update CHANGELOG
               id: changelog
               uses: requarks/changelog-action@6d71e098526ee17bae963f058d34cd763378337f # v1
               with:
-                  token: ${{ secrets.RECYCLER_BYPASS_SECRET }}
+                  token: ${{ steps.generate-token.outputs.token }}
                   tag: ${{ needs.semver.outputs.next_version }}
             - name: Update Release with Changelog
               uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
