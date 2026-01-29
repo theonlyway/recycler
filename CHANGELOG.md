@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2026-01-29
+### :bug: Bug Fixes
+- [`0ff48a3`](https://github.com/theonlyway/recycler/commit/0ff48a3de7092d43ccdccce2e2ff6fa8d60f99bf) - enhance controller startup diagnostics by capturing debug info on failure *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`cf4357f`](https://github.com/theonlyway/recycler/commit/cf4357ff311df2e128f4e5edd58a78f345a5f31c) - add setup for kind cluster and kubectl configuration in dev container *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.9.0] - 2026-01-29
 ### :sparkles: New Features
 - [`c8ad927`](https://github.com/theonlyway/recycler/commit/c8ad92791493e90f5b2036f7d5326c99e4118673) - add preservation of 'latest' tag for GHCR and Docker Hub, and cleanup for failed Helm chart versions *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -435,3 +441,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.7.1]: https://github.com/theonlyway/recycler/compare/1.7.0...1.7.1
 [1.8.2]: https://github.com/theonlyway/recycler/compare/1.8.1...1.8.2
 [1.9.0]: https://github.com/theonlyway/recycler/compare/1.8.2...1.9.0
+[1.9.1]: https://github.com/theonlyway/recycler/compare/1.9.0...1.9.1
