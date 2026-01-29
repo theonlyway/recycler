@@ -110,10 +110,111 @@ jobs:
                   go mod tidy
                   make test-e2e
 
+    helm-lint-test:
+        name: Lint and Test Helm Chart
+        runs-on: ubuntu-latest
+        needs: [semver]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+            - name: Set up Helm
+              uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+              with:
+                  version: "latest"
+
+            - name: Helm Lint
+              run: |
+                  helm lint helm-charts/recycler
+
+            - name: Helm Template
+              run: |
+                  helm template recycler helm-charts/recycler --debug
+
+            - name: Install Kubeconform
+              run: |
+                  curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+                  sudo mv kubeconform /usr/local/bin/
+                  chmod +x /usr/local/bin/kubeconform
+
+            - name: Validate manifests with Kubeconform
+              run: |
+                  helm template recycler helm-charts/recycler | \
+                    kubeconform -strict -summary -kubernetes-version 1.31.0 -skip CustomResourceDefinition
+
+    helm-install-test:
+        name: Test Helm Install on Kind
+        runs-on: ubuntu-latest
+        needs: [semver]
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+            - name: Setup Go
+              uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
+              with:
+                  go-version-file: go.mod
+
+            - name: Set up Helm
+              uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+              with:
+                  version: "latest"
+
+            - name: Install the latest version of kind
+              run: |
+                  make install-kind
+
+            - name: Verify kind installation
+              run: kind version
+
+            - name: Create Kind cluster
+              run: |
+                  kind create cluster --name helm-test --wait 30s
+
+            - name: Build and load image to Kind
+              run: |
+                  make docker-build IMG=recycler:${{ needs.semver.outputs.next_version }} VERSION=${{ needs.semver.outputs.next_version }}
+                  kind load docker-image recycler:${{ needs.semver.outputs.next_version }} --name helm-test
+
+            - name: Install Helm chart
+              run: |
+                  helm install recycler helm-charts/recycler \
+                    --set controllerManager.manager.image.repository=recycler \
+                    --set controllerManager.manager.image.tag=${{ needs.semver.outputs.next_version }} \
+                    --set controllerManager.manager.imagePullPolicy=Never \
+                    --namespace recycler-system \
+                    --create-namespace \
+                    --wait --timeout 2m
+
+            - name: Verify deployment exists
+              run: |
+                  kubectl get deployment recycler-controller-manager -n recycler-system
+
+            - name: Wait for controller to be ready
+              run: |
+                  kubectl rollout status deployment/recycler-controller-manager -n recycler-system --timeout=2m
+
+            - name: Check controller pod status
+              run: |
+                  kubectl get pods -n recycler-system -l control-plane=controller-manager
+                  kubectl wait --for=condition=ready pod -l control-plane=controller-manager -n recycler-system --timeout=2m
+
+            - name: Verify controller is running
+              run: |
+                  kubectl get pods -n recycler-system -l control-plane=controller-manager -o jsonpath='{.items[0].status.phase}' | grep -q "Running"
+                  echo "✓ Controller is running successfully"
+
+            - name: Cleanup
+              if: always()
+              run: |
+                  helm uninstall recycler --namespace recycler-system || true
+                  
     build-ghcr:
         name: Build and Push Operator to GHCR
         runs-on: ubuntu-latest
-        needs: [semver, lint, test, test-e2e]
+        needs: [semver, lint, test, test-e2e, helm-lint-test, helm-install-test]
         permissions:
             contents: write
             packages: write
@@ -185,97 +286,10 @@ jobs:
                       sbom-ghcr.spdx.json
                       sbom-ghcr.cyclonedx.json
 
-    helm-lint-test:
-        name: Lint and Test Helm Chart
-        runs-on: ubuntu-latest
-        needs: [semver, build-ghcr, build-dockerhub]
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
-            - name: Set up Helm
-              uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
-              with:
-                  version: "latest"
-
-            - name: Helm Lint
-              run: |
-                  helm lint helm-charts/recycler
-
-            - name: Helm Template
-              run: |
-                  helm template recycler helm-charts/recycler --debug
-
-            - name: Install Kubeconform
-              run: |
-                  curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
-                  sudo mv kubeconform /usr/local/bin/
-                  chmod +x /usr/local/bin/kubeconform
-
-            - name: Validate manifests with Kubeconform
-              run: |
-                  helm template recycler helm-charts/recycler | \
-                    kubeconform -strict -summary -kubernetes-version 1.31.0 -skip CustomResourceDefinition
-
-    helm-install-test:
-        name: Test Helm Install on Kind
-        runs-on: ubuntu-latest
-        needs: [semver, build-ghcr, build-dockerhub]
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
-            - name: Set up Helm
-              uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
-              with:
-                  version: "latest"
-
-            - name: Install the latest version of kind
-              run: |
-                  make install-kind
-
-            - name: Verify kind installation
-              run: kind version
-
-            - name: Create Kind cluster
-              run: |
-                  kind create cluster --name helm-test --wait 30s
-
-            - name: Install Helm chart
-              run: |
-                  helm install recycler helm-charts/recycler \
-                    --set controllerManager.manager.image.tag=${{ needs.semver.outputs.next_version }} \
-                    --namespace recycler-system \
-                    --create-namespace \
-                    --wait --timeout 2m
-
-            - name: Verify deployment exists
-              run: |
-                  kubectl get deployment recycler-controller-manager -n recycler-system
-
-            - name: Wait for controller to be ready
-              run: |
-                  kubectl rollout status deployment/recycler-controller-manager -n recycler-system --timeout=2m
-
-            - name: Check controller pod status
-              run: |
-                  kubectl get pods -n recycler-system -l control-plane=controller-manager
-                  kubectl wait --for=condition=ready pod -l control-plane=controller-manager -n recycler-system --timeout=2m
-
-            - name: Verify controller is running
-              run: |
-                  kubectl get pods -n recycler-system -l control-plane=controller-manager -o jsonpath='{.items[0].status.phase}' | grep -q "Running"
-                  echo "✓ Controller is running successfully"
-
-            - name: Cleanup
-              if: always()
-              run: |
-                  helm uninstall recycler --namespace recycler-system || true
-
     build-dockerhub:
         name: Build and Push Operator to Docker Hub
         runs-on: ubuntu-latest
-        needs: [semver, lint, test, test-e2e]
+        needs: [semver, lint, test, test-e2e, helm-lint-test, helm-install-test]
         permissions:
             contents: write
             packages: write
@@ -346,7 +360,7 @@ jobs:
     helm:
         name: Helm Chart Release
         runs-on: ubuntu-latest
-        needs: [semver, helm-lint-test, helm-install-test]
+        needs: [semver, build-ghcr, build-dockerhub]
         permissions:
             packages: write
             contents: write
@@ -510,139 +524,3 @@ jobs:
                   branch: main
                   commit_message: "docs: update CHANGELOG.md for ${{ needs.semver.outputs.next_version }} [skip ci]"
                   file_pattern: CHANGELOG.md
-
-    cleanup-images-on-failure:
-        name: Cleanup Images on Helm Test Failure
-        runs-on: ubuntu-latest
-        needs: [semver, helm-lint-test, helm-install-test]
-        if: failure()
-        permissions:
-            packages: write
-        steps:
-            - name: Preserve Latest Tag for GHCR
-              continue-on-error: true
-              run: |
-                  PACKAGE_NAME="recycler"
-                  VERSION="${{ needs.semver.outputs.next_version }}"
-                  REPOSITORY_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
-                  FULL_IMAGE="${{ env.GHCR_REGISTRY }}/${REPOSITORY_OWNER}/${PACKAGE_NAME}"
-
-                  echo "Checking for existing images to preserve 'latest' tag..."
-
-                  # Get all versions of the package
-                  VERSIONS=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
-                    -H "Accept: application/vnd.github+json" \
-                    "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
-
-                  # Find the last successful version (excluding current failed version)
-                  LAST_VERSION=$(echo "$VERSIONS" | jq -r "[.[] | select(.metadata.container.tags[] | (. != \"${VERSION}\" and . != \"latest\"))] | sort_by(.created_at) | reverse | .[0].metadata.container.tags[] | select(. != \"latest\")" | head -n 1)
-
-                  if [ -n "$LAST_VERSION" ] && [ "$LAST_VERSION" != "null" ]; then
-                    echo "Found last successful version: ${LAST_VERSION}"
-                    echo "Re-tagging ${LAST_VERSION} as 'latest' to preserve it..."
-
-                    # Login to GHCR
-                    echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-                    # Re-tag the last successful version as latest
-                    docker buildx imagetools create \
-                      --tag ${FULL_IMAGE}:latest \
-                      ${FULL_IMAGE}:${LAST_VERSION}
-
-                    echo "✓ Successfully preserved 'latest' tag pointing to ${LAST_VERSION}"
-                  else
-                    echo "⚠ No previous successful version found to preserve 'latest' tag"
-                  fi
-
-            - name: Delete GHCR Image
-              continue-on-error: true
-              run: |
-                  TOKEN=$(echo ${{ github.token }} | base64)
-                  PACKAGE_NAME="recycler"
-                  VERSION="${{ needs.semver.outputs.next_version }}"
-
-                  # Get all versions of the package
-                  VERSIONS=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
-                    -H "Accept: application/vnd.github+json" \
-                    "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
-
-                  # Find and delete the specific version (but not latest tag)
-                  VERSION_ID=$(echo "$VERSIONS" | jq -r ".[] | select(.metadata.container.tags[] | (. == \"${VERSION}\")) | .id")
-
-                  if [ -n "$VERSION_ID" ]; then
-                    echo "Deleting GHCR image version ${VERSION} (ID: ${VERSION_ID})"
-                    curl -X DELETE \
-                      -H "Authorization: Bearer ${{ github.token }}" \
-                      -H "Accept: application/vnd.github+json" \
-                      "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}"
-                    echo "✓ Deleted GHCR image version ${VERSION}"
-                  else
-                    echo "Version ${VERSION} not found in GHCR"
-                  fi
-
-            - name: Preserve Latest Tag for Docker Hub
-              continue-on-error: true
-              run: |
-                  VERSION="${{ needs.semver.outputs.next_version }}"
-                  REPO="${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}"
-
-                  echo "Checking for existing images to preserve 'latest' tag on Docker Hub..."
-
-                  # Get Docker Hub token
-                  HUB_TOKEN=$(curl -s -H "Content-Type: application/json" \
-                    -X POST \
-                    -d "{\"username\": \"${{ vars.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
-                    https://hub.docker.com/v2/users/login/ | jq -r .token)
-
-                  if [ -n "$HUB_TOKEN" ] && [ "$HUB_TOKEN" != "null" ]; then
-                    # Get list of tags
-                    TAGS=$(curl -s -H "Authorization: JWT ${HUB_TOKEN}" \
-                      "https://hub.docker.com/v2/repositories/${REPO}/tags?page_size=100" | jq -r '.results[] | select(.name != "'${VERSION}'" and .name != "latest") | .name' | head -n 1)
-
-                    if [ -n "$TAGS" ]; then
-                      LAST_VERSION=$(echo "$TAGS" | head -n 1)
-                      echo "Found last successful version: ${LAST_VERSION}"
-                      echo "Re-tagging ${LAST_VERSION} as 'latest' to preserve it..."
-
-                      # Login to Docker Hub
-                      echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
-
-                      # Re-tag the last successful version as latest
-                      docker buildx imagetools create \
-                        --tag ${REPO}:latest \
-                        ${REPO}:${LAST_VERSION}
-
-                      echo "✓ Successfully preserved 'latest' tag pointing to ${LAST_VERSION}"
-                    else
-                      echo "⚠ No previous successful version found to preserve 'latest' tag"
-                    fi
-                  else
-                    echo "⚠ Failed to authenticate with Docker Hub"
-                  fi
-
-            - name: Delete Docker Hub Image
-              continue-on-error: true
-              run: |
-                  VERSION="${{ needs.semver.outputs.next_version }}"
-                  REPO="${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}"
-
-                  # Get Docker Hub token
-                  HUB_TOKEN=$(curl -s -H "Content-Type: application/json" \
-                    -X POST \
-                    -d "{\"username\": \"${{ vars.DOCKERHUB_USERNAME }}\", \"password\": \"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
-                    https://hub.docker.com/v2/users/login/ | jq -r .token)
-
-                  if [ -n "$HUB_TOKEN" ] && [ "$HUB_TOKEN" != "null" ]; then
-                    echo "Deleting Docker Hub image tag ${VERSION}"
-                    DELETE_RESPONSE=$(curl -s -X DELETE \
-                      -H "Authorization: JWT ${HUB_TOKEN}" \
-                      "https://hub.docker.com/v2/repositories/${REPO}/tags/${VERSION}/")
-
-                    if [ $? -eq 0 ]; then
-                      echo "✓ Deleted Docker Hub image tag ${VERSION}"
-                    else
-                      echo "⚠ Failed to delete Docker Hub image tag ${VERSION}"
-                    fi
-                  else
-                    echo "⚠ Failed to authenticate with Docker Hub"
-                  fi
