@@ -147,7 +147,7 @@ var _ = Describe("controller", Ordered, func() {
 			}
 
 			// Capture diagnostic information if the controller fails to start
-			defer func() {
+			captureDebugInfo := func() {
 				if controllerPodName == "" {
 					return // No pod was found, skip diagnostics
 				}
@@ -191,9 +191,18 @@ var _ = Describe("controller", Ordered, func() {
 				if err == nil && len(logs) > 0 {
 					GinkgoWriter.Printf("\n=== Pod Logs ===\n%s\n", string(logs))
 				}
-			}()
+			}
 
-			EventuallyWithOffset(1, verifyControllerUp, time.Minute, time.Second).Should(Succeed())
+			// Try to verify controller, capture debug info only on failure
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						captureDebugInfo()
+						panic(r) // Re-panic to let Ginkgo handle it
+					}
+				}()
+				EventuallyWithOffset(1, verifyControllerUp, time.Minute, time.Second).Should(Succeed())
+			}()
 
 		})
 
