@@ -32,4 +32,20 @@ echo 'complete -o default -F __start_kubectl k' >> ~/.bashrc
 go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 setup-envtest use --use-env -p path
 
+# Setup kind cluster
+echo "Creating kind cluster..."
+kind create cluster --name devcontainer --wait 5m || echo "Kind cluster may already exist"
+
+# Configure kubectl context
+echo "Configuring kubectl..."
+kubectl cluster-info --context kind-devcontainer
+
+# Verify the cluster is working
+kubectl get nodes
+
+# Set the default context
+kubectl config use-context kind-devcontainer
+
 echo "Dev container setup complete!"
+echo "Kind cluster 'devcontainer' is ready!"
+echo "Run 'kubectl get nodes' to verify the cluster is running."
