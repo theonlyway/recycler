@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-01-29
+### :sparkles: New Features
+- [`c8ad927`](https://github.com/theonlyway/recycler/commit/c8ad92791493e90f5b2036f7d5326c99e4118673) - add preservation of 'latest' tag for GHCR and Docker Hub, and cleanup for failed Helm chart versions *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`a38b238`](https://github.com/theonlyway/recycler/commit/a38b2386ce27374bb2e8b1026710845bf0f1aac4) - remove failed Helm chart deletion step from workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :recycle: Refactors
+- [`92f871a`](https://github.com/theonlyway/recycler/commit/92f871aff227f4ae151a5a4f7c0d5983ca2a1ab9) - restructure build workflow by removing redundant steps and enhancing Helm test dependencies *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`14559e2`](https://github.com/theonlyway/recycler/commit/14559e298d0941e80a9e1702ca12c696f1d33007) - **deps**: update docker/login-action digest to c94ce9f *(PR [#70](https://github.com/theonlyway/recycler/pull/70) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`19acb41`](https://github.com/theonlyway/recycler/commit/19acb41512f93e73ab110c13ef1dc02384604122) - **deps**: update mcr.microsoft.com/devcontainers/go:2.0-1.25-bookworm docker digest to 0624dcd *(PR [#71](https://github.com/theonlyway/recycler/pull/71) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.8.2] - 2026-01-28
 ### :bug: Bug Fixes
 - [`d9f2e58`](https://github.com/theonlyway/recycler/commit/d9f2e5846e8316543d9e93624651c309c8d2c342) - add GitHub App token generation for changelog updates and adjust checkout step *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -419,3 +434,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.6.6]: https://github.com/theonlyway/recycler/compare/1.6.5...1.6.6
 [1.7.1]: https://github.com/theonlyway/recycler/compare/1.7.0...1.7.1
 [1.8.2]: https://github.com/theonlyway/recycler/compare/1.8.1...1.8.2
+[1.9.0]: https://github.com/theonlyway/recycler/compare/1.8.2...1.9.0
