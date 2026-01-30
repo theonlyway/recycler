@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2026-01-30
+### :bug: Bug Fixes
+- [`f060792`](https://github.com/theonlyway/recycler/commit/f06079242eb8f5b17915a54723f450e0e8fda447) - **deps**: update go dependencies *(PR [#73](https://github.com/theonlyway/recycler/pull/73) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.1] - 2026-01-29
 ### :bug: Bug Fixes
 - [`0ff48a3`](https://github.com/theonlyway/recycler/commit/0ff48a3de7092d43ccdccce2e2ff6fa8d60f99bf) - enhance controller startup diagnostics by capturing debug info on failure *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -442,3 +447,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.8.2]: https://github.com/theonlyway/recycler/compare/1.8.1...1.8.2
 [1.9.0]: https://github.com/theonlyway/recycler/compare/1.8.2...1.9.0
 [1.9.1]: https://github.com/theonlyway/recycler/compare/1.9.0...1.9.1
+[1.9.2]: https://github.com/theonlyway/recycler/compare/1.9.1...1.9.2
