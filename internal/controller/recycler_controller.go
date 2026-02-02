@@ -234,8 +234,10 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				"elapsed", elapsed,
 				"delay", delay)
 
-			// Write an event to the Recycler CR BEFORE deleting the pod
-			r.Recorder.Eventf(recycler, nil, corev1.EventTypeNormal, "PodTerminated", "Terminate",
+			// Write events to both the Pod and the Recycler CR BEFORE deleting the pod
+			r.Recorder.Eventf(&pod, recycler, corev1.EventTypeNormal, "PodTerminated", "Terminate",
+				"Pod terminated due to CPU threshold breach")
+			r.Recorder.Eventf(recycler, &pod, corev1.EventTypeNormal, "PodTerminated", "Terminate",
 				"Pod %s terminated due to CPU threshold breach", pod.Name)
 
 			// Set grace period for pod termination
