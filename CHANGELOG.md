@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] - 2026-02-02
+### :bug: Bug Fixes
+- [`5d2c690`](https://github.com/theonlyway/recycler/commit/5d2c69056d502768e3fca8041fcd1037624a2c71) - enhance event logging for pod termination in Recycler controller *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`3b6455a`](https://github.com/theonlyway/recycler/commit/3b6455a3efbdbc11ec6685573119e83e36a1519d) - **deps**: update mcr.microsoft.com/devcontainers/go:2.0-1.25-bookworm docker digest to 65af278 *(PR [#74](https://github.com/theonlyway/recycler/pull/74) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.2] - 2026-01-30
 ### :bug: Bug Fixes
 - [`f060792`](https://github.com/theonlyway/recycler/commit/f06079242eb8f5b17915a54723f450e0e8fda447) - **deps**: update go dependencies *(PR [#73](https://github.com/theonlyway/recycler/pull/73) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -448,3 +456,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.0]: https://github.com/theonlyway/recycler/compare/1.8.2...1.9.0
 [1.9.1]: https://github.com/theonlyway/recycler/compare/1.9.0...1.9.1
 [1.9.2]: https://github.com/theonlyway/recycler/compare/1.9.1...1.9.2
+[1.9.3]: https://github.com/theonlyway/recycler/compare/1.9.2...1.9.3
