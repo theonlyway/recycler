@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] - 2026-02-04
+### :wrench: Chores
+- [`e5bb677`](https://github.com/theonlyway/recycler/commit/e5bb677e6ae7644ccc8651d86f2f3acad8fb51e0) - **deps**: update gcr.io/distroless/static:nonroot docker digest to f9f84bd *(PR [#77](https://github.com/theonlyway/recycler/pull/77) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`3565624`](https://github.com/theonlyway/recycler/commit/3565624ebad8610ac0b516bd9750df4ab2467722) - **deps**: update actions/checkout digest to de0fac2 *(PR [#79](https://github.com/theonlyway/recycler/pull/79) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`3e863a4`](https://github.com/theonlyway/recycler/commit/3e863a40f0d3ac5ff61ecd65b3cdb38fe5e26361) - **deps**: update golang:1.25 docker digest to 06d1251 *(PR [#78](https://github.com/theonlyway/recycler/pull/78) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.3] - 2026-02-02
 ### :bug: Bug Fixes
 - [`5d2c690`](https://github.com/theonlyway/recycler/commit/5d2c69056d502768e3fca8041fcd1037624a2c71) - enhance event logging for pod termination in Recycler controller *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -457,3 +464,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.1]: https://github.com/theonlyway/recycler/compare/1.9.0...1.9.1
 [1.9.2]: https://github.com/theonlyway/recycler/compare/1.9.1...1.9.2
 [1.9.3]: https://github.com/theonlyway/recycler/compare/1.9.2...1.9.3
+[1.9.4]: https://github.com/theonlyway/recycler/compare/1.9.3...1.9.4
