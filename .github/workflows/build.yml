@@ -254,13 +254,13 @@ jobs:
                   echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
                   echo "Image digest: ${DIGEST}"
             - name: Generate SBOM (SPDX)
-              uses: anchore/sbom-action@deef08a0db64bfad603422135db61477b16cef56 # v0
+              uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
               with:
                   image: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
                   format: spdx-json
                   output-file: sbom-ghcr.spdx.json
             - name: Generate SBOM (CycloneDX)
-              uses: anchore/sbom-action@deef08a0db64bfad603422135db61477b16cef56 # v0
+              uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
               with:
                   image: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
                   format: cyclonedx-json
@@ -325,13 +325,13 @@ jobs:
                   echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
                   echo "Image digest: ${DIGEST}"
             - name: Generate SBOM (SPDX)
-              uses: anchore/sbom-action@deef08a0db64bfad603422135db61477b16cef56 # v0
+              uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
               with:
                   image: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
                   format: spdx-json
                   output-file: sbom-dockerhub.spdx.json
             - name: Generate SBOM (CycloneDX)
-              uses: anchore/sbom-action@deef08a0db64bfad603422135db61477b16cef56 # v0
+              uses: anchore/sbom-action@28d71544de8eaf1b958d335707167c5f783590ad # v0
               with:
                   image: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.semver.outputs.next_version }}
                   format: cyclonedx-json
