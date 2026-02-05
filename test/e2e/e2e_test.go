@@ -247,11 +247,24 @@ var _ = Describe("controller", Ordered, func() {
 			cmd = exec.Command("kubectl", "get", "pods",
 				"-n", testNamespace,
 				"-l", "app=cpu-stress",
-				"-o", "jsonpath={.items[*].metadata.name}",
+				"-o", "json",
 			)
-			podNameOutput, err := utils.Run(cmd)
+			podListOutput, err := utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
-			initialPodNames = utils.GetNonEmptyLines(string(podNameOutput))
+
+			var podList struct {
+				Items []struct {
+					Metadata struct {
+						Name string `json:"name"`
+					} `json:"metadata"`
+				} `json:"items"`
+			}
+			err = json.Unmarshal(podListOutput, &podList)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			for _, pod := range podList.Items {
+				initialPodNames = append(initialPodNames, pod.Metadata.Name)
+			}
 			ExpectWithOffset(1, len(initialPodNames)).Should(BeNumerically(">=", 1), "Expected at least one pod")
 			GinkgoWriter.Printf("Initial pods to monitor: %v\n", initialPodNames)
 			cmd = exec.Command("kubectl", "apply", "-f", "-")
@@ -467,44 +480,47 @@ var _ = Describe("controller", Ordered, func() {
 				cmd = exec.Command("kubectl", "get", "pods",
 					"-n", testNamespace,
 					"-l", "app=cpu-stress",
-					"-o", "jsonpath={.items[*].metadata.name}",
+					"-o", "json",
 				)
-				newPodNamesOutput, err := utils.Run(cmd)
+				newPodListOutput, err := utils.Run(cmd)
 				if err != nil {
 					return err
 				}
 
-				newPodNames := utils.GetNonEmptyLines(string(newPodNamesOutput))
+				var podList struct {
+					Items []struct {
+						Metadata struct {
+							Name string `json:"name"`
+						} `json:"metadata"`
+						Status struct {
+							Phase string `json:"phase"`
+						} `json:"status"`
+					} `json:"items"`
+				}
+				if err := json.Unmarshal(newPodListOutput, &podList); err != nil {
+					return fmt.Errorf("failed to parse pod list: %v", err)
+				}
 
 				// Should have the same number of pods as initially
-				if len(newPodNames) != len(initialPodNames) {
-					return fmt.Errorf("expected %d pods but found %d", len(initialPodNames), len(newPodNames))
+				if len(podList.Items) != len(initialPodNames) {
+					return fmt.Errorf("expected %d pods but found %d", len(initialPodNames), len(podList.Items))
 				}
 
 				// Check that all pods have changed (none match initial names)
-				for _, newPod := range newPodNames {
+				for _, newPod := range podList.Items {
 					for _, initialPod := range initialPodNames {
-						if newPod == initialPod {
+						if newPod.Metadata.Name == initialPod {
 							return fmt.Errorf("pod %s hasn't been replaced yet", initialPod)
 						}
 					}
 
 					// Verify each new pod is running
-					cmd = exec.Command("kubectl", "get", "pod",
-						newPod,
-						"-n", testNamespace,
-						"-o", "jsonpath={.status.phase}",
-					)
-					status, err := utils.Run(cmd)
-					if err != nil {
-						return err
-					}
-					if string(status) != podStatusRunning {
-						return fmt.Errorf("new pod %s not running yet, status: %s", newPod, status)
+					if newPod.Status.Phase != podStatusRunning {
+						return fmt.Errorf("new pod %s not running yet, status: %s", newPod.Metadata.Name, newPod.Status.Phase)
 					}
 				}
 
-				GinkgoWriter.Printf("All %d pods successfully replaced and running\n", len(newPodNames))
+				GinkgoWriter.Printf("All %d pods successfully replaced and running\n", len(podList.Items))
 				return nil
 			}
 			EventuallyWithOffset(1, verifyNewPodCreated, 2*time.Minute, 5*time.Second).Should(Succeed())
