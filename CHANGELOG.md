@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6] - 2026-02-05
+### :wrench: Chores
+- [`a3f8334`](https://github.com/theonlyway/recycler/commit/a3f8334ab7c06e7099e6cf7232c14ceef3ae2ed2) - Increase replicas from 1 to 2 in deployment [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`bd45803`](https://github.com/theonlyway/recycler/commit/bd45803b4c4193106d219c0b1d549c2615d01131) - **deps**: update dependency go to v1.25.7 *(PR [#80](https://github.com/theonlyway/recycler/pull/80) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.5] - 2026-02-05
 ### :wrench: Chores
 - [`258fb97`](https://github.com/theonlyway/recycler/commit/258fb97424f1a044f89e553790065821d724927e) - **deps**: update anchore/sbom-action digest to 28d7154 *(PR [#81](https://github.com/theonlyway/recycler/pull/81) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -472,3 +478,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.3]: https://github.com/theonlyway/recycler/compare/1.9.2...1.9.3
 [1.9.4]: https://github.com/theonlyway/recycler/compare/1.9.3...1.9.4
 [1.9.5]: https://github.com/theonlyway/recycler/compare/1.9.4...1.9.5
+[1.9.6]: https://github.com/theonlyway/recycler/compare/1.9.5...1.9.6
