@@ -242,7 +242,6 @@ var _ = Describe("controller", Ordered, func() {
 			EventuallyWithOffset(1, verifyStressPodRunning, 2*time.Minute, 2*time.Second).Should(Succeed())
 
 			// Get all initial pod names
-			var initialPodNames []string
 			By("getting all initial stress pod names")
 			cmd = exec.Command("kubectl", "get", "pods",
 				"-n", testNamespace,
@@ -262,10 +261,11 @@ var _ = Describe("controller", Ordered, func() {
 			err = json.Unmarshal(podListOutput, &podList)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
+			initialPodNames := make([]string, 0, len(podList.Items))
 			for _, pod := range podList.Items {
 				initialPodNames = append(initialPodNames, pod.Metadata.Name)
 			}
-			ExpectWithOffset(1, len(initialPodNames)).Should(BeNumerically(">=", 1), "Expected at least one pod")
+			ExpectWithOffset(1, initialPodNames).ShouldNot(BeEmpty(), "Expected at least one pod")
 			GinkgoWriter.Printf("Initial pods to monitor: %v\n", initialPodNames)
 			cmd = exec.Command("kubectl", "apply", "-f", "-")
 			cmd.Stdin = utils.StringReader(cpuStressRecyclerYAML)
