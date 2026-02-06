@@ -439,7 +439,7 @@ var _ = Describe("controller", Ordered, func() {
 				GinkgoWriter.Printf("\n=== Failed to get all events: %v ===\n", err)
 			}
 
-			By("verifying PodTerminated events were recorded on Recycler CR for all pods")
+			By("verifying CPUThresholdBreached and PodTerminated events were recorded on Recycler CR for all pods")
 			verifyTerminationEvent := func() error {
 				cmd = exec.Command("kubectl", "get", "events",
 					"-n", testNamespace,
@@ -451,7 +451,7 @@ var _ = Describe("controller", Ordered, func() {
 					return err
 				}
 
-				// Count PodTerminated events
+				// Count PodTerminated and CPUThresholdBreached events
 				var eventList struct {
 					Items []struct {
 						Reason  string `json:"reason"`
@@ -463,18 +463,66 @@ var _ = Describe("controller", Ordered, func() {
 				}
 
 				terminationEventCount := 0
+				breachEventCount := 0
 				for _, event := range eventList.Items {
 					if event.Reason == "PodTerminated" {
 						terminationEventCount++
 					}
+					if event.Reason == "CPUThresholdBreached" {
+						breachEventCount++
+					}
 				}
 
 				if terminationEventCount < len(initialPodNames) {
-					return fmt.Errorf("expected %d PodTerminated events, but found %d", len(initialPodNames), terminationEventCount)
+					return fmt.Errorf("expected %d PodTerminated events, but found %d",
+						len(initialPodNames), terminationEventCount)
+				}
+				if breachEventCount < len(initialPodNames) {
+					return fmt.Errorf("expected %d CPUThresholdBreached events, but found %d",
+						len(initialPodNames), breachEventCount)
 				}
 				return nil
 			}
 			EventuallyWithOffset(1, verifyTerminationEvent, 30*time.Second, 2*time.Second).Should(Succeed())
+
+			By("verifying CPUThresholdBreached events were recorded on the pods")
+			verifyPodBreachEvents := func() error {
+				for _, podName := range initialPodNames {
+					cmd = exec.Command("kubectl", "get", "events",
+						"-n", testNamespace,
+						"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Pod", podName),
+						"-o", "json",
+					)
+					events, err := utils.Run(cmd)
+					if err != nil {
+						return fmt.Errorf("failed to get events for pod %s: %v", podName, err)
+					}
+
+					var eventList struct {
+						Items []struct {
+							Reason  string `json:"reason"`
+							Message string `json:"message"`
+						} `json:"items"`
+					}
+					if err := json.Unmarshal(events, &eventList); err != nil {
+						return fmt.Errorf("failed to parse events for pod %s: %v", podName, err)
+					}
+
+					found := false
+					for _, event := range eventList.Items {
+						if event.Reason == "CPUThresholdBreached" {
+							found = true
+							break
+						}
+					}
+
+					if !found {
+						return fmt.Errorf("CPUThresholdBreached event not found for pod %s", podName)
+					}
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyPodBreachEvents, 30*time.Second, 2*time.Second).Should(Succeed())
 
 			By("verifying new pods were created by deployment to replace all terminated pods")
 			verifyNewPodCreated := func() error {
