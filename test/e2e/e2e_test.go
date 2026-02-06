@@ -241,20 +241,32 @@ var _ = Describe("controller", Ordered, func() {
 			}
 			EventuallyWithOffset(1, verifyStressPodRunning, 2*time.Minute, 2*time.Second).Should(Succeed())
 
-			// Get the initial pod name
-			var initialPodName string
-			By("getting initial stress pod name")
+			// Get all initial pod names
+			By("getting all initial stress pod names")
 			cmd = exec.Command("kubectl", "get", "pods",
 				"-n", testNamespace,
 				"-l", "app=cpu-stress",
-				"-o", "jsonpath={.items[0].metadata.name}",
+				"-o", "json",
 			)
-			podNameOutput, err := utils.Run(cmd)
+			podListOutput, err := utils.Run(cmd)
 			ExpectWithOffset(1, err).NotTo(HaveOccurred())
-			initialPodName = string(podNameOutput)
-			ExpectWithOffset(1, initialPodName).ShouldNot(BeEmpty())
 
-			By("creating a Recycler CR to monitor the CPU stress deployment")
+			var podList struct {
+				Items []struct {
+					Metadata struct {
+						Name string `json:"name"`
+					} `json:"metadata"`
+				} `json:"items"`
+			}
+			err = json.Unmarshal(podListOutput, &podList)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+			initialPodNames := make([]string, 0, len(podList.Items))
+			for _, pod := range podList.Items {
+				initialPodNames = append(initialPodNames, pod.Metadata.Name)
+			}
+			ExpectWithOffset(1, initialPodNames).ShouldNot(BeEmpty(), "Expected at least one pod")
+			GinkgoWriter.Printf("Initial pods to monitor: %v\n", initialPodNames)
 			cmd = exec.Command("kubectl", "apply", "-f", "-")
 			cmd.Stdin = utils.StringReader(cpuStressRecyclerYAML)
 			_, err = utils.Run(cmd)
@@ -312,33 +324,43 @@ var _ = Describe("controller", Ordered, func() {
 			}
 			EventuallyWithOffset(1, verifyRecyclerHealthy, 30*time.Second, 2*time.Second).Should(Succeed())
 
-			By("defining pod termination verification check")
+			By("Pod termination verification check for all pods")
 			verifyPodTerminated := func() error {
-				// Check if the original pod still exists
-				cmd = exec.Command("kubectl", "get", "pod",
-					initialPodName,
-					"-n", testNamespace,
-					"--ignore-not-found",
-				)
-				output, _ := utils.Run(cmd)
+				// Check each initial pod to see if it has been terminated
+				terminatedCount := 0
+				for _, podName := range initialPodNames {
+					// Check if the original pod still exists
+					cmd = exec.Command("kubectl", "get", "pod",
+						podName,
+						"-n", testNamespace,
+						"--ignore-not-found",
+					)
+					output, _ := utils.Run(cmd)
 
-				// If the pod no longer exists, it was terminated
-				if len(output) == 0 {
+					// If the pod no longer exists, it was terminated
+					if len(output) == 0 {
+						terminatedCount++
+						continue
+					}
+
+					// Check if pod has deletion timestamp
+					cmd = exec.Command("kubectl", "get", "pod",
+						podName,
+						"-n", testNamespace,
+						"-o", "jsonpath={.metadata.deletionTimestamp}",
+					)
+					deletionTimestamp, _ := utils.Run(cmd)
+					if len(deletionTimestamp) > 0 {
+						terminatedCount++
+					}
+				}
+
+				// All initial pods should be terminated
+				if terminatedCount == len(initialPodNames) {
 					return nil
 				}
 
-				// Check if pod has deletion timestamp
-				cmd = exec.Command("kubectl", "get", "pod",
-					initialPodName,
-					"-n", testNamespace,
-					"-o", "jsonpath={.metadata.deletionTimestamp}",
-				)
-				deletionTimestamp, _ := utils.Run(cmd)
-				if len(deletionTimestamp) > 0 {
-					return nil
-				}
-
-				return fmt.Errorf("pod %s has not been terminated yet", initialPodName)
+				return fmt.Errorf("%d of %d pods have been terminated", terminatedCount, len(initialPodNames))
 			}
 			// Calculate timeout: time to collect enough metrics + recycle delay + grace period + reconcile + buffer
 			metricsCollectionTime := time.Duration(pollingIntervalSeconds*podMetricsHistory) * time.Second
@@ -349,7 +371,8 @@ var _ = Describe("controller", Ordered, func() {
 				reconcileInterval + // Wait for reconciliation cycle after termination time
 				60*time.Second // buffer for overhead and Kubernetes operations
 
-			By(fmt.Sprintf("waiting for the pod to be terminated due to high CPU usage (timeout: %s)", terminationTimeout))
+			By(fmt.Sprintf("waiting for all %d pods to be terminated due to high CPU usage (timeout: %s)",
+				len(initialPodNames), terminationTimeout))
 			GinkgoWriter.Printf("Termination timeout breakdown:\n")
 			GinkgoWriter.Printf("  - Metrics collection: %s (%ds polling × %d datapoints)\n",
 				metricsCollectionTime, pollingIntervalSeconds, podMetricsHistory)
@@ -376,17 +399,19 @@ var _ = Describe("controller", Ordered, func() {
 
 			EventuallyWithOffset(1, verifyPodTerminated, terminationTimeout, 5*time.Second).Should(Succeed())
 
-			By("capturing all events related to the test pod")
-			cmd = exec.Command("kubectl", "get", "events",
-				"-n", testNamespace,
-				"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Pod", initialPodName),
-				"-o", "wide",
-			)
-			podEvents, err := utils.Run(cmd)
-			if err == nil {
-				GinkgoWriter.Printf("\n=== Pod Events ===\n%s\n", string(podEvents))
-			} else {
-				GinkgoWriter.Printf("\n=== Failed to get pod events: %v ===\n", err)
+			By("capturing all events related to the initial test pods")
+			for _, podName := range initialPodNames {
+				cmd = exec.Command("kubectl", "get", "events",
+					"-n", testNamespace,
+					"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Pod", podName),
+					"-o", "wide",
+				)
+				podEvents, err := utils.Run(cmd)
+				if err == nil {
+					GinkgoWriter.Printf("\n=== Events for Pod %s ===\n%s\n", podName, string(podEvents))
+				} else {
+					GinkgoWriter.Printf("\n=== Failed to get events for pod %s: %v ===\n", podName, err)
+				}
 			}
 
 			By("capturing all events related to the Recycler CR")
@@ -414,55 +439,137 @@ var _ = Describe("controller", Ordered, func() {
 				GinkgoWriter.Printf("\n=== Failed to get all events: %v ===\n", err)
 			}
 
-			By("verifying PodTerminated event was recorded on Recycler CR")
+			By("verifying CPUThresholdBreached and PodTerminated events were recorded on Recycler CR for all pods")
 			verifyTerminationEvent := func() error {
 				cmd = exec.Command("kubectl", "get", "events",
 					"-n", testNamespace,
 					"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Recycler", recyclerName),
-					"-o", "jsonpath={.items[*].reason}",
+					"-o", "json",
 				)
 				events, err := utils.Run(cmd)
 				if err != nil {
 					return err
 				}
 
-				eventsList := string(events)
-				if !utils.ContainsString(eventsList, "PodTerminated") {
-					return fmt.Errorf("PodTerminated event not found, got events: %s", eventsList)
+				// Count PodTerminated and CPUThresholdBreached events
+				var eventList struct {
+					Items []struct {
+						Reason  string `json:"reason"`
+						Message string `json:"message"`
+					} `json:"items"`
+				}
+				if err := json.Unmarshal(events, &eventList); err != nil {
+					return fmt.Errorf("failed to parse events: %v", err)
+				}
+
+				terminationEventCount := 0
+				breachEventCount := 0
+				for _, event := range eventList.Items {
+					if event.Reason == "PodTerminated" {
+						terminationEventCount++
+					}
+					if event.Reason == "CPUThresholdBreached" {
+						breachEventCount++
+					}
+				}
+
+				if terminationEventCount < len(initialPodNames) {
+					return fmt.Errorf("expected %d PodTerminated events, but found %d",
+						len(initialPodNames), terminationEventCount)
+				}
+				if breachEventCount < len(initialPodNames) {
+					return fmt.Errorf("expected %d CPUThresholdBreached events, but found %d",
+						len(initialPodNames), breachEventCount)
 				}
 				return nil
 			}
 			EventuallyWithOffset(1, verifyTerminationEvent, 30*time.Second, 2*time.Second).Should(Succeed())
 
-			By("verifying new pod was created by deployment")
+			By("verifying CPUThresholdBreached events were recorded on the pods")
+			verifyPodBreachEvents := func() error {
+				for _, podName := range initialPodNames {
+					cmd = exec.Command("kubectl", "get", "events",
+						"-n", testNamespace,
+						"--field-selector", fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=Pod", podName),
+						"-o", "json",
+					)
+					events, err := utils.Run(cmd)
+					if err != nil {
+						return fmt.Errorf("failed to get events for pod %s: %v", podName, err)
+					}
+
+					var eventList struct {
+						Items []struct {
+							Reason  string `json:"reason"`
+							Message string `json:"message"`
+						} `json:"items"`
+					}
+					if err := json.Unmarshal(events, &eventList); err != nil {
+						return fmt.Errorf("failed to parse events for pod %s: %v", podName, err)
+					}
+
+					found := false
+					for _, event := range eventList.Items {
+						if event.Reason == "CPUThresholdBreached" {
+							found = true
+							break
+						}
+					}
+
+					if !found {
+						return fmt.Errorf("CPUThresholdBreached event not found for pod %s", podName)
+					}
+				}
+				return nil
+			}
+			EventuallyWithOffset(1, verifyPodBreachEvents, 30*time.Second, 2*time.Second).Should(Succeed())
+
+			By("verifying new pods were created by deployment to replace all terminated pods")
 			verifyNewPodCreated := func() error {
 				cmd = exec.Command("kubectl", "get", "pods",
 					"-n", testNamespace,
 					"-l", "app=cpu-stress",
-					"-o", "jsonpath={.items[0].metadata.name}",
+					"-o", "json",
 				)
-				newPodName, err := utils.Run(cmd)
+				newPodListOutput, err := utils.Run(cmd)
 				if err != nil {
 					return err
 				}
 
-				if string(newPodName) == initialPodName {
-					return fmt.Errorf("pod name hasn't changed yet")
+				var podList struct {
+					Items []struct {
+						Metadata struct {
+							Name string `json:"name"`
+						} `json:"metadata"`
+						Status struct {
+							Phase string `json:"phase"`
+						} `json:"status"`
+					} `json:"items"`
+				}
+				if err := json.Unmarshal(newPodListOutput, &podList); err != nil {
+					return fmt.Errorf("failed to parse pod list: %v", err)
 				}
 
-				// Verify new pod is running
-				cmd = exec.Command("kubectl", "get", "pod",
-					string(newPodName),
-					"-n", testNamespace,
-					"-o", "jsonpath={.status.phase}",
-				)
-				status, err := utils.Run(cmd)
-				if err != nil {
-					return err
+				// Should have the same number of pods as initially
+				if len(podList.Items) != len(initialPodNames) {
+					return fmt.Errorf("expected %d pods but found %d", len(initialPodNames), len(podList.Items))
 				}
-				if string(status) != podStatusRunning {
-					return fmt.Errorf("new pod not running yet, status: %s", status)
+
+				// Check that all pods have changed (none match initial names)
+				for _, newPod := range podList.Items {
+					for _, initialPod := range initialPodNames {
+						if newPod.Metadata.Name == initialPod {
+							return fmt.Errorf("pod %s hasn't been replaced yet", initialPod)
+						}
+					}
+
+					// Verify each new pod is running
+					if newPod.Status.Phase != podStatusRunning {
+						return fmt.Errorf("new pod %s not running yet, status: %s", newPod.Metadata.Name, newPod.Status.Phase)
+					}
 				}
+
+				GinkgoWriter.Printf("All %d pods successfully replaced and running\n", len(podList.Items))
 				return nil
 			}
 			EventuallyWithOffset(1, verifyNewPodCreated, 2*time.Minute, 5*time.Second).Should(Succeed())
