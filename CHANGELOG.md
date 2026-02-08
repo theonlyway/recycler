@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7] - 2026-02-08
+### :white_check_mark: Tests
+- [`acb9932`](https://github.com/theonlyway/recycler/commit/acb9932d7f1a98f18bb5fc304fb501b88abd669c) - enhance e2e tests to handle multiple pods and verify pod termination *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`2107acf`](https://github.com/theonlyway/recycler/commit/2107acfaaf4c2b30b26ea9d6bebe1550f0b6574e) - update e2e tests to use JSON output for pod retrieval and enhance pod status verification *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`69ca769`](https://github.com/theonlyway/recycler/commit/69ca769c84d9e09e2c64787b5754ceed14e72624) - format output message for pod termination wait in e2e tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`bccc166`](https://github.com/theonlyway/recycler/commit/bccc1662c99bb523e7e51267261d06866f4b7036) - refactor initial pod names handling in e2e tests for clarity *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`aed91d6`](https://github.com/theonlyway/recycler/commit/aed91d68d863e9a847fd49732d850e2b0fa20248) - enhance e2e tests to verify CPUThresholdBreached events alongside PodTerminated events *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`cf171a3`](https://github.com/theonlyway/recycler/commit/cf171a350cee74243959a2f69667cadc3a9ddfdc) - **deps**: update golang:1.25 docker digest to cc73743 *(PR [#84](https://github.com/theonlyway/recycler/pull/84) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.6] - 2026-02-05
 ### :wrench: Chores
 - [`a3f8334`](https://github.com/theonlyway/recycler/commit/a3f8334ab7c06e7099e6cf7232c14ceef3ae2ed2) - Increase replicas from 1 to 2 in deployment [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -479,3 +491,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.4]: https://github.com/theonlyway/recycler/compare/1.9.3...1.9.4
 [1.9.5]: https://github.com/theonlyway/recycler/compare/1.9.4...1.9.5
 [1.9.6]: https://github.com/theonlyway/recycler/compare/1.9.5...1.9.6
+[1.9.7]: https://github.com/theonlyway/recycler/compare/1.9.6...1.9.7
