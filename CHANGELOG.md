@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9] - 2026-02-11
+### :wrench: Chores
+- [`c722509`](https://github.com/theonlyway/recycler/commit/c7225099e05f1f7c569bfe1e47074a171b3d5a09) - **deps**: update golang docker tag to v1.26 *(PR [#87](https://github.com/theonlyway/recycler/pull/87) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.8] - 2026-02-11
 ### :wrench: Chores
 - [`9b41db4`](https://github.com/theonlyway/recycler/commit/9b41db41d5ba163ad1bdb1eac21a07429db70702) - **deps**: update golang:1.25 docker digest to 85c0ab0 *(PR [#86](https://github.com/theonlyway/recycler/pull/86) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -498,3 +503,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.6]: https://github.com/theonlyway/recycler/compare/1.9.5...1.9.6
 [1.9.7]: https://github.com/theonlyway/recycler/compare/1.9.6...1.9.7
 [1.9.8]: https://github.com/theonlyway/recycler/compare/1.9.7...1.9.8
+[1.9.9]: https://github.com/theonlyway/recycler/compare/1.9.8...1.9.9
