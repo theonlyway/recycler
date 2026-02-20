@@ -188,7 +188,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 }
 
 func logInMemoryMetrics(log logr.Logger) {
-	InMemoryMetricsStorage.Range(func(key, value interface{}) bool {
+	InMemoryMetricsStorage.Range(func(key, value any) bool {
 		metricsHistory := value.([]PodCPUUsage)
 		for i, metric := range metricsHistory {
 			log.V(1).Info("In-memory metric stored", "key", key, "index", i, "podName", metric.PodName, "CPUUsage", metric.CPUUsage.String(), "CPULimit", metric.CPULimit.String(), "CPUPercentage", metric.CPUPercentage, "Timestamp", metric.Timestamp)
