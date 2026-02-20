@@ -37,7 +37,7 @@ import (
 // mockEventRecorder is a mock implementation of events.EventRecorder for testing
 type mockEventRecorder struct{}
 
-func (m *mockEventRecorder) Eventf(regarding runtime.Object, related runtime.Object, eventtype, reason, action, note string, args ...interface{}) {
+func (m *mockEventRecorder) Eventf(regarding runtime.Object, related runtime.Object, eventtype, reason, action, note string, args ...any) {
 }
 
 var _ = Describe("Recycler Controller", func() {
