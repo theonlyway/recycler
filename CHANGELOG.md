@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.12] - 2026-02-23
+### :wrench: Chores
+- [`d6d5b28`](https://github.com/theonlyway/recycler/commit/d6d5b2838cc0491eea0943f1e8bee4b41e1ee91d) - ran go fix *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.9.11] - 2026-02-14
 ### :wrench: Chores
 - [`ccd5556`](https://github.com/theonlyway/recycler/commit/ccd5556d1ccf94e278dc6315eca1e5bfc4ab82fa) - **deps**: update gcr.io/distroless/static:nonroot docker digest to 01e550f *(PR [#88](https://github.com/theonlyway/recycler/pull/88) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -516,3 +521,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.9]: https://github.com/theonlyway/recycler/compare/1.9.8...1.9.9
 [1.9.10]: https://github.com/theonlyway/recycler/compare/1.9.9...1.9.10
 [1.9.11]: https://github.com/theonlyway/recycler/compare/1.9.10...1.9.11
+[1.9.12]: https://github.com/theonlyway/recycler/compare/1.9.11...1.9.12
