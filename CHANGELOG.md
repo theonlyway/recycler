@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.15] - 2026-03-03
+### :bug: Bug Fixes
+- [`91354e0`](https://github.com/theonlyway/recycler/commit/91354e0964529790b4967055c84b4c1c853defc0) - **deps**: update go dependencies to v0.35.2 *(PR [#97](https://github.com/theonlyway/recycler/pull/97) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`3e26aac`](https://github.com/theonlyway/recycler/commit/3e26aac695434e348ff7ec4fd7f0ecf1277f055d) - **deps**: update actions/attest-sbom action to v4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1cab7c3`](https://github.com/theonlyway/recycler/commit/1cab7c31f1e12b37ea4a3c604fe4cedc53561132) - **deps**: update github artifact actions *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`bdc590a`](https://github.com/theonlyway/recycler/commit/bdc590ada67eb082ccecdf66a5d7d53f663cef1f) - **deps**: update actions/attest-build-provenance action to v4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.14] - 2026-02-26
 ### :wrench: Chores
 - [`4d038ff`](https://github.com/theonlyway/recycler/commit/4d038ff13d82153331c7b42448a88df28521c296) - **deps**: update anchore/sbom-action digest to 17ae174 *(PR [#91](https://github.com/theonlyway/recycler/pull/91) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -536,3 +546,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.12]: https://github.com/theonlyway/recycler/compare/1.9.11...1.9.12
 [1.9.13]: https://github.com/theonlyway/recycler/compare/1.9.12...1.9.13
 [1.9.14]: https://github.com/theonlyway/recycler/compare/1.9.13...1.9.14
+[1.9.15]: https://github.com/theonlyway/recycler/compare/1.9.14...1.9.15
