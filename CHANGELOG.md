@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.18] - 2026-03-05
+### :bug: Bug Fixes
+- [`e1d4a33`](https://github.com/theonlyway/recycler/commit/e1d4a33215b674c12de8a822cc01f7875ca698eb) - **deps**: update module sigs.k8s.io/controller-runtime to v0.23.2 *(PR [#101](https://github.com/theonlyway/recycler/pull/101) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.17] - 2026-03-04
 ### :wrench: Chores
 - [`275b130`](https://github.com/theonlyway/recycler/commit/275b130109593b4eeeb19c0c058d75673f86d77c) - **deps**: update golang:1.26 docker digest to fb612b7 *(PR [#99](https://github.com/theonlyway/recycler/pull/99) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -559,3 +564,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.15]: https://github.com/theonlyway/recycler/compare/1.9.14...1.9.15
 [1.9.16]: https://github.com/theonlyway/recycler/compare/1.9.15...1.9.16
 [1.9.17]: https://github.com/theonlyway/recycler/compare/1.9.16...1.9.17
+[1.9.18]: https://github.com/theonlyway/recycler/compare/1.9.17...1.9.18
