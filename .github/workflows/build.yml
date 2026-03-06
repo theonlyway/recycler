@@ -235,7 +235,7 @@ jobs:
             - name: Set Environment Variables
               run: echo "REPOSITORY_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
             - name: Login to GHCR
-              uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+              uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
               with:
                   registry: ${{ env.GHCR_REGISTRY }}
                   username: ${{ github.actor }}
@@ -308,7 +308,7 @@ jobs:
             - name: Install Operator SDK
               run: make operator-sdk
             - name: Login to Dockerhub
-              uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+              uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
               with:
                 username: ${{ vars.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
