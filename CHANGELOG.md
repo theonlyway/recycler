@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.21] - 2026-03-06
+### :wrench: Chores
+- [`5d3a934`](https://github.com/theonlyway/recycler/commit/5d3a934f435edd84ba2c747d71bc1347668a8460) - **deps**: update dependency go to v1.26.1 *(PR [#103](https://github.com/theonlyway/recycler/pull/103) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.20] - 2026-03-06
 ### :wrench: Chores
 - [`034e47a`](https://github.com/theonlyway/recycler/commit/034e47a5d989b666607c3b2b812eb94713a4efaf) - **deps**: update docker/login-action action to v4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -578,3 +583,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.18]: https://github.com/theonlyway/recycler/compare/1.9.17...1.9.18
 [1.9.19]: https://github.com/theonlyway/recycler/compare/1.9.18...1.9.19
 [1.9.20]: https://github.com/theonlyway/recycler/compare/1.9.19...1.9.20
+[1.9.21]: https://github.com/theonlyway/recycler/compare/1.9.20...1.9.21
