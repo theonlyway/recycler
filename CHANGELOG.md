@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.20] - 2026-03-06
+### :wrench: Chores
+- [`034e47a`](https://github.com/theonlyway/recycler/commit/034e47a5d989b666607c3b2b812eb94713a4efaf) - **deps**: update docker/login-action action to v4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`186f098`](https://github.com/theonlyway/recycler/commit/186f098b14e41a66882192645343d5ce5736feb6) - **deps**: update golang:1.26 docker digest to e2ddb15 *(PR [#104](https://github.com/theonlyway/recycler/pull/104) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.19] - 2026-03-06
 ### :bug: Bug Fixes
 - [`94cd7f6`](https://github.com/theonlyway/recycler/commit/94cd7f66557c2352c2e840314b0c2d9319738b6a) - **deps**: update module sigs.k8s.io/controller-runtime to v0.23.3 *(PR [#102](https://github.com/theonlyway/recycler/pull/102) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -571,3 +577,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.17]: https://github.com/theonlyway/recycler/compare/1.9.16...1.9.17
 [1.9.18]: https://github.com/theonlyway/recycler/compare/1.9.17...1.9.18
 [1.9.19]: https://github.com/theonlyway/recycler/compare/1.9.18...1.9.19
+[1.9.20]: https://github.com/theonlyway/recycler/compare/1.9.19...1.9.20
