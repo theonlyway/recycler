@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.23] - 2026-03-16
+### :wrench: Chores
+- [`98500a2`](https://github.com/theonlyway/recycler/commit/98500a2bc6dd73e8cdec05211f5946c8a77d031d) - **deps**: update actions/download-artifact digest to 3e5f45b *(PR [#107](https://github.com/theonlyway/recycler/pull/107) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`384db16`](https://github.com/theonlyway/recycler/commit/384db16e627999c286a1055668aaac9b4311c7b4) - **deps**: update mcr.microsoft.com/devcontainers/go docker tag to v2.1 *(PR [#108](https://github.com/theonlyway/recycler/pull/108) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`80d2e8d`](https://github.com/theonlyway/recycler/commit/80d2e8d6df72af26d6a80888ff76c70af59a9d3a) - **deps**: update actions/create-github-app-token digest to fee1f7d *(PR [#109](https://github.com/theonlyway/recycler/pull/109) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`26c630e`](https://github.com/theonlyway/recycler/commit/26c630ebad5749351143d5d342a13f12df896023) - **deps**: update softprops/action-gh-release digest to b25b93d *(PR [#111](https://github.com/theonlyway/recycler/pull/111) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`6d4e29e`](https://github.com/theonlyway/recycler/commit/6d4e29e33d48c8c9700941298e8fe290f53c07f3) - **deps**: update gcr.io/distroless/static:nonroot docker digest to e3f9456 *(PR [#112](https://github.com/theonlyway/recycler/pull/112) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.22] - 2026-03-11
 ### :wrench: Chores
 - [`894e6f7`](https://github.com/theonlyway/recycler/commit/894e6f77da6a17925da633d48c4e8287cf592c5f) - **deps**: update anchore/sbom-action digest to 57aae52 *(PR [#105](https://github.com/theonlyway/recycler/pull/105) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -591,3 +600,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.20]: https://github.com/theonlyway/recycler/compare/1.9.19...1.9.20
 [1.9.21]: https://github.com/theonlyway/recycler/compare/1.9.20...1.9.21
 [1.9.22]: https://github.com/theonlyway/recycler/compare/1.9.21...1.9.22
+[1.9.23]: https://github.com/theonlyway/recycler/compare/1.9.22...1.9.23
