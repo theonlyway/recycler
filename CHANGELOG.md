@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.24] - 2026-03-17
+### :wrench: Chores
+- [`597de24`](https://github.com/theonlyway/recycler/commit/597de24c92bd8a18ab614466d2e01569292c2075) - **deps**: update softprops/action-gh-release digest to 153bb8e *(PR [#113](https://github.com/theonlyway/recycler/pull/113) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`98ee956`](https://github.com/theonlyway/recycler/commit/98ee9562dd2d4aa0c74589b7883a752bdcdec68b) - **deps**: update golang:1.26 docker digest to c42e4d7 *(PR [#114](https://github.com/theonlyway/recycler/pull/114) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.23] - 2026-03-16
 ### :wrench: Chores
 - [`98500a2`](https://github.com/theonlyway/recycler/commit/98500a2bc6dd73e8cdec05211f5946c8a77d031d) - **deps**: update actions/download-artifact digest to 3e5f45b *(PR [#107](https://github.com/theonlyway/recycler/pull/107) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -601,3 +607,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.21]: https://github.com/theonlyway/recycler/compare/1.9.20...1.9.21
 [1.9.22]: https://github.com/theonlyway/recycler/compare/1.9.21...1.9.22
 [1.9.23]: https://github.com/theonlyway/recycler/compare/1.9.22...1.9.23
+[1.9.24]: https://github.com/theonlyway/recycler/compare/1.9.23...1.9.24
