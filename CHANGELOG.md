@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.25] - 2026-03-19
+### :bug: Bug Fixes
+- [`79e3d49`](https://github.com/theonlyway/recycler/commit/79e3d4936063ae27720e7b1a5910f5b68be8d5ca) - **deps**: update go dependencies to v0.35.3 *(PR [#116](https://github.com/theonlyway/recycler/pull/116) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`a29bd43`](https://github.com/theonlyway/recycler/commit/a29bd43d4286edcb1db7a863ec33a9a22f8cd6de) - **deps**: update actions/create-github-app-token action to v3 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`5bebf25`](https://github.com/theonlyway/recycler/commit/5bebf250786a16f6ae45f33b1cc6a3cfcff8fb8a) - **deps**: update actions/attest-sbom digest to c604332 *(PR [#115](https://github.com/theonlyway/recycler/pull/115) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.24] - 2026-03-17
 ### :wrench: Chores
 - [`597de24`](https://github.com/theonlyway/recycler/commit/597de24c92bd8a18ab614466d2e01569292c2075) - **deps**: update softprops/action-gh-release digest to 153bb8e *(PR [#113](https://github.com/theonlyway/recycler/pull/113) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -608,3 +617,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.22]: https://github.com/theonlyway/recycler/compare/1.9.21...1.9.22
 [1.9.23]: https://github.com/theonlyway/recycler/compare/1.9.22...1.9.23
 [1.9.24]: https://github.com/theonlyway/recycler/compare/1.9.23...1.9.24
+[1.9.25]: https://github.com/theonlyway/recycler/compare/1.9.24...1.9.25
