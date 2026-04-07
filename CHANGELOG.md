@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.27] - 2026-04-07
+### :wrench: Chores
+- [`8941272`](https://github.com/theonlyway/recycler/commit/8941272ef0c029621601c0b9c0f3ce952b573216) - **deps**: update actions/setup-go digest to 4a36011 *(PR [#120](https://github.com/theonlyway/recycler/pull/120) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`8ea6bc3`](https://github.com/theonlyway/recycler/commit/8ea6bc3fe9caa1e5a5e861e6c89ac906342e7c89) - **deps**: update docker/login-action digest to 4907a6d *(PR [#121](https://github.com/theonlyway/recycler/pull/121) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1091170`](https://github.com/theonlyway/recycler/commit/1091170e36a67ed9908519a6685d89b7af0f17f5) - **deps**: update golang:1.26 docker digest to 5e69504 *(PR [#122](https://github.com/theonlyway/recycler/pull/122) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.26] - 2026-03-21
 ### :wrench: Chores
 - [`94d2539`](https://github.com/theonlyway/recycler/commit/94d2539e060cf367cc060b7bf66309759413e8a7) - **deps**: update anchore/sbom-action digest to e22c389 *(PR [#117](https://github.com/theonlyway/recycler/pull/117) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -625,3 +632,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.24]: https://github.com/theonlyway/recycler/compare/1.9.23...1.9.24
 [1.9.25]: https://github.com/theonlyway/recycler/compare/1.9.24...1.9.25
 [1.9.26]: https://github.com/theonlyway/recycler/compare/1.9.25...1.9.26
+[1.9.27]: https://github.com/theonlyway/recycler/compare/1.9.26...1.9.27
