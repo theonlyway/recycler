@@ -402,7 +402,7 @@ jobs:
                   echo "Downloaded SBOM files:"
                   find ./sbom-reports -type f -name "*.json"
             - name: Update Release with Comprehensive Package Information
-              uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+              uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
               id: release
               with:
                   name: Release ${{ needs.semver.outputs.next_version }}
@@ -511,7 +511,7 @@ jobs:
                   token: ${{ steps.generate-token.outputs.token }}
                   tag: ${{ needs.semver.outputs.next_version }}
             - name: Update Release with Changelog
-              uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+              uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
               id: release
               with:
                   name: ${{ needs.semver.outputs.next_version }}
