@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.30] - 2026-04-12
+### :wrench: Chores
+- [`c8139b3`](https://github.com/theonlyway/recycler/commit/c8139b39962829e1ee6286f178a398893607cfa8) - **deps**: update actions/upload-artifact digest to 043fb46 *(PR [#125](https://github.com/theonlyway/recycler/pull/125) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`8d5a663`](https://github.com/theonlyway/recycler/commit/8d5a66354139d1af9f685d2b7481d1705d17e444) - **deps**: update actions/create-github-app-token digest to 1b10c78 *(PR [#126](https://github.com/theonlyway/recycler/pull/126) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`5e7441a`](https://github.com/theonlyway/recycler/commit/5e7441a77ec6a6402c1405cdcbdef508484b7d79) - **deps**: update softprops/action-gh-release digest to 3bb1273 *(PR [#127](https://github.com/theonlyway/recycler/pull/127) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`9da3f1b`](https://github.com/theonlyway/recycler/commit/9da3f1bdb86f6cef20f00cf7a31065c46066d6af) - **deps**: update golang:1.26 docker digest to fcdb3e4 *(PR [#129](https://github.com/theonlyway/recycler/pull/129) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.29] - 2026-04-08
 ### :wrench: Chores
 - [`c48a55a`](https://github.com/theonlyway/recycler/commit/c48a55a91efd2e2b1542cb226bb5cbd0019bcfa3) - **deps**: update dependency go to v1.26.2 *(PR [#123](https://github.com/theonlyway/recycler/pull/123) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -645,3 +653,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.27]: https://github.com/theonlyway/recycler/compare/1.9.26...1.9.27
 [1.9.28]: https://github.com/theonlyway/recycler/compare/1.9.27...1.9.28
 [1.9.29]: https://github.com/theonlyway/recycler/compare/1.9.28...1.9.29
+[1.9.30]: https://github.com/theonlyway/recycler/compare/1.9.29...1.9.30
