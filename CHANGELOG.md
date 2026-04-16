@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.32] - 2026-04-16
+### :bug: Bug Fixes
+- [`bc12ece`](https://github.com/theonlyway/recycler/commit/bc12ece8543e0fd9029575018f2cccc55719930b) - **deps**: update module k8s.io/metrics to v0.35.4 *(PR [#131](https://github.com/theonlyway/recycler/pull/131) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`a6c1521`](https://github.com/theonlyway/recycler/commit/a6c1521df7687a31f5eeaeb46164ad10052dd333) - **deps**: update azure/setup-helm action to v5 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`5c7fbd9`](https://github.com/theonlyway/recycler/commit/5c7fbd933674fdc98e257870f466b08caae143be) - **deps**: update softprops/action-gh-release action to v3 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.31] - 2026-04-15
 ### :wrench: Chores
 - [`7aac042`](https://github.com/theonlyway/recycler/commit/7aac0423c45d5cd0cce7528e5df6a272408b7517) - **deps**: update golang:1.26 docker digest to 5f3787b *(PR [#130](https://github.com/theonlyway/recycler/pull/130) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -660,3 +669,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.29]: https://github.com/theonlyway/recycler/compare/1.9.28...1.9.29
 [1.9.30]: https://github.com/theonlyway/recycler/compare/1.9.29...1.9.30
 [1.9.31]: https://github.com/theonlyway/recycler/compare/1.9.30...1.9.31
+[1.9.32]: https://github.com/theonlyway/recycler/compare/1.9.31...1.9.32
