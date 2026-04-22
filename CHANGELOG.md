@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.33] - 2026-04-22
+### :wrench: Chores
+- [`10b2ea2`](https://github.com/theonlyway/recycler/commit/10b2ea2ebb5493b3596c6bf8374e7504b45874e9) - **deps**: update mcr.microsoft.com/devcontainers/go:2.1-1.25-bookworm docker digest to 80694b9 *(PR [#132](https://github.com/theonlyway/recycler/pull/132) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`0d5dde9`](https://github.com/theonlyway/recycler/commit/0d5dde9cdc2767ec3e17a89ed1de7f78f4dcc7ef) - **deps**: update golang:1.26 docker digest to 1e598ea *(PR [#133](https://github.com/theonlyway/recycler/pull/133) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.32] - 2026-04-16
 ### :bug: Bug Fixes
 - [`bc12ece`](https://github.com/theonlyway/recycler/commit/bc12ece8543e0fd9029575018f2cccc55719930b) - **deps**: update module k8s.io/metrics to v0.35.4 *(PR [#131](https://github.com/theonlyway/recycler/pull/131) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -670,3 +676,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.30]: https://github.com/theonlyway/recycler/compare/1.9.29...1.9.30
 [1.9.31]: https://github.com/theonlyway/recycler/compare/1.9.30...1.9.31
 [1.9.32]: https://github.com/theonlyway/recycler/compare/1.9.31...1.9.32
+[1.9.33]: https://github.com/theonlyway/recycler/compare/1.9.32...1.9.33
