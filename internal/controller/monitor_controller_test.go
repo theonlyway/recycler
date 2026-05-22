@@ -35,6 +35,11 @@ import (
 	recyclertheonlywayecomv1alpha1 "github.com/theonlyway/recycler/api/v1alpha1"
 )
 
+const (
+	monitorDeploymentName = "monitor-deployment"
+	testPodName           = "test-pod"
+)
+
 var _ = Describe("Monitor Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "monitor-test-resource"
@@ -43,24 +48,24 @@ var _ = Describe("Monitor Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default",
+			Namespace: testNamespace,
 		}
 
 		BeforeEach(func() {
 			By("Creating the target deployment for monitoring")
 			deployment := &appsv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "monitor-deployment",
-					Namespace: "default",
+					Name:      monitorDeploymentName,
+					Namespace: testNamespace,
 				},
 				Spec: appsv1.DeploymentSpec{
 					Replicas: int32Ptr(1),
 					Selector: &metav1.LabelSelector{
-						MatchLabels: map[string]string{"app": "monitor-test"},
+						MatchLabels: map[string]string{appLabelKey: "monitor-test"},
 					},
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{"app": "monitor-test"},
+							Labels: map[string]string{appLabelKey: "monitor-test"},
 						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
@@ -85,13 +90,13 @@ var _ = Describe("Monitor Controller", func() {
 				resource := &recyclertheonlywayecomv1alpha1.Recycler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "default",
+						Namespace: testNamespace,
 					},
 					Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 						ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-							Kind:       "Deployment",
-							Name:       "monitor-deployment",
-							APIVersion: "apps/v1",
+							Kind:       kindDeployment,
+							Name:       monitorDeploymentName,
+							APIVersion: appsV1APIVersion,
 						},
 						AverageCpuUtilizationPercent: 75,
 						RecycleDelaySeconds:          300,
@@ -121,8 +126,8 @@ var _ = Describe("Monitor Controller", func() {
 			By("Cleaning up the deployment")
 			deployment := &appsv1.Deployment{}
 			deploymentKey := types.NamespacedName{
-				Name:      "monitor-deployment",
-				Namespace: "default",
+				Name:      monitorDeploymentName,
+				Namespace: testNamespace,
 			}
 			err = k8sClient.Get(ctx, deploymentKey, deployment)
 			if err == nil {
@@ -164,7 +169,7 @@ var _ = Describe("Monitor Controller", func() {
 
 			nonExistentName := types.NamespacedName{
 				Name:      "non-existent-monitor",
-				Namespace: "default",
+				Namespace: testNamespace,
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -179,20 +184,20 @@ var _ = Describe("Monitor Controller", func() {
 			annotationRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "annotation-monitor-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "Deployment",
-						Name:       "monitor-deployment",
-						APIVersion: "apps/v1",
+						Kind:       kindDeployment,
+						Name:       monitorDeploymentName,
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 80,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       60,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "annotation",
+					MetricStorageLocation:        StorageAnnotation,
 				},
 			}
 			Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
@@ -207,7 +212,7 @@ var _ = Describe("Monitor Controller", func() {
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      "annotation-monitor-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 			})
 			// Error expected due to missing metrics server
@@ -221,14 +226,14 @@ var _ = Describe("Monitor Controller", func() {
 	Context("PodCPUUsage struct", func() {
 		It("should create a valid PodCPUUsage struct", func() {
 			usage := PodCPUUsage{
-				PodName:       "test-pod",
+				PodName:       testPodName,
 				CPUUsage:      resource.MustParse("200m"),
 				CPULimit:      resource.MustParse("500m"),
 				CPUPercentage: 40.0,
 				Timestamp:     time.Now(),
 			}
 
-			Expect(usage.PodName).To(Equal("test-pod"))
+			Expect(usage.PodName).To(Equal(testPodName))
 			Expect(usage.CPUUsage.MilliValue()).To(Equal(int64(200)))
 			Expect(usage.CPULimit.MilliValue()).To(Equal(int64(500)))
 			Expect(usage.CPUPercentage).To(Equal(40.0))
@@ -253,7 +258,7 @@ var _ = Describe("Monitor Controller", func() {
 			key := "default/test-pod"
 			metrics := []PodCPUUsage{
 				{
-					PodName:       "test-pod",
+					PodName:       testPodName,
 					CPUUsage:      resource.MustParse("100m"),
 					CPULimit:      resource.MustParse("500m"),
 					CPUPercentage: 20.0,
@@ -268,7 +273,7 @@ var _ = Describe("Monitor Controller", func() {
 
 			retrievedMetrics := value.([]PodCPUUsage)
 			Expect(retrievedMetrics).To(HaveLen(1))
-			Expect(retrievedMetrics[0].PodName).To(Equal("test-pod"))
+			Expect(retrievedMetrics[0].PodName).To(Equal(testPodName))
 
 			// Cleanup
 			InMemoryMetricsStorage.Delete(key)
@@ -322,22 +327,22 @@ var _ = Describe("Monitor Controller", func() {
 		It("should calculate average CPU correctly", func() {
 			log := ctrl.Log.WithName("test")
 			metricsHistory := []PodCPUUsage{
-				{PodName: "test-pod", CPUPercentage: 10.0},
-				{PodName: "test-pod", CPUPercentage: 20.0},
-				{PodName: "test-pod", CPUPercentage: 30.0},
+				{PodName: testPodName, CPUPercentage: 10.0},
+				{PodName: testPodName, CPUPercentage: 20.0},
+				{PodName: testPodName, CPUPercentage: 30.0},
 			}
 
-			avg := calculateAverageCPU(metricsHistory, log, "test-pod")
+			avg := calculateAverageCPU(metricsHistory, log, testPodName)
 			Expect(avg).To(Equal(20.0))
 		})
 
 		It("should handle empty metrics history in average calculation", func() {
 			log := ctrl.Log.WithName("test")
 			metricsHistory := []PodCPUUsage{
-				{PodName: "test-pod", CPUPercentage: 50.0},
+				{PodName: testPodName, CPUPercentage: 50.0},
 			}
 
-			avg := calculateAverageCPU(metricsHistory, log, "test-pod")
+			avg := calculateAverageCPU(metricsHistory, log, testPodName)
 			Expect(avg).To(Equal(50.0))
 		})
 
@@ -345,7 +350,7 @@ var _ = Describe("Monitor Controller", func() {
 			// Store some test metrics
 			InMemoryMetricsStorage.Store("default/test-pod", []PodCPUUsage{
 				{
-					PodName:       "test-pod",
+					PodName:       testPodName,
 					CPUPercentage: 25.5,
 					Timestamp:     time.Now(),
 				},
@@ -369,8 +374,8 @@ var _ = Describe("Monitor Controller", func() {
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 				Log:    log,
-			}, "test-pod", "default", PodCPUUsage{
-				PodName:       "test-pod",
+			}, testPodName, testNamespace, PodCPUUsage{
+				PodName:       testPodName,
 				CPUPercentage: 50.0,
 			}, 10, log, "invalid-storage")
 
@@ -384,20 +389,20 @@ var _ = Describe("Monitor Controller", func() {
 			nonExistentRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "no-deploy-monitor",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "Deployment",
+						Kind:       kindDeployment,
 						Name:       "non-existent-deployment",
-						APIVersion: "apps/v1",
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 50,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       60,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "memory",
+					MetricStorageLocation:        StorageMemory,
 				},
 			}
 			Expect(k8sClient.Create(ctx, nonExistentRecycler)).To(Succeed())
@@ -412,7 +417,7 @@ var _ = Describe("Monitor Controller", func() {
 			_, err := monitorReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      "no-deploy-monitor",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 			})
 

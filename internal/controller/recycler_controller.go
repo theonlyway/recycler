@@ -251,7 +251,7 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				log.Error(err, "Failed to delete pod", "podName", pod.Name)
 			} else {
 				// Check if in-memory storage is being used
-				if recycler.Spec.MetricStorageLocation == "memory" {
+				if recycler.Spec.MetricStorageLocation == StorageMemory {
 					// Remove the pod's entry from in-memory storage
 					key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 					InMemoryMetricsStorage.Delete(key) // Access exported variable
@@ -302,7 +302,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 
 	// Handle cleanup based on MetricStorageLocation
 	switch recycler.Spec.MetricStorageLocation {
-	case "annotation":
+	case StorageAnnotation:
 		// Remove annotations from each pod
 		for _, pod := range podList.Items {
 			retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -330,7 +330,7 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 					"Removed annotations from pod %s", pod.Name)
 			}
 		}
-	case "memory":
+	case StorageMemory:
 		// Clear in-memory metrics storage for each pod
 		for _, pod := range podList.Items {
 			key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)

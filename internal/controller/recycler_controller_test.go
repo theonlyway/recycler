@@ -40,6 +40,11 @@ type mockEventRecorder struct{}
 func (m *mockEventRecorder) Eventf(regarding runtime.Object, related runtime.Object, eventtype, reason, action, note string, args ...any) {
 }
 
+const (
+	targetDeploymentName      = "target-deployment"
+	finalizerTestRecyclerName = "finalizer-test-recycler"
+)
+
 var _ = Describe("Recycler Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "test-resource"
@@ -48,7 +53,7 @@ var _ = Describe("Recycler Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: testNamespace, // TODO(user):Modify as needed
 		}
 		recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
 
@@ -56,16 +61,16 @@ var _ = Describe("Recycler Controller", func() {
 			By("Creating the target dummy deployment")
 			deployment := &appsv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "target-deployment",
-					Namespace: "default",
+					Name:      targetDeploymentName,
+					Namespace: testNamespace,
 				},
 				Spec: appsv1.DeploymentSpec{
 					Selector: &metav1.LabelSelector{
-						MatchLabels: map[string]string{"app": "test"},
+						MatchLabels: map[string]string{appLabelKey: "test"},
 					},
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{"app": "test"},
+							Labels: map[string]string{appLabelKey: "test"},
 						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
@@ -85,20 +90,20 @@ var _ = Describe("Recycler Controller", func() {
 				resource := &recyclertheonlywayecomv1alpha1.Recycler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "default",
+						Namespace: testNamespace,
 					},
 					Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 						ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-							Kind:       "Deployment",
-							Name:       "target-deployment",
-							APIVersion: "apps/v1",
+							Kind:       kindDeployment,
+							Name:       targetDeploymentName,
+							APIVersion: appsV1APIVersion,
 						},
 						AverageCpuUtilizationPercent: 50,
 						RecycleDelaySeconds:          300,
 						PollingIntervalSeconds:       60,
 						PodMetricsHistory:            10,
 						GracePeriodSeconds:           30,
-						MetricStorageLocation:        "memory",
+						MetricStorageLocation:        StorageMemory,
 					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
@@ -132,12 +137,12 @@ var _ = Describe("Recycler Controller", func() {
 
 			By("Cleanup the target deployment")
 			deployment := &appsv1.Deployment{}
-			err = k8sClient.Get(ctx, types.NamespacedName{Name: "target-deployment", Namespace: "default"}, deployment)
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: targetDeploymentName, Namespace: testNamespace}, deployment)
 			if err == nil {
 				Expect(k8sClient.Delete(ctx, deployment)).To(Succeed())
 				// Wait for deletion to complete
 				Eventually(func() bool {
-					err := k8sClient.Get(ctx, types.NamespacedName{Name: "target-deployment", Namespace: "default"}, deployment)
+					err := k8sClient.Get(ctx, types.NamespacedName{Name: targetDeploymentName, Namespace: testNamespace}, deployment)
 					return errors.IsNotFound(err)
 				}, "10s", "100ms").Should(BeTrue())
 			}
@@ -264,7 +269,7 @@ var _ = Describe("Recycler Controller", func() {
 
 			nonExistentName := types.NamespacedName{
 				Name:      "non-existent",
-				Namespace: "default",
+				Namespace: testNamespace,
 			}
 
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -279,20 +284,20 @@ var _ = Describe("Recycler Controller", func() {
 			annotationRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "annotation-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "Deployment",
-						Name:       "target-deployment",
-						APIVersion: "apps/v1",
+						Kind:       kindDeployment,
+						Name:       targetDeploymentName,
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 50,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       60,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "annotation",
+					MetricStorageLocation:        StorageAnnotation,
 				},
 			}
 			Expect(k8sClient.Create(ctx, annotationRecycler)).To(Succeed())
@@ -307,7 +312,7 @@ var _ = Describe("Recycler Controller", func() {
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      "annotation-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -322,20 +327,20 @@ var _ = Describe("Recycler Controller", func() {
 			customRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "custom-poll-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "Deployment",
-						Name:       "target-deployment",
-						APIVersion: "apps/v1",
+						Kind:       kindDeployment,
+						Name:       targetDeploymentName,
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 50,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       120,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "memory",
+					MetricStorageLocation:        StorageMemory,
 				},
 			}
 			Expect(k8sClient.Create(ctx, customRecycler)).To(Succeed())
@@ -350,7 +355,7 @@ var _ = Describe("Recycler Controller", func() {
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      "custom-poll-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -366,20 +371,20 @@ var _ = Describe("Recycler Controller", func() {
 			nonExistentRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "no-deployment-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "Deployment",
+						Kind:       kindDeployment,
 						Name:       "non-existent-deployment",
-						APIVersion: "apps/v1",
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 50,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       60,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "memory",
+					MetricStorageLocation:        StorageMemory,
 				},
 			}
 			Expect(k8sClient.Create(ctx, nonExistentRecycler)).To(Succeed())
@@ -394,7 +399,7 @@ var _ = Describe("Recycler Controller", func() {
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      "no-deployment-recycler",
-					Namespace: "default",
+					Namespace: testNamespace,
 				},
 			})
 			// Should return error when deployment not found
@@ -409,21 +414,21 @@ var _ = Describe("Recycler Controller", func() {
 
 			finalizerRecycler := &recyclertheonlywayecomv1alpha1.Recycler{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "finalizer-test-recycler",
-					Namespace: "default",
+					Name:      finalizerTestRecyclerName,
+					Namespace: testNamespace,
 				},
 				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
 					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
-						Kind:       "Deployment",
-						Name:       "target-deployment",
-						APIVersion: "apps/v1",
+						Kind:       kindDeployment,
+						Name:       targetDeploymentName,
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 50,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       60,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "memory",
+					MetricStorageLocation:        StorageMemory,
 				},
 			}
 			Expect(k8sClient.Create(ctx, finalizerRecycler)).To(Succeed())
@@ -438,8 +443,8 @@ var _ = Describe("Recycler Controller", func() {
 			// First reconcile to add finalizer
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Name:      "finalizer-test-recycler",
-					Namespace: "default",
+					Name:      finalizerTestRecyclerName,
+					Namespace: testNamespace,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -450,8 +455,8 @@ var _ = Describe("Recycler Controller", func() {
 			// Reconcile again to process finalizer
 			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Name:      "finalizer-test-recycler",
-					Namespace: "default",
+					Name:      finalizerTestRecyclerName,
+					Namespace: testNamespace,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
@@ -459,8 +464,8 @@ var _ = Describe("Recycler Controller", func() {
 			// Verify resource is eventually deleted
 			Eventually(func() bool {
 				err := k8sClient.Get(ctx, types.NamespacedName{
-					Name:      "finalizer-test-recycler",
-					Namespace: "default",
+					Name:      finalizerTestRecyclerName,
+					Namespace: testNamespace,
 				}, finalizerRecycler)
 				return errors.IsNotFound(err)
 			}, "10s", "100ms").Should(BeTrue())

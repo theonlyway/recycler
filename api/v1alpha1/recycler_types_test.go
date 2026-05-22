@@ -25,6 +25,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+const (
+	kindDeployment            = "Deployment"
+	testDeploymentName        = "test-deployment"
+	appsV1APIVersion          = "apps/v1"
+	storageMemory             = "memory"
+	testName                  = "test"
+	conditionReady            = "Ready"
+	conditionReconcileSuccess = "ReconcileSuccess"
+)
+
 func TestRecyclerTypes(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Recycler Types Suite")
@@ -34,22 +44,22 @@ var _ = Describe("Recycler Types", func() {
 	Context("CrossVersionObjectReference", func() {
 		It("should create a valid CrossVersionObjectReference", func() {
 			ref := CrossVersionObjectReference{
-				Kind:       "Deployment",
-				Name:       "test-deployment",
-				APIVersion: "apps/v1",
+				Kind:       kindDeployment,
+				Name:       testDeploymentName,
+				APIVersion: appsV1APIVersion,
 			}
 
-			Expect(ref.Kind).To(Equal("Deployment"))
-			Expect(ref.Name).To(Equal("test-deployment"))
-			Expect(ref.APIVersion).To(Equal("apps/v1"))
+			Expect(ref.Kind).To(Equal(kindDeployment))
+			Expect(ref.Name).To(Equal(testDeploymentName))
+			Expect(ref.APIVersion).To(Equal(appsV1APIVersion))
 		})
 
 		It("should handle default values", func() {
 			ref := CrossVersionObjectReference{
-				Name: "test-deployment",
+				Name: testDeploymentName,
 			}
 
-			Expect(ref.Name).To(Equal("test-deployment"))
+			Expect(ref.Name).To(Equal(testDeploymentName))
 			Expect(ref.Kind).To(Equal(""))
 			Expect(ref.APIVersion).To(Equal(""))
 		})
@@ -59,16 +69,16 @@ var _ = Describe("Recycler Types", func() {
 		It("should create a valid RecyclerSpec with all fields", func() {
 			spec := RecyclerSpec{
 				ScaleTargetRef: CrossVersionObjectReference{
-					Kind:       "Deployment",
-					Name:       "test-deployment",
-					APIVersion: "apps/v1",
+					Kind:       kindDeployment,
+					Name:       testDeploymentName,
+					APIVersion: appsV1APIVersion,
 				},
 				AverageCpuUtilizationPercent: 75,
 				RecycleDelaySeconds:          600,
 				PollingIntervalSeconds:       120,
 				PodMetricsHistory:            20,
 				GracePeriodSeconds:           60,
-				MetricStorageLocation:        "memory",
+				MetricStorageLocation:        storageMemory,
 			}
 
 			Expect(spec.AverageCpuUtilizationPercent).To(Equal(int32(75)))
@@ -76,14 +86,14 @@ var _ = Describe("Recycler Types", func() {
 			Expect(spec.PollingIntervalSeconds).To(Equal(int32(120)))
 			Expect(spec.PodMetricsHistory).To(Equal(int32(20)))
 			Expect(spec.GracePeriodSeconds).To(Equal(int32(60)))
-			Expect(spec.MetricStorageLocation).To(Equal("memory"))
+			Expect(spec.MetricStorageLocation).To(Equal(storageMemory))
 		})
 
 		It("should handle annotation storage location", func() {
 			spec := RecyclerSpec{
 				ScaleTargetRef: CrossVersionObjectReference{
-					Kind: "Deployment",
-					Name: "test",
+					Kind: kindDeployment,
+					Name: testName,
 				},
 				AverageCpuUtilizationPercent: 50,
 				MetricStorageLocation:        "annotation",
@@ -98,9 +108,9 @@ var _ = Describe("Recycler Types", func() {
 			status := RecyclerStatus{
 				Conditions: []metav1.Condition{
 					{
-						Type:               "Ready",
+						Type:               conditionReady,
 						Status:             metav1.ConditionTrue,
-						Reason:             "ReconcileSuccess",
+						Reason:             conditionReconcileSuccess,
 						Message:            "Recycler is ready",
 						LastTransitionTime: metav1.Now(),
 					},
@@ -108,7 +118,7 @@ var _ = Describe("Recycler Types", func() {
 			}
 
 			Expect(status.Conditions).To(HaveLen(1))
-			Expect(status.Conditions[0].Type).To(Equal("Ready"))
+			Expect(status.Conditions[0].Type).To(Equal(conditionReady))
 			Expect(status.Conditions[0].Status).To(Equal(metav1.ConditionTrue))
 		})
 
@@ -116,9 +126,9 @@ var _ = Describe("Recycler Types", func() {
 			status := RecyclerStatus{
 				Conditions: []metav1.Condition{
 					{
-						Type:   "Ready",
+						Type:   conditionReady,
 						Status: metav1.ConditionTrue,
-						Reason: "ReconcileSuccess",
+						Reason: conditionReconcileSuccess,
 					},
 					{
 						Type:   "Monitoring",
@@ -150,23 +160,23 @@ var _ = Describe("Recycler Types", func() {
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
-						Kind:       "Deployment",
-						Name:       "test-deployment",
-						APIVersion: "apps/v1",
+						Kind:       kindDeployment,
+						Name:       testDeploymentName,
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 80,
 					RecycleDelaySeconds:          300,
 					PollingIntervalSeconds:       60,
 					PodMetricsHistory:            10,
 					GracePeriodSeconds:           30,
-					MetricStorageLocation:        "memory",
+					MetricStorageLocation:        storageMemory,
 				},
 				Status: RecyclerStatus{
 					Conditions: []metav1.Condition{
 						{
-							Type:   "Ready",
+							Type:   conditionReady,
 							Status: metav1.ConditionTrue,
-							Reason: "ReconcileSuccess",
+							Reason: conditionReconcileSuccess,
 						},
 					},
 				},
@@ -182,7 +192,7 @@ var _ = Describe("Recycler Types", func() {
 			recycler := Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "minimal-recycler",
-					Namespace: "test",
+					Namespace: testName,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -257,9 +267,9 @@ var _ = Describe("Recycler Types", func() {
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
-						Kind:       "Deployment",
-						Name:       "test-deployment",
-						APIVersion: "apps/v1",
+						Kind:       kindDeployment,
+						Name:       testDeploymentName,
+						APIVersion: appsV1APIVersion,
 					},
 					AverageCpuUtilizationPercent: 70,
 					RecycleDelaySeconds:          400,
@@ -295,16 +305,16 @@ var _ = Describe("Recycler Types", func() {
 		It("should handle various metric storage locations", func() {
 			memorySpec := RecyclerSpec{
 				ScaleTargetRef: CrossVersionObjectReference{
-					Name: "test",
+					Name: testName,
 				},
 				AverageCpuUtilizationPercent: 50,
-				MetricStorageLocation:        "memory",
+				MetricStorageLocation:        storageMemory,
 			}
-			Expect(memorySpec.MetricStorageLocation).To(Equal("memory"))
+			Expect(memorySpec.MetricStorageLocation).To(Equal(storageMemory))
 
 			annotationSpec := RecyclerSpec{
 				ScaleTargetRef: CrossVersionObjectReference{
-					Name: "test",
+					Name: testName,
 				},
 				AverageCpuUtilizationPercent: 50,
 				MetricStorageLocation:        "annotation",
@@ -314,17 +324,17 @@ var _ = Describe("Recycler Types", func() {
 
 		It("should handle different ScaleTargetRef kinds", func() {
 			deploymentRef := CrossVersionObjectReference{
-				Kind:       "Deployment",
-				Name:       "test-deployment",
-				APIVersion: "apps/v1",
+				Kind:       kindDeployment,
+				Name:       testDeploymentName,
+				APIVersion: appsV1APIVersion,
 			}
-			Expect(deploymentRef.Kind).To(Equal("Deployment"))
+			Expect(deploymentRef.Kind).To(Equal(kindDeployment))
 		})
 
 		It("should handle various integer field values", func() {
 			spec := RecyclerSpec{
 				ScaleTargetRef: CrossVersionObjectReference{
-					Name: "test",
+					Name: testName,
 				},
 				AverageCpuUtilizationPercent: 100,
 				RecycleDelaySeconds:          1,
