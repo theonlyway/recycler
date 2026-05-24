@@ -43,6 +43,7 @@ func (m *mockEventRecorder) Eventf(regarding runtime.Object, related runtime.Obj
 const (
 	targetDeploymentName      = "target-deployment"
 	finalizerTestRecyclerName = "finalizer-test-recycler"
+	testAppValue              = "test"
 )
 
 var _ = Describe("Recycler Controller", func() {
@@ -66,15 +67,15 @@ var _ = Describe("Recycler Controller", func() {
 				},
 				Spec: appsv1.DeploymentSpec{
 					Selector: &metav1.LabelSelector{
-						MatchLabels: map[string]string{appLabelKey: "test"},
+						MatchLabels: map[string]string{appLabelKey: testAppValue},
 					},
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{appLabelKey: "test"},
+							Labels: map[string]string{appLabelKey: testAppValue},
 						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
-								Name:    "test",
+								Name:    testAppValue,
 								Image:   "busybox",
 								Command: []string{"sleep", "3600"},
 							}},
