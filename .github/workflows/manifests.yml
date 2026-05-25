@@ -11,8 +11,6 @@ jobs:
   verify-manifests:
     name: Verify manifests are up to date
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Clone the code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -21,6 +19,10 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: go.mod
+
+      - name: Check controller-gen version annotation
+        run: |
+          make check-controller-gen-version
 
       - name: Generate manifests
         run: |
@@ -31,20 +33,12 @@ jobs:
           make helm
 
       - name: Check for changes
-        id: verify
         run: |
           if [[ -n $(git status --porcelain) ]]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "The following files have changes:"
+            echo "Manifests or helm charts are out of date. The following files have changes:"
             git status --porcelain
-          else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "No changes detected"
+            git diff
+            echo "Run 'make manifests && make helm' locally and commit the results."
+            exit 1
           fi
-
-      - name: Commit manifest changes
-        if: steps.verify.outputs.changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7
-        with:
-          commit_message: 'chore: update manifests and helm charts'
-          file_pattern: 'config/** helm-charts/**'
+          echo "Manifests and helm charts are up to date."

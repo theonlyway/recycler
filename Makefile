@@ -105,7 +105,7 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: vscode-schema
@@ -116,7 +116,7 @@ vscode-schema: manifests yq jq ## Generate JSON schema for VS Code IntelliSense 
 	@echo "Generated .vscode/recycler-schema.json for VS Code IntelliSense"
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+generate: ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: fmt
@@ -161,13 +161,31 @@ test-e2e:
 	KIND_CLUSTER=$(KIND_CLUSTER) go test ./test/e2e/ -v -ginkgo.v
 	$(MAKE) cleanup-test-e2e
 .PHONY: lint
-lint: golangci-lint ## Run golangci-lint linter
+lint: golangci-lint check-controller-gen-version ## Run golangci-lint linter
 	@echo "Running [golangci-lint config path]..."
 	@$(GOLANGCI_LINT) config path
 	@echo "Running [golangci-lint config verify]..."
 	@$(GOLANGCI_LINT) config verify
 	@echo "Running [golangci-lint run]..."
 	$(GOLANGCI_LINT) run
+
+.PHONY: check-controller-gen-version
+check-controller-gen-version: ## Fail if controller-gen.kubebuilder.io/version annotation in CRDs does not match go.mod
+	@echo "Checking controller-gen version annotation in CRDs..."
+	@EXPECTED="$(shell go list -m -f '{{.Version}}' sigs.k8s.io/controller-tools)"; \
+	FAILED=0; \
+	for f in config/crd/bases/*.yaml; do \
+		ACTUAL=$$(grep 'controller-gen.kubebuilder.io/version' "$$f" | awk '{print $$2}'); \
+		if [ -n "$$ACTUAL" ] && [ "$$ACTUAL" != "$$EXPECTED" ]; then \
+			echo "FAIL: $$f: controller-gen.kubebuilder.io/version is '$$ACTUAL', expected '$$EXPECTED'"; \
+			FAILED=1; \
+		fi; \
+	done; \
+	if [ "$$FAILED" -eq 1 ]; then \
+		echo "Run 'make manifests' locally and commit the results."; \
+		exit 1; \
+	fi; \
+	echo "OK: all CRDs have controller-gen version $$EXPECTED"
 
 .PHONY: lint-fix
 lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
@@ -279,7 +297,7 @@ $(LOCALBIN):
 ## Tool Binaries
 KUBECTL ?= kubectl
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
-CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
+CONTROLLER_GEN ?= go tool controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
 YQ ?= $(LOCALBIN)/yq
@@ -287,7 +305,6 @@ JQ ?= $(LOCALBIN)/jq
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.4.3
-CONTROLLER_TOOLS_VERSION ?= v0.19.0
 #ENVTEST_VERSION is the version of controller-runtime release branch to fetch the envtest setup script (i.e. release-0.20)
 ENVTEST_VERSION ?= $(shell go list -m -f "{{ .Version }}" sigs.k8s.io/controller-runtime | awk -F'[v.]' '{printf "release-%d.%d", $$2, $$3}')
 #ENVTEST_K8S_VERSION is the version of Kubernetes to use for setting up ENVTEST binaries (i.e. 1.31)
@@ -301,10 +318,6 @@ kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
 $(KUSTOMIZE): $(LOCALBIN)
 	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5,$(KUSTOMIZE_VERSION))
 
-.PHONY: controller-gen
-controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
-$(CONTROLLER_GEN): $(LOCALBIN)
-	$(call go-install-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen,$(CONTROLLER_TOOLS_VERSION))
 
 .PHONY: setup-envtest
 setup-envtest: envtest ## Download the binaries required for ENVTEST in the local bin directory.

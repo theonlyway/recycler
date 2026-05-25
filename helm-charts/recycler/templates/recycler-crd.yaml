@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: recyclers.recycler.theonlywaye.com
   annotations:
-    controller-gen.kubebuilder.io/version: v0.19.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   labels:
   {{- include "recycler.labels" . | nindent 4 }}
 spec:
