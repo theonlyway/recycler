@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.37] - 2026-05-25
+### :white_check_mark: Tests
+- [`0a14561`](https://github.com/theonlyway/recycler/commit/0a145614734d6ef4283152aae53017381e18e4ac) - enhance coverage for DeepCopy methods and pod termination logic *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`c87c234`](https://github.com/theonlyway/recycler/commit/c87c234158b123a6b997f37130f3ad38fca2c642) - refactor test cases to use constants for container names and images *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.9.36] - 2026-05-25
 ### :bug: Bug Fixes
 - [`0301a95`](https://github.com/theonlyway/recycler/commit/0301a95236f990015a60ee761c19410e809672ea) - **deps**: update go dependencies *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -707,3 +713,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.34]: https://github.com/theonlyway/recycler/compare/1.9.33...1.9.34
 [1.9.35]: https://github.com/theonlyway/recycler/compare/1.9.34...1.9.35
 [1.9.36]: https://github.com/theonlyway/recycler/compare/1.9.35...1.9.36
+[1.9.37]: https://github.com/theonlyway/recycler/compare/1.9.36...1.9.37
