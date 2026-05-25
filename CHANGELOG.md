@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.38] - 2026-05-25
+### :wrench: Chores
+- [`fbb13ff`](https://github.com/theonlyway/recycler/commit/fbb13ffd26e4a8bc6269b841be61d34937366275) - update dependencies and controller-gen version *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`bebc32d`](https://github.com/theonlyway/recycler/commit/bebc32db28a8bf3fe69094e27612d02e90323fe2) - update manifests and helm charts *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`9b69acb`](https://github.com/theonlyway/recycler/commit/9b69acb56512fc76c7c6a563ef7292f4ddcd2896) - update workflow to check controller-gen version and remove auto-commit step *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5297278`](https://github.com/theonlyway/recycler/commit/5297278b3f7c61d41bd5632cfb80c337eb528341) - **deps**: update gcr.io/distroless/static:nonroot docker digest to 963fa6c *(PR [#140](https://github.com/theonlyway/recycler/pull/140) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.37] - 2026-05-25
 ### :white_check_mark: Tests
 - [`0a14561`](https://github.com/theonlyway/recycler/commit/0a145614734d6ef4283152aae53017381e18e4ac) - enhance coverage for DeepCopy methods and pod termination logic *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -714,3 +722,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.35]: https://github.com/theonlyway/recycler/compare/1.9.34...1.9.35
 [1.9.36]: https://github.com/theonlyway/recycler/compare/1.9.35...1.9.36
 [1.9.37]: https://github.com/theonlyway/recycler/compare/1.9.36...1.9.37
+[1.9.38]: https://github.com/theonlyway/recycler/compare/1.9.37...1.9.38
