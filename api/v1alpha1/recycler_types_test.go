@@ -33,6 +33,9 @@ const (
 	testName                  = "test"
 	conditionReady            = "Ready"
 	conditionReconcileSuccess = "ReconcileSuccess"
+	testRecyclerName          = "test-recycler"
+	defaultNamespace          = "default"
+	recyclerOneName           = "recycler-1"
 )
 
 func TestRecyclerTypes(t *testing.T) {
@@ -155,8 +158,8 @@ var _ = Describe("Recycler Types", func() {
 					Kind:       "Recycler",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-recycler",
-					Namespace: "default",
+					Name:      testRecyclerName,
+					Namespace: defaultNamespace,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -182,8 +185,8 @@ var _ = Describe("Recycler Types", func() {
 				},
 			}
 
-			Expect(recycler.Name).To(Equal("test-recycler"))
-			Expect(recycler.Namespace).To(Equal("default"))
+			Expect(recycler.Name).To(Equal(testRecyclerName))
+			Expect(recycler.Namespace).To(Equal(defaultNamespace))
 			Expect(recycler.Spec.AverageCpuUtilizationPercent).To(Equal(int32(80)))
 			Expect(recycler.Status.Conditions).To(HaveLen(1))
 		})
@@ -224,7 +227,7 @@ var _ = Describe("Recycler Types", func() {
 				Items: []Recycler{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "recycler-1",
+							Name: recyclerOneName,
 						},
 					},
 					{
@@ -236,7 +239,7 @@ var _ = Describe("Recycler Types", func() {
 			}
 
 			Expect(list.Items).To(HaveLen(2))
-			Expect(list.Items[0].Name).To(Equal("recycler-1"))
+			Expect(list.Items[0].Name).To(Equal(recyclerOneName))
 			Expect(list.Items[1].Name).To(Equal("recycler-2"))
 		})
 	})
@@ -262,8 +265,8 @@ var _ = Describe("Recycler Types", func() {
 		It("should serialize and deserialize Recycler correctly", func() {
 			original := &Recycler{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-recycler",
-					Namespace: "default",
+					Name:      testRecyclerName,
+					Namespace: defaultNamespace,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -289,7 +292,7 @@ var _ = Describe("Recycler Types", func() {
 				Items: []Recycler{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "recycler-1",
+							Name: recyclerOneName,
 						},
 					},
 				},
@@ -297,7 +300,198 @@ var _ = Describe("Recycler Types", func() {
 
 			copy := original.DeepCopy()
 			Expect(copy.Items).To(HaveLen(1))
-			Expect(copy.Items[0].Name).To(Equal("recycler-1"))
+			Expect(copy.Items[0].Name).To(Equal(recyclerOneName))
+		})
+	})
+
+	Context("DeepCopy methods", func() {
+		It("should return nil for nil CrossVersionObjectReference.DeepCopy", func() {
+			var ref *CrossVersionObjectReference
+			Expect(ref.DeepCopy()).To(BeNil())
+		})
+
+		It("should DeepCopyInto CrossVersionObjectReference", func() {
+			ref := &CrossVersionObjectReference{
+				Kind:       kindDeployment,
+				Name:       testDeploymentName,
+				APIVersion: appsV1APIVersion,
+			}
+			out := &CrossVersionObjectReference{}
+			ref.DeepCopyInto(out)
+			Expect(out.Kind).To(Equal(kindDeployment))
+			Expect(out.Name).To(Equal(testDeploymentName))
+			Expect(out.APIVersion).To(Equal(appsV1APIVersion))
+		})
+
+		It("should DeepCopy CrossVersionObjectReference", func() {
+			ref := &CrossVersionObjectReference{
+				Kind: kindDeployment,
+				Name: testDeploymentName,
+			}
+			copied := ref.DeepCopy()
+			Expect(copied).NotTo(BeNil())
+			Expect(copied.Kind).To(Equal(kindDeployment))
+			Expect(copied.Name).To(Equal(testDeploymentName))
+		})
+
+		It("should return nil for nil Recycler.DeepCopy", func() {
+			var r *Recycler
+			Expect(r.DeepCopy()).To(BeNil())
+		})
+
+		It("should return nil for nil Recycler.DeepCopyObject", func() {
+			var r *Recycler
+			Expect(r.DeepCopyObject()).To(BeNil())
+		})
+
+		It("should DeepCopyObject a non-nil Recycler", func() {
+			recycler := &Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      testRecyclerName,
+					Namespace: defaultNamespace,
+				},
+				Spec: RecyclerSpec{
+					ScaleTargetRef: CrossVersionObjectReference{
+						Kind: kindDeployment,
+						Name: testDeploymentName,
+					},
+					AverageCpuUtilizationPercent: 75,
+				},
+			}
+			obj := recycler.DeepCopyObject()
+			Expect(obj).NotTo(BeNil())
+			copied, ok := obj.(*Recycler)
+			Expect(ok).To(BeTrue())
+			Expect(copied.Name).To(Equal(testRecyclerName))
+			Expect(copied.Spec.AverageCpuUtilizationPercent).To(Equal(int32(75)))
+		})
+
+		It("should DeepCopyInto Recycler with non-nil conditions", func() {
+			original := &Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "original",
+					Namespace: defaultNamespace,
+				},
+				Spec: RecyclerSpec{
+					ScaleTargetRef: CrossVersionObjectReference{
+						Kind: kindDeployment,
+						Name: testDeploymentName,
+					},
+					AverageCpuUtilizationPercent: 50,
+				},
+				Status: RecyclerStatus{
+					Conditions: []metav1.Condition{
+						{
+							Type:   conditionReady,
+							Status: metav1.ConditionTrue,
+							Reason: conditionReconcileSuccess,
+						},
+					},
+				},
+			}
+			out := &Recycler{}
+			original.DeepCopyInto(out)
+			Expect(out.Name).To(Equal("original"))
+			Expect(out.Status.Conditions).To(HaveLen(1))
+			Expect(out.Status.Conditions[0].Type).To(Equal(conditionReady))
+		})
+
+		It("should return nil for nil RecyclerList.DeepCopy", func() {
+			var list *RecyclerList
+			Expect(list.DeepCopy()).To(BeNil())
+		})
+
+		It("should return nil for nil RecyclerList.DeepCopyObject", func() {
+			var list *RecyclerList
+			Expect(list.DeepCopyObject()).To(BeNil())
+		})
+
+		It("should DeepCopyObject a non-nil RecyclerList", func() {
+			list := &RecyclerList{
+				Items: []Recycler{
+					{ObjectMeta: metav1.ObjectMeta{Name: recyclerOneName}},
+				},
+			}
+			obj := list.DeepCopyObject()
+			Expect(obj).NotTo(BeNil())
+			copied, ok := obj.(*RecyclerList)
+			Expect(ok).To(BeTrue())
+			Expect(copied.Items).To(HaveLen(1))
+			Expect(copied.Items[0].Name).To(Equal(recyclerOneName))
+		})
+
+		It("should DeepCopyInto RecyclerList preserving items", func() {
+			list := &RecyclerList{
+				Items: []Recycler{
+					{ObjectMeta: metav1.ObjectMeta{Name: "item-1"}},
+					{ObjectMeta: metav1.ObjectMeta{Name: "item-2"}},
+				},
+			}
+			out := &RecyclerList{}
+			list.DeepCopyInto(out)
+			Expect(out.Items).To(HaveLen(2))
+			Expect(out.Items[0].Name).To(Equal("item-1"))
+			Expect(out.Items[1].Name).To(Equal("item-2"))
+		})
+
+		It("should return nil for nil RecyclerSpec.DeepCopy", func() {
+			var spec *RecyclerSpec
+			Expect(spec.DeepCopy()).To(BeNil())
+		})
+
+		It("should DeepCopy a RecyclerSpec", func() {
+			spec := &RecyclerSpec{
+				ScaleTargetRef: CrossVersionObjectReference{
+					Kind: kindDeployment,
+					Name: testDeploymentName,
+				},
+				AverageCpuUtilizationPercent: 80,
+				RecycleDelaySeconds:          300,
+				MetricStorageLocation:        storageMemory,
+			}
+			copied := spec.DeepCopy()
+			Expect(copied).NotTo(BeNil())
+			Expect(copied.AverageCpuUtilizationPercent).To(Equal(int32(80)))
+			Expect(copied.ScaleTargetRef.Name).To(Equal(testDeploymentName))
+			Expect(copied.MetricStorageLocation).To(Equal(storageMemory))
+		})
+
+		It("should return nil for nil RecyclerStatus.DeepCopy", func() {
+			var status *RecyclerStatus
+			Expect(status.DeepCopy()).To(BeNil())
+		})
+
+		It("should DeepCopy a RecyclerStatus with non-nil conditions", func() {
+			status := &RecyclerStatus{
+				Conditions: []metav1.Condition{
+					{
+						Type:   conditionReady,
+						Status: metav1.ConditionTrue,
+						Reason: conditionReconcileSuccess,
+					},
+				},
+			}
+			copied := status.DeepCopy()
+			Expect(copied).NotTo(BeNil())
+			Expect(copied.Conditions).To(HaveLen(1))
+			Expect(copied.Conditions[0].Type).To(Equal(conditionReady))
+			// Mutating original should not affect copy
+			status.Conditions[0].Type = "Modified"
+			Expect(copied.Conditions[0].Type).To(Equal(conditionReady))
+		})
+
+		It("should DeepCopyInto RecyclerStatus with multiple conditions", func() {
+			status := &RecyclerStatus{
+				Conditions: []metav1.Condition{
+					{Type: "Available", Status: metav1.ConditionTrue, Reason: "Ready"},
+					{Type: "Degraded", Status: metav1.ConditionFalse, Reason: "Recovering"},
+				},
+			}
+			out := &RecyclerStatus{}
+			status.DeepCopyInto(out)
+			Expect(out.Conditions).To(HaveLen(2))
+			Expect(out.Conditions[0].Type).To(Equal("Available"))
+			Expect(out.Conditions[1].Type).To(Equal("Degraded"))
 		})
 	})
 

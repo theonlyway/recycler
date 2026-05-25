@@ -18,6 +18,8 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -44,6 +46,7 @@ const (
 	targetDeploymentName      = "target-deployment"
 	finalizerTestRecyclerName = "finalizer-test-recycler"
 	testAppValue              = "test"
+	busyboxImage              = "busybox"
 )
 
 var _ = Describe("Recycler Controller", func() {
@@ -76,7 +79,7 @@ var _ = Describe("Recycler Controller", func() {
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
 								Name:    testAppValue,
-								Image:   "busybox",
+								Image:   busyboxImage,
 								Command: []string{"sleep", "3600"},
 							}},
 						},
@@ -470,6 +473,283 @@ var _ = Describe("Recycler Controller", func() {
 				}, finalizerRecycler)
 				return errors.IsNotFound(err)
 			}, "10s", "100ms").Should(BeTrue())
+		})
+	})
+
+	Context("terminatePods function", func() {
+		const (
+			terminateDeploymentName = "terminate-test-deployment"
+			expiredPodName          = "expired-breach-pod"
+			recentPodName           = "recent-breach-pod"
+			noAnnotationPodName     = "no-annotation-pod"
+			invalidTsPodName        = "invalid-ts-pod"
+			terminateTestLabelValue = "terminate-test"
+		)
+
+		ctx := context.Background()
+
+		makeTerminateRecycler := func(delaySeconds int32, storage string) *recyclertheonlywayecomv1alpha1.Recycler {
+			return &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "terminate-recycler",
+					Namespace: testNamespace,
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       kindDeployment,
+						Name:       terminateDeploymentName,
+						APIVersion: appsV1APIVersion,
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          delaySeconds,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            5,
+					GracePeriodSeconds:           0,
+					MetricStorageLocation:        storage,
+				},
+			}
+		}
+
+		BeforeEach(func() {
+			deployment := &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      terminateDeploymentName,
+					Namespace: testNamespace,
+				},
+				Spec: appsv1.DeploymentSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{appLabelKey: terminateTestLabelValue},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{appLabelKey: terminateTestLabelValue},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{{
+								Name:  testAppValue,
+								Image: busyboxImage,
+							}},
+						},
+					},
+				},
+			}
+			_ = k8sClient.Create(ctx, deployment)
+		})
+
+		AfterEach(func() {
+			for _, name := range []string{expiredPodName, recentPodName, noAnnotationPodName, invalidTsPodName} {
+				pod := &corev1.Pod{}
+				if err := k8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: testNamespace}, pod); err == nil {
+					_ = k8sClient.Delete(ctx, pod)
+				}
+			}
+			deployment := &appsv1.Deployment{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: terminateDeploymentName, Namespace: testNamespace}, deployment); err == nil {
+				_ = k8sClient.Delete(ctx, deployment)
+				Eventually(func() bool {
+					return errors.IsNotFound(k8sClient.Get(ctx, types.NamespacedName{Name: terminateDeploymentName, Namespace: testNamespace}, &appsv1.Deployment{}))
+				}, "10s", "100ms").Should(BeTrue())
+			}
+		})
+
+		createPodWithLabels := func(name string, annotations map[string]string) {
+			pod := &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        name,
+					Namespace:   testNamespace,
+					Labels:      map[string]string{appLabelKey: terminateTestLabelValue},
+					Annotations: annotations,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{{
+						Name:  testAppValue,
+						Image: busyboxImage,
+					}},
+				},
+			}
+			Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+		}
+
+		newRecyclerReconciler := func() *RecyclerReconciler {
+			return &RecyclerReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("test"),
+				Recorder: &mockEventRecorder{},
+			}
+		}
+
+		It("should skip pods without breach timestamp annotation", func() {
+			createPodWithLabels(noAnnotationPodName, nil)
+
+			err := terminatePods(ctx, newRecyclerReconciler(), makeTerminateRecycler(5, StorageMemory), ctrl.Log.WithName("test"))
+			Expect(err).NotTo(HaveOccurred())
+
+			existingPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: noAnnotationPodName, Namespace: testNamespace}, existingPod)).To(Succeed())
+		})
+
+		It("should skip pods with a recent breach timestamp", func() {
+			createPodWithLabels(recentPodName, map[string]string{
+				cpuBreachTimestampAnnotation: time.Now().Format(time.RFC3339),
+			})
+
+			// Use a 1-hour delay so the recent breach will not have elapsed
+			err := terminatePods(ctx, newRecyclerReconciler(), makeTerminateRecycler(3600, StorageMemory), ctrl.Log.WithName("test"))
+			Expect(err).NotTo(HaveOccurred())
+
+			existingPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: recentPodName, Namespace: testNamespace}, existingPod)).To(Succeed())
+		})
+
+		It("should terminate pod with expired breach timestamp and clear in-memory storage", func() {
+			createPodWithLabels(expiredPodName, map[string]string{
+				cpuBreachTimestampAnnotation: time.Now().Add(-10 * time.Minute).Format(time.RFC3339),
+			})
+
+			key := fmt.Sprintf("%s/%s", testNamespace, expiredPodName)
+			InMemoryMetricsStorage.Store(key, []PodCPUUsage{{PodName: expiredPodName}})
+
+			// 5-second delay, breach was 10 minutes ago — should trigger termination
+			err := terminatePods(ctx, newRecyclerReconciler(), makeTerminateRecycler(5, StorageMemory), ctrl.Log.WithName("test"))
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(func() bool {
+				return errors.IsNotFound(k8sClient.Get(ctx, types.NamespacedName{Name: expiredPodName, Namespace: testNamespace}, &corev1.Pod{}))
+			}, "10s", "100ms").Should(BeTrue())
+
+			_, exists := InMemoryMetricsStorage.Load(key)
+			Expect(exists).To(BeFalse())
+		})
+
+		It("should terminate pod with expired breach and not clear storage when using annotation storage", func() {
+			createPodWithLabels(expiredPodName, map[string]string{
+				cpuBreachTimestampAnnotation: time.Now().Add(-10 * time.Minute).Format(time.RFC3339),
+			})
+
+			err := terminatePods(ctx, newRecyclerReconciler(), makeTerminateRecycler(5, StorageAnnotation), ctrl.Log.WithName("test"))
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(func() bool {
+				return errors.IsNotFound(k8sClient.Get(ctx, types.NamespacedName{Name: expiredPodName, Namespace: testNamespace}, &corev1.Pod{}))
+			}, "10s", "100ms").Should(BeTrue())
+		})
+
+		It("should skip pods with an invalid breach timestamp", func() {
+			createPodWithLabels(invalidTsPodName, map[string]string{
+				cpuBreachTimestampAnnotation: "not-a-valid-timestamp",
+			})
+
+			err := terminatePods(ctx, newRecyclerReconciler(), makeTerminateRecycler(5, StorageMemory), ctrl.Log.WithName("test"))
+			Expect(err).NotTo(HaveOccurred())
+
+			existingPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: invalidTsPodName, Namespace: testNamespace}, existingPod)).To(Succeed())
+		})
+	})
+
+	Context("doFinalizerOperationsForRecycler with annotation storage", func() {
+		const (
+			finalizerAnnotationDeployment = "finalizer-annotation-deployment"
+			finalizerAnnotationPod        = "finalizer-annotation-pod"
+			finalizerAnnotationLabelValue = "finalizer-annotation-test"
+		)
+
+		ctx := context.Background()
+
+		BeforeEach(func() {
+			deployment := &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      finalizerAnnotationDeployment,
+					Namespace: testNamespace,
+				},
+				Spec: appsv1.DeploymentSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{appLabelKey: finalizerAnnotationLabelValue},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{appLabelKey: finalizerAnnotationLabelValue},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{{
+								Name:  testAppValue,
+								Image: busyboxImage,
+							}},
+						},
+					},
+				},
+			}
+			_ = k8sClient.Create(ctx, deployment)
+		})
+
+		AfterEach(func() {
+			pod := &corev1.Pod{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: finalizerAnnotationPod, Namespace: testNamespace}, pod); err == nil {
+				_ = k8sClient.Delete(ctx, pod)
+			}
+			deployment := &appsv1.Deployment{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: finalizerAnnotationDeployment, Namespace: testNamespace}, deployment); err == nil {
+				_ = k8sClient.Delete(ctx, deployment)
+				Eventually(func() bool {
+					return errors.IsNotFound(k8sClient.Get(ctx, types.NamespacedName{Name: finalizerAnnotationDeployment, Namespace: testNamespace}, &appsv1.Deployment{}))
+				}, "10s", "100ms").Should(BeTrue())
+			}
+		})
+
+		It("should remove cpu breach and metrics annotations from pods", func() {
+			pod := &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      finalizerAnnotationPod,
+					Namespace: testNamespace,
+					Labels:    map[string]string{appLabelKey: finalizerAnnotationLabelValue},
+					Annotations: map[string]string{
+						cpuBreachTimestampAnnotation: time.Now().Format(time.RFC3339),
+						podMetricsAnnotation:         `[]`,
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{{
+						Name:  testAppValue,
+						Image: busyboxImage,
+					}},
+				},
+			}
+			Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+
+			recycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "finalizer-annotation-recycler",
+					Namespace: testNamespace,
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       kindDeployment,
+						Name:       finalizerAnnotationDeployment,
+						APIVersion: appsV1APIVersion,
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            5,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        StorageAnnotation,
+				},
+			}
+
+			r := &RecyclerReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("test"),
+				Recorder: &mockEventRecorder{},
+			}
+
+			r.doFinalizerOperationsForRecycler(ctx, recycler)
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: finalizerAnnotationPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations).NotTo(HaveKey(cpuBreachTimestampAnnotation))
+			Expect(updatedPod.Annotations).NotTo(HaveKey(podMetricsAnnotation))
 		})
 	})
 })
