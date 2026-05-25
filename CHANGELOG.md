@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.35] - 2026-05-25
+### :recycle: Refactors
+- [`9a600eb`](https://github.com/theonlyway/recycler/commit/9a600eb5787b1a03b8fd95e61b4678373ca100bc) - replace string literals with constants in controller and test files *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`bd61f13`](https://github.com/theonlyway/recycler/commit/bd61f13519711255c93431dfed40f6541ec789aa) - replace hardcoded string literals with constants in tests and Makefile *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`508297e`](https://github.com/theonlyway/recycler/commit/508297e17a1241f0876660a588e6be3bfa03e26e) - **deps**: update requarks/changelog-action digest to b78a335 *(PR [#136](https://github.com/theonlyway/recycler/pull/136) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`3780e07`](https://github.com/theonlyway/recycler/commit/3780e070c262155d27a0e5fdd7a1f2d5902f29da) - **deps**: update golang:1.26 docker digest to 6df14f4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.34] - 2026-04-27
 ### :wrench: Chores
 - [`154133d`](https://github.com/theonlyway/recycler/commit/154133d372623cee5f8330fec393143d50664378) - **deps**: update golang:1.26 docker digest to b54cbf5 *(PR [#135](https://github.com/theonlyway/recycler/pull/135) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -683,3 +693,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.32]: https://github.com/theonlyway/recycler/compare/1.9.31...1.9.32
 [1.9.33]: https://github.com/theonlyway/recycler/compare/1.9.32...1.9.33
 [1.9.34]: https://github.com/theonlyway/recycler/compare/1.9.33...1.9.34
+[1.9.35]: https://github.com/theonlyway/recycler/compare/1.9.34...1.9.35
