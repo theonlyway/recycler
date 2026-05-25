@@ -18,6 +18,8 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -426,6 +428,272 @@ var _ = Describe("Monitor Controller", func() {
 
 			// Cleanup
 			Expect(k8sClient.Delete(ctx, nonExistentRecycler)).To(Succeed())
+		})
+	})
+
+	Context("Helper function direct tests", func() {
+		const (
+			directTestPod      = "direct-test-pod"
+			directTestRecycler = "direct-test-recycler"
+		)
+
+		ctx := context.Background()
+
+		newMonitorReconciler := func() *MonitorReconciler {
+			return &MonitorReconciler{
+				Client:   k8sClient,
+				Scheme:   k8sClient.Scheme(),
+				Log:      ctrl.Log.WithName("test"),
+				Recorder: &mockEventRecorder{},
+			}
+		}
+
+		createPod := func(annotations map[string]string) *corev1.Pod {
+			pod := &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        directTestPod,
+					Namespace:   testNamespace,
+					Annotations: annotations,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{{
+						Name:  "test",
+						Image: "busybox",
+					}},
+				},
+			}
+			Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+			return pod
+		}
+
+		createRecycler := func() *recyclertheonlywayecomv1alpha1.Recycler {
+			recycler := &recyclertheonlywayecomv1alpha1.Recycler{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      directTestRecycler,
+					Namespace: testNamespace,
+				},
+				Spec: recyclertheonlywayecomv1alpha1.RecyclerSpec{
+					ScaleTargetRef: recyclertheonlywayecomv1alpha1.CrossVersionObjectReference{
+						Kind:       kindDeployment,
+						Name:       "some-deployment",
+						APIVersion: appsV1APIVersion,
+					},
+					AverageCpuUtilizationPercent: 50,
+					RecycleDelaySeconds:          300,
+					PollingIntervalSeconds:       60,
+					PodMetricsHistory:            5,
+					GracePeriodSeconds:           30,
+					MetricStorageLocation:        StorageMemory,
+				},
+			}
+			Expect(k8sClient.Create(ctx, recycler)).To(Succeed())
+			return recycler
+		}
+
+		AfterEach(func() {
+			pod := &corev1.Pod{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, pod); err == nil {
+				_ = k8sClient.Delete(ctx, pod)
+				Eventually(func() bool {
+					return errors.IsNotFound(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, &corev1.Pod{}))
+				}, "10s", "100ms").Should(BeTrue())
+			}
+			recycler := &recyclertheonlywayecomv1alpha1.Recycler{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: directTestRecycler, Namespace: testNamespace}, recycler); err == nil {
+				_ = k8sClient.Delete(ctx, recycler)
+			}
+		})
+
+		It("should update pod metrics history with annotation storage", func() {
+			createPod(nil)
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			dataPoint := PodCPUUsage{
+				PodName:       directTestPod,
+				CPUPercentage: 30.0,
+				Timestamp:     time.Now(),
+			}
+			err := updatePodMetricsHistory(ctx, r, directTestPod, testNamespace, dataPoint, 5, log, StorageAnnotation)
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations).To(HaveKey(podMetricsAnnotation))
+		})
+
+		It("should trim metrics history when exceeding max size with annotation storage", func() {
+			createPod(nil)
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			for i := 0; i < 3; i++ {
+				dataPoint := PodCPUUsage{
+					PodName:       directTestPod,
+					CPUPercentage: float64(i * 10),
+					Timestamp:     time.Now(),
+				}
+				err := updatePodMetricsHistory(ctx, r, directTestPod, testNamespace, dataPoint, 2, log, StorageAnnotation)
+				Expect(err).NotTo(HaveOccurred())
+			}
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+
+			var history []PodCPUUsage
+			Expect(json.Unmarshal([]byte(updatedPod.Annotations[podMetricsAnnotation]), &history)).To(Succeed())
+			Expect(history).To(HaveLen(2))
+		})
+
+		It("should fetch metrics history from annotation storage", func() {
+			dataPoint := PodCPUUsage{
+				PodName:       directTestPod,
+				CPUPercentage: 55.0,
+				Timestamp:     time.Now(),
+			}
+			historyJSON, _ := json.Marshal([]PodCPUUsage{dataPoint})
+			pod := createPod(map[string]string{
+				podMetricsAnnotation: string(historyJSON),
+			})
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			history, err := fetchPodMetricsHistory(ctx, r, pod, log, StorageAnnotation)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(history).To(HaveLen(1))
+			Expect(history[0].CPUPercentage).To(Equal(55.0))
+		})
+
+		It("should return nil for pod without metrics annotation", func() {
+			pod := createPod(nil)
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			history, err := fetchPodMetricsHistory(ctx, r, pod, log, StorageAnnotation)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(history).To(BeNil())
+		})
+
+		It("should return nil for pod not in in-memory storage", func() {
+			pod := createPod(nil)
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			key := fmt.Sprintf("%s/%s", testNamespace, directTestPod)
+			InMemoryMetricsStorage.Delete(key)
+
+			history, err := fetchPodMetricsHistory(ctx, r, pod, log, StorageMemory)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(history).To(BeNil())
+		})
+
+		It("should add breach annotation when CPU exceeds threshold", func() {
+			createPod(nil)
+			recycler := createRecycler()
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			pod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, pod)).To(Succeed())
+
+			metricsHistory := []PodCPUUsage{
+				{CPUPercentage: 80.0},
+				{CPUPercentage: 90.0},
+			}
+			err := checkPodMetricsAnnotation(ctx, r, recycler, pod, metricsHistory, 50, log)
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations).To(HaveKey(cpuBreachTimestampAnnotation))
+		})
+
+		It("should remove breach annotation when CPU recovers below threshold", func() {
+			createPod(map[string]string{
+				cpuBreachTimestampAnnotation: time.Now().Format(time.RFC3339),
+			})
+			recycler := createRecycler()
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			pod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, pod)).To(Succeed())
+
+			metricsHistory := []PodCPUUsage{
+				{CPUPercentage: 20.0},
+				{CPUPercentage: 30.0},
+			}
+			err := checkPodMetricsAnnotation(ctx, r, recycler, pod, metricsHistory, 50, log)
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations).NotTo(HaveKey(cpuBreachTimestampAnnotation))
+		})
+
+		It("should not update breach annotation when it already exists", func() {
+			originalBreachTime := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
+			createPod(map[string]string{
+				cpuBreachTimestampAnnotation: originalBreachTime,
+			})
+			recycler := createRecycler()
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			pod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, pod)).To(Succeed())
+
+			err := handleThresholdBreach(ctx, r, recycler, pod, 90.0, log)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Breach timestamp should not have been overwritten
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations[cpuBreachTimestampAnnotation]).To(Equal(originalBreachTime))
+		})
+
+		It("should not error when recovering a pod that has no breach annotation", func() {
+			createPod(nil)
+			recycler := createRecycler()
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			pod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, pod)).To(Succeed())
+
+			err := handleThresholdRecovery(ctx, r, recycler, pod, 30.0, log)
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations).NotTo(HaveKey(cpuBreachTimestampAnnotation))
+		})
+
+		It("should remove breach annotation when pod has recovered", func() {
+			createPod(map[string]string{
+				cpuBreachTimestampAnnotation: time.Now().Add(-30 * time.Minute).Format(time.RFC3339),
+			})
+			recycler := createRecycler()
+
+			r := newMonitorReconciler()
+			log := ctrl.Log.WithName("test")
+
+			pod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, pod)).To(Succeed())
+
+			err := handleThresholdRecovery(ctx, r, recycler, pod, 10.0, log)
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedPod := &corev1.Pod{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: directTestPod, Namespace: testNamespace}, updatedPod)).To(Succeed())
+			Expect(updatedPod.Annotations).NotTo(HaveKey(cpuBreachTimestampAnnotation))
 		})
 	})
 })
