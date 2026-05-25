@@ -170,23 +170,22 @@ lint: golangci-lint check-controller-gen-version ## Run golangci-lint linter
 	$(GOLANGCI_LINT) run
 
 .PHONY: check-controller-gen-version
-check-controller-gen-version: ## Check controller-gen.kubebuilder.io/version annotation in CRDs matches go.mod, regenerating if needed
+check-controller-gen-version: ## Fail if controller-gen.kubebuilder.io/version annotation in CRDs does not match go.mod
 	@echo "Checking controller-gen version annotation in CRDs..."
 	@EXPECTED="$(shell go list -m -f '{{.Version}}' sigs.k8s.io/controller-tools)"; \
-	STALE=0; \
+	FAILED=0; \
 	for f in config/crd/bases/*.yaml; do \
 		ACTUAL=$$(grep 'controller-gen.kubebuilder.io/version' "$$f" | awk '{print $$2}'); \
 		if [ -n "$$ACTUAL" ] && [ "$$ACTUAL" != "$$EXPECTED" ]; then \
-			echo "WARN: $$f: controller-gen.kubebuilder.io/version is '$$ACTUAL', expected '$$EXPECTED'"; \
-			STALE=1; \
+			echo "FAIL: $$f: controller-gen.kubebuilder.io/version is '$$ACTUAL', expected '$$EXPECTED'"; \
+			FAILED=1; \
 		fi; \
 	done; \
-	if [ "$$STALE" -eq 1 ]; then \
-		echo "Stale CRDs detected — regenerating via 'make manifests'..."; \
-		$(MAKE) manifests; \
-	else \
-		echo "OK: all CRDs have controller-gen version $$EXPECTED"; \
-	fi
+	if [ "$$FAILED" -eq 1 ]; then \
+		echo "Run 'make manifests' locally and commit the results."; \
+		exit 1; \
+	fi; \
+	echo "OK: all CRDs have controller-gen version $$EXPECTED"
 
 .PHONY: lint-fix
 lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
