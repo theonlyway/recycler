@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.36] - 2026-05-25
+### :bug: Bug Fixes
+- [`0301a95`](https://github.com/theonlyway/recycler/commit/0301a95236f990015a60ee761c19410e809672ea) - **deps**: update go dependencies *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :recycle: Refactors
+- [`13ae4bd`](https://github.com/theonlyway/recycler/commit/13ae4bde471594ff515dcf9e67b3667fa981c207) - update SchemeBuilder registration for API types in v1alpha1 *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`7a5230c`](https://github.com/theonlyway/recycler/commit/7a5230c10ad52d4b23fd7c8d30466b9bb804b6ca) - **deps**: update docker/login-action digest to 650006c *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`cf3b739`](https://github.com/theonlyway/recycler/commit/cf3b739796243a25c0aee9c626b158504fc6ad04) - **deps**: update actions/create-github-app-token digest to bcd2ba4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.35] - 2026-05-25
 ### :recycle: Refactors
 - [`9a600eb`](https://github.com/theonlyway/recycler/commit/9a600eb5787b1a03b8fd95e61b4678373ca100bc) - replace string literals with constants in controller and test files *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -694,3 +706,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.33]: https://github.com/theonlyway/recycler/compare/1.9.32...1.9.33
 [1.9.34]: https://github.com/theonlyway/recycler/compare/1.9.33...1.9.34
 [1.9.35]: https://github.com/theonlyway/recycler/compare/1.9.34...1.9.35
+[1.9.36]: https://github.com/theonlyway/recycler/compare/1.9.35...1.9.36
