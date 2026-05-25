@@ -46,6 +46,12 @@ var testEnv *envtest.Environment
 var ctx context.Context
 var cancel context.CancelFunc
 
+const (
+	testNamespace    = "default"
+	appsV1APIVersion = "apps/v1"
+	appLabelKey      = "app"
+)
+
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
 

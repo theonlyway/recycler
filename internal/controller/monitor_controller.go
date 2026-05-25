@@ -48,6 +48,7 @@ const monitorControllerName = "monitor"
 const (
 	StorageMemory     string = "memory"
 	StorageAnnotation string = "annotation"
+	kindDeployment    string = "Deployment"
 )
 
 // Exported thread-safe in-memory storage for metrics
@@ -102,7 +103,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Fetch the resource type using ScaleTargetRef
 	switch kind := recycler.Spec.ScaleTargetRef.Kind; kind {
-	case "Deployment":
+	case kindDeployment:
 		// Fetch the target deployment using ScaleTargetRef
 		deployment := &appsv1.Deployment{}
 		log.V(1).Info("Retrieving pods in target deployment", "controller", monitorControllerName, "deployment", recycler.Spec.ScaleTargetRef.Name)
