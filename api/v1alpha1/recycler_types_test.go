@@ -33,6 +33,9 @@ const (
 	testName                  = "test"
 	conditionReady            = "Ready"
 	conditionReconcileSuccess = "ReconcileSuccess"
+	testRecyclerName          = "test-recycler"
+	defaultNamespace          = "default"
+	recyclerOneName           = "recycler-1"
 )
 
 func TestRecyclerTypes(t *testing.T) {
@@ -155,8 +158,8 @@ var _ = Describe("Recycler Types", func() {
 					Kind:       "Recycler",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-recycler",
-					Namespace: "default",
+					Name:      testRecyclerName,
+					Namespace: defaultNamespace,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -182,8 +185,8 @@ var _ = Describe("Recycler Types", func() {
 				},
 			}
 
-			Expect(recycler.Name).To(Equal("test-recycler"))
-			Expect(recycler.Namespace).To(Equal("default"))
+			Expect(recycler.Name).To(Equal(testRecyclerName))
+			Expect(recycler.Namespace).To(Equal(defaultNamespace))
 			Expect(recycler.Spec.AverageCpuUtilizationPercent).To(Equal(int32(80)))
 			Expect(recycler.Status.Conditions).To(HaveLen(1))
 		})
@@ -224,7 +227,7 @@ var _ = Describe("Recycler Types", func() {
 				Items: []Recycler{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "recycler-1",
+							Name: recyclerOneName,
 						},
 					},
 					{
@@ -236,7 +239,7 @@ var _ = Describe("Recycler Types", func() {
 			}
 
 			Expect(list.Items).To(HaveLen(2))
-			Expect(list.Items[0].Name).To(Equal("recycler-1"))
+			Expect(list.Items[0].Name).To(Equal(recyclerOneName))
 			Expect(list.Items[1].Name).To(Equal("recycler-2"))
 		})
 	})
@@ -262,8 +265,8 @@ var _ = Describe("Recycler Types", func() {
 		It("should serialize and deserialize Recycler correctly", func() {
 			original := &Recycler{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-recycler",
-					Namespace: "default",
+					Name:      testRecyclerName,
+					Namespace: defaultNamespace,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -289,7 +292,7 @@ var _ = Describe("Recycler Types", func() {
 				Items: []Recycler{
 					{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: "recycler-1",
+							Name: recyclerOneName,
 						},
 					},
 				},
@@ -297,7 +300,7 @@ var _ = Describe("Recycler Types", func() {
 
 			copy := original.DeepCopy()
 			Expect(copy.Items).To(HaveLen(1))
-			Expect(copy.Items[0].Name).To(Equal("recycler-1"))
+			Expect(copy.Items[0].Name).To(Equal(recyclerOneName))
 		})
 	})
 
@@ -344,8 +347,8 @@ var _ = Describe("Recycler Types", func() {
 		It("should DeepCopyObject a non-nil Recycler", func() {
 			recycler := &Recycler{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-recycler",
-					Namespace: "default",
+					Name:      testRecyclerName,
+					Namespace: defaultNamespace,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -359,7 +362,7 @@ var _ = Describe("Recycler Types", func() {
 			Expect(obj).NotTo(BeNil())
 			copied, ok := obj.(*Recycler)
 			Expect(ok).To(BeTrue())
-			Expect(copied.Name).To(Equal("test-recycler"))
+			Expect(copied.Name).To(Equal(testRecyclerName))
 			Expect(copied.Spec.AverageCpuUtilizationPercent).To(Equal(int32(75)))
 		})
 
@@ -367,7 +370,7 @@ var _ = Describe("Recycler Types", func() {
 			original := &Recycler{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "original",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: RecyclerSpec{
 					ScaleTargetRef: CrossVersionObjectReference{
@@ -406,7 +409,7 @@ var _ = Describe("Recycler Types", func() {
 		It("should DeepCopyObject a non-nil RecyclerList", func() {
 			list := &RecyclerList{
 				Items: []Recycler{
-					{ObjectMeta: metav1.ObjectMeta{Name: "recycler-1"}},
+					{ObjectMeta: metav1.ObjectMeta{Name: recyclerOneName}},
 				},
 			}
 			obj := list.DeepCopyObject()
@@ -414,7 +417,7 @@ var _ = Describe("Recycler Types", func() {
 			copied, ok := obj.(*RecyclerList)
 			Expect(ok).To(BeTrue())
 			Expect(copied.Items).To(HaveLen(1))
-			Expect(copied.Items[0].Name).To(Equal("recycler-1"))
+			Expect(copied.Items[0].Name).To(Equal(recyclerOneName))
 		})
 
 		It("should DeepCopyInto RecyclerList preserving items", func() {

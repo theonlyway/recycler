@@ -457,8 +457,8 @@ var _ = Describe("Monitor Controller", func() {
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Name:  "test",
-						Image: "busybox",
+						Name:  testAppValue,
+						Image: busyboxImage,
 					}},
 				},
 			}

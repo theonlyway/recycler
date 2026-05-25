@@ -46,6 +46,7 @@ const (
 	targetDeploymentName      = "target-deployment"
 	finalizerTestRecyclerName = "finalizer-test-recycler"
 	testAppValue              = "test"
+	busyboxImage              = "busybox"
 )
 
 var _ = Describe("Recycler Controller", func() {
@@ -78,7 +79,7 @@ var _ = Describe("Recycler Controller", func() {
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
 								Name:    testAppValue,
-								Image:   "busybox",
+								Image:   busyboxImage,
 								Command: []string{"sleep", "3600"},
 							}},
 						},
@@ -482,6 +483,7 @@ var _ = Describe("Recycler Controller", func() {
 			recentPodName           = "recent-breach-pod"
 			noAnnotationPodName     = "no-annotation-pod"
 			invalidTsPodName        = "invalid-ts-pod"
+			terminateTestLabelValue = "terminate-test"
 		)
 
 		ctx := context.Background()
@@ -516,16 +518,16 @@ var _ = Describe("Recycler Controller", func() {
 				},
 				Spec: appsv1.DeploymentSpec{
 					Selector: &metav1.LabelSelector{
-						MatchLabels: map[string]string{appLabelKey: "terminate-test"},
+						MatchLabels: map[string]string{appLabelKey: terminateTestLabelValue},
 					},
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{appLabelKey: "terminate-test"},
+							Labels: map[string]string{appLabelKey: terminateTestLabelValue},
 						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
-								Name:  "test",
-								Image: "busybox",
+								Name:  testAppValue,
+								Image: busyboxImage,
 							}},
 						},
 					},
@@ -555,13 +557,13 @@ var _ = Describe("Recycler Controller", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        name,
 					Namespace:   testNamespace,
-					Labels:      map[string]string{appLabelKey: "terminate-test"},
+					Labels:      map[string]string{appLabelKey: terminateTestLabelValue},
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Name:  "test",
-						Image: "busybox",
+						Name:  testAppValue,
+						Image: busyboxImage,
 					}},
 				},
 			}
@@ -650,6 +652,7 @@ var _ = Describe("Recycler Controller", func() {
 		const (
 			finalizerAnnotationDeployment = "finalizer-annotation-deployment"
 			finalizerAnnotationPod        = "finalizer-annotation-pod"
+			finalizerAnnotationLabelValue = "finalizer-annotation-test"
 		)
 
 		ctx := context.Background()
@@ -662,16 +665,16 @@ var _ = Describe("Recycler Controller", func() {
 				},
 				Spec: appsv1.DeploymentSpec{
 					Selector: &metav1.LabelSelector{
-						MatchLabels: map[string]string{appLabelKey: "finalizer-annotation-test"},
+						MatchLabels: map[string]string{appLabelKey: finalizerAnnotationLabelValue},
 					},
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{appLabelKey: "finalizer-annotation-test"},
+							Labels: map[string]string{appLabelKey: finalizerAnnotationLabelValue},
 						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{{
-								Name:  "test",
-								Image: "busybox",
+								Name:  testAppValue,
+								Image: busyboxImage,
 							}},
 						},
 					},
@@ -699,7 +702,7 @@ var _ = Describe("Recycler Controller", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      finalizerAnnotationPod,
 					Namespace: testNamespace,
-					Labels:    map[string]string{appLabelKey: "finalizer-annotation-test"},
+					Labels:    map[string]string{appLabelKey: finalizerAnnotationLabelValue},
 					Annotations: map[string]string{
 						cpuBreachTimestampAnnotation: time.Now().Format(time.RFC3339),
 						podMetricsAnnotation:         `[]`,
@@ -707,8 +710,8 @@ var _ = Describe("Recycler Controller", func() {
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Name:  "test",
-						Image: "busybox",
+						Name:  testAppValue,
+						Image: busyboxImage,
 					}},
 				},
 			}
@@ -750,4 +753,3 @@ var _ = Describe("Recycler Controller", func() {
 		})
 	})
 })
-
