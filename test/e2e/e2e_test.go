@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -573,6 +574,39 @@ var _ = Describe("controller", Ordered, func() {
 				return nil
 			}
 			EventuallyWithOffset(1, verifyNewPodCreated, 2*time.Minute, 5*time.Second).Should(Succeed())
+
+			By("verifying custom Prometheus metrics on the /metrics endpoint")
+			// We query /metrics directly via a port-forward — no Prometheus scrape cycle needed.
+			metricsBody, err := utils.FetchControllerMetrics(namespace)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred(), "failed to fetch /metrics from controller")
+			GinkgoWriter.Printf("\n=== /metrics excerpt (recycler_* lines) ===\n")
+			for _, line := range strings.Split(metricsBody, "\n") {
+				if strings.HasPrefix(line, "recycler_") {
+					GinkgoWriter.Printf("%s\n", line)
+				}
+			}
+
+			By("verifying recycler_pod_recycles_total >= number of initial pods")
+			recyclesVal, recyclesFound := utils.MetricValue(metricsBody, "recycler_pod_recycles_total",
+				map[string]string{"namespace": testNamespace, "recycler": recyclerName})
+			ExpectWithOffset(1, recyclesFound).To(BeTrue(),
+				"recycler_pod_recycles_total not found in /metrics")
+			ExpectWithOffset(1, recyclesVal).To(BeNumerically(">=", float64(len(initialPodNames))),
+				"expected at least %d recycles", len(initialPodNames))
+
+			By("verifying recycler_cpu_threshold_breaches_total >= number of initial pods")
+			breachesVal, breachesFound := utils.MetricValue(metricsBody, "recycler_cpu_threshold_breaches_total",
+				map[string]string{"namespace": testNamespace, "recycler": recyclerName})
+			ExpectWithOffset(1, breachesFound).To(BeTrue(),
+				"recycler_cpu_threshold_breaches_total not found in /metrics")
+			ExpectWithOffset(1, breachesVal).To(BeNumerically(">=", float64(len(initialPodNames))),
+				"expected at least %d breach events", len(initialPodNames))
+
+			By("verifying recycler_pod_cpu_utilization_percent is present for the test namespace")
+			_, utilizationFound := utils.MetricValue(metricsBody, "recycler_pod_cpu_utilization_percent",
+				map[string]string{"namespace": testNamespace})
+			ExpectWithOffset(1, utilizationFound).To(BeTrue(),
+				"recycler_pod_cpu_utilization_percent not found in /metrics for namespace %s", testNamespace)
 
 			By("cleaning up test resources")
 			cmd = exec.Command("kubectl", "delete", "recycler", recyclerName, "-n", testNamespace)

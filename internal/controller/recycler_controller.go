@@ -250,6 +250,8 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 			if err := r.Delete(ctx, &pod, deleteOptions); err != nil {
 				log.Error(err, "Failed to delete pod", "podName", pod.Name)
 			} else {
+				recycleTotal.WithLabelValues(pod.Namespace, recycler.Name, pod.Name).Inc()
+				cpuBreachDuration.WithLabelValues(pod.Namespace, recycler.Name, pod.Name).Observe(elapsed.Seconds())
 				// Check if in-memory storage is being used
 				if recycler.Spec.MetricStorageLocation == StorageMemory {
 					// Remove the pod's entry from in-memory storage

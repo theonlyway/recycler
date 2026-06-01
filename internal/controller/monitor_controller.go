@@ -380,6 +380,7 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 
 func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
 	averageCPU := calculateAverageCPU(metricsHistory, log, pod.Name)
+	podCPUUtilization.WithLabelValues(pod.Namespace, pod.Name).Set(averageCPU)
 
 	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
 		log.Error(err, "Failed to fetch pod", "podName", pod.Name)
@@ -424,6 +425,8 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 			log.Error(err, "Failed to update pod with breach timestamp", "podName", pod.Name)
 			return err
 		}
+
+		cpuBreachesTotal.WithLabelValues(pod.Namespace, recycler.Name, pod.Name).Inc()
 
 		// Calculate termination time based on breach time and delay
 		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second

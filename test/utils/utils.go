@@ -17,11 +17,15 @@ limitations under the License.
 package utils
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/onsi/ginkgo/v2"
 )
@@ -246,4 +250,99 @@ func StringReader(s string) io.Reader {
 // ContainsString checks if a string contains a substring
 func ContainsString(s, substr string) bool {
 	return strings.Contains(s, substr)
+}
+
+// FetchControllerMetrics port-forwards the controller's metrics service and returns the raw
+// Prometheus text from /metrics. It handles token creation and TLS internally.
+// The caller is responsible for calling the returned cleanup function.
+func FetchControllerMetrics(namespace string) (string, error) {
+	// Create a short-lived service account token.
+	tokenCmd := exec.Command("kubectl", "create", "token",
+		"recycler-controller-manager", "--namespace", namespace, "--duration=60s")
+	tokenBytes, err := Run(tokenCmd)
+	if err != nil {
+		return "", fmt.Errorf("failed to create service account token: %w", err)
+	}
+	token := strings.TrimSpace(string(tokenBytes))
+
+	// Start port-forward in the background.
+	pfCmd := exec.Command("kubectl", "port-forward",
+		"svc/recycler-controller-manager-metrics-service",
+		"--namespace", namespace,
+		"18443:8443")
+	if err := pfCmd.Start(); err != nil {
+		return "", fmt.Errorf("failed to start port-forward: %w", err)
+	}
+	defer func() { _ = pfCmd.Process.Kill() }()
+
+	// Give the tunnel a moment to be established.
+	time.Sleep(2 * time.Second)
+
+	// Make an HTTPS GET with the bearer token, skipping TLS verification
+	// because the manager uses a self-signed certificate.
+	//nolint:gosec // G402: InsecureSkipVerify is intentional in e2e test-only code.
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+		},
+		Timeout: 10 * time.Second,
+	}
+	req, err := http.NewRequest(http.MethodGet, "https://localhost:18443/metrics", nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to build metrics request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("metrics request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read metrics response: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("metrics endpoint returned HTTP %d: %s", resp.StatusCode, string(body))
+	}
+	return string(body), nil
+}
+
+// MetricValue searches raw Prometheus text for the first sample whose name and labels
+// all match, returning its float64 value. Labels may be a partial set.
+func MetricValue(body, metricName string, labels map[string]string) (float64, bool) {
+	for _, line := range strings.Split(body, "\n") {
+		// Skip comments and empty lines.
+		if strings.HasPrefix(line, "#") || strings.TrimSpace(line) == "" {
+			continue
+		}
+		// Line must start with the metric name.
+		if !strings.HasPrefix(line, metricName+"{") && !strings.HasPrefix(line, metricName+" ") {
+			continue
+		}
+		// Check every required label is present.
+		allMatch := true
+		for k, v := range labels {
+			if !strings.Contains(line, k+`="`+v+`"`) {
+				allMatch = false
+				break
+			}
+		}
+		if !allMatch {
+			continue
+		}
+		// Prometheus text format: `name{labels} value [timestamp]`
+		// The value is always the second whitespace-separated token.
+		parts := strings.Fields(line)
+		if len(parts) < 2 {
+			continue
+		}
+		val, err := strconv.ParseFloat(parts[1], 64)
+		if err != nil {
+			continue
+		}
+		return val, true
+	}
+	return 0, false
 }
