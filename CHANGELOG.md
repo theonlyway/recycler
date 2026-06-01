@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-06-01
+### :sparkles: New Features
+- [`5ea32a6`](https://github.com/theonlyway/recycler/commit/5ea32a6fa099f97c2eb4dcef6074947b42019632) - **metrics**: add custom Prometheus metrics for pod recycling and CPU utilization *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`48d94ff`](https://github.com/theonlyway/recycler/commit/48d94ff9ccdf749b5ed0dcc74d7296073160476a) - **metrics**: enhance custom metrics with consistent label usage and add Copilot instructions *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`1e37b5b`](https://github.com/theonlyway/recycler/commit/1e37b5b7daa220df93b126d8a9f4d7c0d4aec809) - **metrics**: extend service account token duration for FetchControllerMetrics function *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`3ce669d`](https://github.com/theonlyway/recycler/commit/3ce669db5815ded33efbb2e714d0fb0cc78b7e8d) - **metrics**: implement temporary ClusterRoleBinding for FetchControllerMetrics authorization *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a4f36c0`](https://github.com/theonlyway/recycler/commit/a4f36c0ab6be0e7466064f8f590d777bc4cf7653) - **docs**: update Copilot instructions to include make targets for build and lint *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`9426475`](https://github.com/theonlyway/recycler/commit/942647566db633503d96797fb5aca0c46edaf914) - **metrics**: add SumMetricValues function for aggregating metric values across series *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`9c03701`](https://github.com/theonlyway/recycler/commit/9c03701e79752997f8d7156bf41e09230b56ec7e) - **metrics**: update cpuBreachDuration histogram buckets for realistic recycle delays *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`ccc0f1e`](https://github.com/theonlyway/recycler/commit/ccc0f1e9743be9f658791933d7a50fb521834388) - **metrics**: refine metrics labels and add podLastRecycleTime for enhanced tracking *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a4873e5`](https://github.com/theonlyway/recycler/commit/a4873e521084da7bef455d0285b20fdaf2665734) - **docs**: update README with new Go and Kubernetes version requirements, and enhance security verification section *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`90aecaa`](https://github.com/theonlyway/recycler/commit/90aecaae20eb74e0235f9dcfe396ea5b1ec689ec) - **deps**: update ghcr.io/devcontainers/features/docker-in-docker docker tag to v3 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`af4b3a8`](https://github.com/theonlyway/recycler/commit/af4b3a8030fc502d0f2b34fec72dc44a6c8c36e7) - **deps**: update golangci/golangci-lint-action digest to 82606bf *(PR [#143](https://github.com/theonlyway/recycler/pull/143) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`851062b`](https://github.com/theonlyway/recycler/commit/851062b54d9af985bbbbe77f56b180b36419e9b1) - **deps**: update mcr.microsoft.com/devcontainers/go:2.1-1.25-bookworm docker digest to 768f4d1 *(PR [#145](https://github.com/theonlyway/recycler/pull/145) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.9.40] - 2026-05-25
 ### :wrench: Chores
 - [`c371d07`](https://github.com/theonlyway/recycler/commit/c371d07432c62085d5960da1ddd880ebf97a29e0) - **deps**: update golang:1.26 docker digest to 2d6c802 *(PR [#142](https://github.com/theonlyway/recycler/pull/142) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -729,3 +747,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.37]: https://github.com/theonlyway/recycler/compare/1.9.36...1.9.37
 [1.9.38]: https://github.com/theonlyway/recycler/compare/1.9.37...1.9.38
 [1.9.40]: https://github.com/theonlyway/recycler/compare/1.9.39...1.9.40
+[1.10.0]: https://github.com/theonlyway/recycler/compare/1.9.40...1.10.0
