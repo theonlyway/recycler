@@ -21,8 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
-const labelNamespace = "recycler_namespace"
-const labelPod = "recycler_pod"
+const labelNamespace string = "recycler_namespace"
+const labelPod string = "recycler_pod"
 
 var (
 	// recycleTotal counts every pod deleted by the recycler controller.
