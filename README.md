@@ -104,7 +104,20 @@ spec:
 
 ## Prometheus Metrics
 
-The controller exposes the following custom metrics on the `/metrics` endpoint (HTTPS, port `8443`). Enable scraping via the Helm value `prometheus.serviceMonitor.enabled=true`.
+The controller exposes the following custom metrics on the `/metrics` endpoint (HTTPS, port `8443`). If you are using the Prometheus Operator, set the Helm value `prometheus.serviceMonitor.enabled=true` to deploy a `ServiceMonitor` and enable scraping.
+
+The `ServiceMonitor` must carry the labels that your Prometheus instance selects on. Check your Prometheus CR's `serviceMonitorSelector` to determine the required labels:
+```sh
+kubectl get prometheus -A -o jsonpath='{range .items[*]}{.metadata.namespace}/{.metadata.name}: {.spec.serviceMonitorSelector}{"\n"}{end}'
+```
+
+Then pass the required labels via `prometheus.serviceMonitor.additionalLabels`. For example, if the output is `{"matchLabels":{"release":"kube-prometheus-stack"}}`:
+```sh
+helm install recycler oci://ghcr.io/theonlyway/charts/recycler \
+  --namespace recycler-system --create-namespace \
+  --set prometheus.serviceMonitor.enabled=true \
+  --set prometheus.serviceMonitor.additionalLabels.release=kube-prometheus-stack
+```
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
