@@ -102,6 +102,40 @@ spec:
   metricStorageLocation: memory # Where to store the metrics data. Either in memory or as an annotation on the pod. There are implications to both
 ```
 
+## Prometheus Metrics
+
+The controller exposes the following custom metrics on the `/metrics` endpoint (HTTPS, port `8443`). Enable scraping via the Helm value `prometheus.serviceMonitor.enabled=true`.
+
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `recycler_pod_recycles_total` | Counter | `namespace`, `recycler` | Total number of pods deleted by the controller. Increments each time a pod is terminated after breaching the CPU threshold. |
+| `recycler_cpu_threshold_breaches_total` | Counter | `namespace`, `recycler` | Total number of CPU threshold breach events detected. Increments when a pod first crosses the threshold and the breach annotation is written. |
+| `recycler_cpu_breach_duration_seconds` | Histogram | `namespace`, `recycler` | Time in seconds between when the breach annotation was written and when the pod was actually deleted (i.e. how long the pod spent above threshold before recycling). Buckets: `30, 60, 120, 180, 300, 600, 900, 1800`. |
+| `recycler_pod_last_recycle_timestamp_seconds` | Gauge | `namespace`, `recycler`, `pod` | Unix timestamp of the most recent recycle event for a specific pod. Useful for building an audit history of which pods were terminated and when. |
+| `recycler_pod_cpu_utilization_percent` | Gauge | `namespace`, `pod` | Current rolling-average CPU utilisation percentage for each monitored pod, calculated over the `podMetricsHistory` window. |
+
+### Example queries
+
+**Rate of pod recycles per namespace:**
+```promql
+rate(recycler_pod_recycles_total[5m])
+```
+
+**Pods currently above threshold (utilisation gauge):**
+```promql
+recycler_pod_cpu_utilization_percent > <threshold>
+```
+
+**95th percentile breach-to-recycle duration:**
+```promql
+histogram_quantile(0.95, rate(recycler_cpu_breach_duration_seconds_bucket[1h]))
+```
+
+**Total breaches detected by recycler CR:**
+```promql
+recycler_cpu_threshold_breaches_total
+```
+
 ## Building and deploying manually
 ### To Deploy on the cluster
 **Build and push your image to the location specified by `IMG`:**
