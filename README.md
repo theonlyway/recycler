@@ -121,11 +121,11 @@ helm install recycler oci://ghcr.io/theonlyway/charts/recycler \
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `recycler_pod_recycles_total` | Counter | `namespace`, `recycler` | Total number of pods deleted by the controller. Increments each time a pod is terminated after breaching the CPU threshold. |
-| `recycler_cpu_threshold_breaches_total` | Counter | `namespace`, `recycler` | Total number of CPU threshold breach events detected. Increments when a pod first crosses the threshold and the breach annotation is written. |
-| `recycler_cpu_breach_duration_seconds` | Histogram | `namespace`, `recycler` | Time in seconds between when the breach annotation was written and when the pod was actually deleted (i.e. how long the pod spent above threshold before recycling). Buckets: `30, 60, 120, 180, 300, 600, 900, 1800`. |
-| `recycler_pod_last_recycle_timestamp_seconds` | Gauge | `namespace`, `recycler`, `pod` | Unix timestamp of the most recent recycle event for a specific pod. Useful for building an audit history of which pods were terminated and when. |
-| `recycler_pod_cpu_utilization_percent` | Gauge | `namespace`, `pod` | Current rolling-average CPU utilisation percentage for each monitored pod, calculated over the `podMetricsHistory` window. |
+| `recycler_pod_recycles_total` | Counter | `recycler_namespace`, `recycler` | Total number of pods deleted by the controller. Increments each time a pod is terminated after breaching the CPU threshold. |
+| `recycler_cpu_threshold_breaches_total` | Counter | `recycler_namespace`, `recycler` | Total number of CPU threshold breach events detected. Increments when a pod first crosses the threshold and the breach annotation is written. |
+| `recycler_cpu_breach_duration_seconds` | Histogram | `recycler_namespace`, `recycler` | Time in seconds between when the breach annotation was written and when the pod was actually deleted (i.e. how long the pod spent above threshold before recycling). Buckets: `30, 60, 120, 180, 300, 600, 900, 1800`. |
+| `recycler_pod_last_recycle_timestamp_seconds` | Gauge | `recycler_namespace`, `recycler`, `recycler_pod` | Unix timestamp of the most recent recycle event for a specific pod. Useful for building an audit history of which pods were terminated and when. |
+| `recycler_pod_cpu_utilization_percent` | Gauge | `recycler_namespace`, `recycler_pod` | Current rolling-average CPU utilisation percentage for each monitored pod, calculated over the `podMetricsHistory` window. |
 
 ### Example queries
 
