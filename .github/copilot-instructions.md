@@ -10,6 +10,20 @@ make build        # fallback: go build ./...
 make lint         # fallback: ./bin/golangci-lint run ./...
 ```
 
+## Manifests & Helm (Required After API or Config Changes)
+
+After any change to `api/v1alpha1/` types or kubebuilder marker annotations, regenerate CRDs and deepcopy methods:
+
+```bash
+make generate manifests
+```
+
+Always run `make build && make lint` after the above.
+
+The Helm chart (`helm-charts/recycler/`) is **hand-maintained**. Do not run `make helm` as part of normal development — it overwrites the chart with helmify output and will clobber hand-crafted templates and values. `make helm` exists only as a reference bootstrap tool.
+
+After any structural change to `config/` (new resource type, RBAC change, new deployment arg), manually mirror the equivalent change in `helm-charts/recycler/templates/` and `helm-charts/recycler/values.yaml`.
+
 ## What the Operator Does
 
 Recycler monitors CPU utilization of pods in a target Deployment and automatically terminates pods whose rolling-average CPU exceeds a configured threshold. It solves runaway pods that evade health checks and avoids unnecessary HPA scaling.

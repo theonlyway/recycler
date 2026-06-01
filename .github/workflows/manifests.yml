@@ -28,17 +28,13 @@ jobs:
         run: |
           make manifests
 
-      - name: Generate helm charts
-        run: |
-          make helm
-
       - name: Check for changes
         run: |
           if [[ -n $(git status --porcelain) ]]; then
-            echo "Manifests or helm charts are out of date. The following files have changes:"
+            echo "Manifests are out of date. The following files have changes:"
             git status --porcelain
             git diff
-            echo "Run 'make manifests && make helm' locally and commit the results."
+            echo "Run 'make manifests' locally and commit the results."
             exit 1
           fi
-          echo "Manifests and helm charts are up to date."
+          echo "Manifests are up to date."
