@@ -7,10 +7,10 @@ A Kubernetes controller that monitors pods CPU utilisation inside a deployment, 
 Ideally something like this shouldn't even exist if people wrote their software properly. But sometimes bugs exist for longer than they should and you get sick of a HPA scaling needlessly, a pod not failing health checks even though it's at 100% CPU, and one day you are on leave and you've hit the limit you set on the HPA. All this results in some graph being more red then it should be which causes someone to panic. Until someone fixes their bug in the code, this controller was created to monitor pods and terminate them if they exceed a defined threshold.
 
 ### Prerequisites
-- go version v1.24.0+
+- go version v1.26.3+
 - docker version 17.03+.
-- kubectl version v1.11.3+.
-- Access to a Kubernetes v1.11.3+ cluster.
+- kubectl version v1.36.0+.
+- Access to a Kubernetes v1.36.0+ cluster.
 
 ## Automatic installation
 ### Helm
@@ -179,6 +179,47 @@ Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/<org>/recycler/<tag or branch>/dist/install.yaml
 ```
+
+## Security & Verification
+
+Each release includes cryptographically signed build provenance attestations and SBOMs (Software Bill of Materials) in both SPDX and CycloneDX formats. These are attached to each GitHub release and pushed to the container registries.
+
+### Verify Attestations
+
+Requires the [GitHub CLI](https://cli.github.com/).
+
+**Verify build provenance (GHCR):**
+```sh
+gh attestation verify oci://ghcr.io/theonlyway/recycler:<version> \
+  --repo theonlyway/recycler
+```
+
+**Verify SBOM attestation (GHCR):**
+```sh
+gh attestation verify oci://ghcr.io/theonlyway/recycler:<version> \
+  --repo theonlyway/recycler \
+  --predicate-type https://spdx.dev/Document/v2.3
+```
+
+**View full attestation details:**
+```sh
+gh attestation verify oci://ghcr.io/theonlyway/recycler:<version> \
+  --repo theonlyway/recycler \
+  --format json | jq
+```
+
+### SBOM Files
+
+Four SBOM files are attached to each release:
+
+| File | Format | Image |
+|------|--------|-------|
+| `sbom-ghcr.spdx.json` | SPDX 2.3 | GHCR |
+| `sbom-ghcr.cyclonedx.json` | CycloneDX | GHCR |
+| `sbom-dockerhub.spdx.json` | SPDX 2.3 | Docker Hub |
+| `sbom-dockerhub.cyclonedx.json` | CycloneDX | Docker Hub |
+
+Use **SPDX** for attestation verification and compliance. Use **CycloneDX** with security scanning tools like [Grype](https://github.com/anchore/grype), [Trivy](https://github.com/aquasecurity/trivy), or [Dependency-Track](https://dependencytrack.org/).
 
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project

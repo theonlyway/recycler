@@ -210,7 +210,7 @@ jobs:
               if: always()
               run: |
                   helm uninstall recycler --namespace recycler-system || true
-                  
+
     build-ghcr:
         name: Build and Push Operator to GHCR
         runs-on: ubuntu-latest
@@ -436,50 +436,13 @@ jobs:
                       docker pull theonlywaye/recycler:${{ needs.semver.outputs.next_version }}
                       ```
 
-                      ## 🔒 Security & Verification
+                      ## 🔒 Security
 
-                      This release includes cryptographically signed attestations and SBOMs:
-                      - ✅ **Build Provenance**: Cryptographically signed attestations proving where and how the images were built
-                      - ✅ **SBOM Attestations**: Signed Software Bill of Materials in SPDX format
-                      - ✅ **Multi-architecture**: Supports linux/amd64 and linux/arm64
+                      - ✅ Build provenance attestation (cryptographically signed)
+                      - ✅ SBOM in SPDX and CycloneDX formats attached as release assets
+                      - ✅ Multi-architecture: linux/amd64 and linux/arm64
 
-                      ### Verify Attestations
-
-                      Verify build provenance and authenticity using the GitHub CLI:
-
-                      ```bash
-                      # Install GitHub CLI if needed
-                      # https://cli.github.com/
-
-                      # Verify build provenance for GHCR image
-                      gh attestation verify oci://ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }} \
-                        --repo ${{ github.repository }}
-
-                      # Verify SBOM attestation
-                      gh attestation verify oci://ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }} \
-                        --repo ${{ github.repository }} \
-                        --predicate-type https://spdx.dev/Document/v2.3
-
-                      # View full attestation details
-                      gh attestation verify oci://ghcr.io/${{ github.repository_owner }}/recycler:${{ needs.semver.outputs.next_version }} \
-                        --repo ${{ github.repository }} \
-                        --format json | jq
-                      ```
-
-                      ### SBOM Formats Available
-
-                      Both **SPDX** (for compliance/licensing) and **CycloneDX** (for security scanning) formats are provided:
-
-                      **Attested (Cryptographically Signed):**
-                      - SPDX 2.3 format - Verifiable via `gh attestation verify` with `--predicate-type https://spdx.dev/Document/v2.3`
-
-                      **Release Assets (Download):**
-                      - `sbom-ghcr.spdx.json` - SPDX for GHCR image
-                      - `sbom-ghcr.cyclonedx.json` - CycloneDX for GHCR image
-                      - `sbom-dockerhub.spdx.json` - SPDX for Docker Hub image
-                      - `sbom-dockerhub.cyclonedx.json` - CycloneDX for Docker Hub image
-
-                      Use **SPDX** for attestation verification and compliance. Use **CycloneDX** with security scanning tools like Grype, Trivy, or Dependency-Track.
+                      See the [README](https://github.com/${{ github.repository }}/blob/main/README.md#security--verification) for how to verify attestations and use the SBOM files.
                   tag_name: ${{ needs.semver.outputs.next_version }}
                   files: |
                       releases/recycler-helm-chart-${{ needs.semver.outputs.next_version }}.tgz
