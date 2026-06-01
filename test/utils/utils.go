@@ -297,7 +297,11 @@ func FetchControllerMetrics(namespace string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("metrics request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "warning: failed to close metrics response body: %v\n", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

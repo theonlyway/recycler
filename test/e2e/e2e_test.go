@@ -211,6 +211,7 @@ var _ = Describe("controller", Ordered, func() {
 			const testNamespace = "cpu-test"
 			const deploymentName = "cpu-stress"
 			const recyclerName = "cpu-stress-recycler"
+			const labelNamespace = "namespace"
 			var err error
 
 			By("creating test namespace")
@@ -588,7 +589,7 @@ var _ = Describe("controller", Ordered, func() {
 
 			By("verifying recycler_pod_recycles_total >= number of initial pods")
 			recyclesVal, recyclesFound := utils.MetricValue(metricsBody, "recycler_pod_recycles_total",
-				map[string]string{"namespace": testNamespace, "recycler": recyclerName})
+				map[string]string{labelNamespace: testNamespace, "recycler": recyclerName})
 			ExpectWithOffset(1, recyclesFound).To(BeTrue(),
 				"recycler_pod_recycles_total not found in /metrics")
 			ExpectWithOffset(1, recyclesVal).To(BeNumerically(">=", float64(len(initialPodNames))),
@@ -596,7 +597,7 @@ var _ = Describe("controller", Ordered, func() {
 
 			By("verifying recycler_cpu_threshold_breaches_total >= number of initial pods")
 			breachesVal, breachesFound := utils.MetricValue(metricsBody, "recycler_cpu_threshold_breaches_total",
-				map[string]string{"namespace": testNamespace, "recycler": recyclerName})
+				map[string]string{labelNamespace: testNamespace, "recycler": recyclerName})
 			ExpectWithOffset(1, breachesFound).To(BeTrue(),
 				"recycler_cpu_threshold_breaches_total not found in /metrics")
 			ExpectWithOffset(1, breachesVal).To(BeNumerically(">=", float64(len(initialPodNames))),
@@ -604,7 +605,7 @@ var _ = Describe("controller", Ordered, func() {
 
 			By("verifying recycler_pod_cpu_utilization_percent is present for the test namespace")
 			_, utilizationFound := utils.MetricValue(metricsBody, "recycler_pod_cpu_utilization_percent",
-				map[string]string{"namespace": testNamespace})
+				map[string]string{labelNamespace: testNamespace})
 			ExpectWithOffset(1, utilizationFound).To(BeTrue(),
 				"recycler_pod_cpu_utilization_percent not found in /metrics for namespace %s", testNamespace)
 
