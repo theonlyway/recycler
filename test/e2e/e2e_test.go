@@ -588,20 +588,16 @@ var _ = Describe("controller", Ordered, func() {
 			}
 
 			By("verifying recycler_pod_recycles_total >= number of initial pods")
-			recyclesVal, recyclesFound := utils.MetricValue(metricsBody, "recycler_pod_recycles_total",
+			recyclesTotal := utils.SumMetricValues(metricsBody, "recycler_pod_recycles_total",
 				map[string]string{labelNamespace: testNamespace, "recycler": recyclerName})
-			ExpectWithOffset(1, recyclesFound).To(BeTrue(),
-				"recycler_pod_recycles_total not found in /metrics")
-			ExpectWithOffset(1, recyclesVal).To(BeNumerically(">=", float64(len(initialPodNames))),
-				"expected at least %d recycles", len(initialPodNames))
+			ExpectWithOffset(1, recyclesTotal).To(BeNumerically(">=", float64(len(initialPodNames))),
+				"expected at least %d recycles, got %.0f", len(initialPodNames), recyclesTotal)
 
 			By("verifying recycler_cpu_threshold_breaches_total >= number of initial pods")
-			breachesVal, breachesFound := utils.MetricValue(metricsBody, "recycler_cpu_threshold_breaches_total",
+			breachesTotal := utils.SumMetricValues(metricsBody, "recycler_cpu_threshold_breaches_total",
 				map[string]string{labelNamespace: testNamespace, "recycler": recyclerName})
-			ExpectWithOffset(1, breachesFound).To(BeTrue(),
-				"recycler_cpu_threshold_breaches_total not found in /metrics")
-			ExpectWithOffset(1, breachesVal).To(BeNumerically(">=", float64(len(initialPodNames))),
-				"expected at least %d breach events", len(initialPodNames))
+			ExpectWithOffset(1, breachesTotal).To(BeNumerically(">=", float64(len(initialPodNames))),
+				"expected at least %d breach events, got %.0f", len(initialPodNames), breachesTotal)
 
 			By("verifying recycler_pod_cpu_utilization_percent is present for the test namespace")
 			_, utilizationFound := utils.MetricValue(metricsBody, "recycler_pod_cpu_utilization_percent",

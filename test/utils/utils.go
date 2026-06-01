@@ -369,3 +369,38 @@ func MetricValue(body, metricName string, labels map[string]string) (float64, bo
 	}
 	return 0, false
 }
+
+// SumMetricValues sums the values of all samples whose name and labels all match.
+// Use this for counters that are split across multiple series (e.g. per-pod label),
+// where you want the total across all matching series rather than a single value.
+func SumMetricValues(body, metricName string, labels map[string]string) float64 {
+	var total float64
+	for _, line := range strings.Split(body, "\n") {
+		if strings.HasPrefix(line, "#") || strings.TrimSpace(line) == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, metricName+"{") && !strings.HasPrefix(line, metricName+" ") {
+			continue
+		}
+		allMatch := true
+		for k, v := range labels {
+			if !strings.Contains(line, k+`="`+v+`"`) {
+				allMatch = false
+				break
+			}
+		}
+		if !allMatch {
+			continue
+		}
+		parts := strings.Fields(line)
+		if len(parts) < 2 {
+			continue
+		}
+		val, err := strconv.ParseFloat(parts[1], 64)
+		if err != nil {
+			continue
+		}
+		total += val
+	}
+	return total
+}
