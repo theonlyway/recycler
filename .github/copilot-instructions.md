@@ -3,10 +3,11 @@
 ## Build & Lint (Required Before Finishing)
 
 Always run both of the following before marking a task complete. Fix any errors before responding.
+Use `make` targets where they exist, falling back to the raw commands if a target is unavailable.
 
 ```bash
-go build ./...
-./bin/golangci-lint run ./...
+make build        # fallback: go build ./...
+make lint         # fallback: ./bin/golangci-lint run ./...
 ```
 
 ## What the Operator Does
