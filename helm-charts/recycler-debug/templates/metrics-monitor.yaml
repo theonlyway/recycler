@@ -4,13 +4,13 @@ kind: ServiceMonitor
 metadata:
   labels:
     control-plane: controller-manager
-    app.kubernetes.io/name: {{ include "recycler.name" . }}
+    app.kubernetes.io/name: {{ include "recycler-debug.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     {{- with .Values.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
-  name: {{ include "recycler.fullname" . }}-controller-manager-metrics-monitor
-  namespace: {{ include "recycler.namespace" . }}
+  name: {{ include "recycler-debug.fullname" . }}-controller-manager-metrics-monitor
+  namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
     - path: /metrics

@@ -388,8 +388,6 @@ $(HELMIFY): $(LOCALBIN)
 
 helm: manifests kustomize helmify
 	$(KUSTOMIZE) build config/default | $(HELMIFY) $(CHART_NAME)
-	cp config/prometheus/helm-service-monitor.yaml $(CHART_NAME)/templates/metrics-monitor.yaml
-	grep -q 'serviceMonitor:' $(CHART_NAME)/values.yaml || printf 'serviceMonitor:\n  enabled: false\n  additionalLabels: {}\n' >> $(CHART_NAME)/values.yaml
 
 helm-debug: manifests kustomize helmify
 	$(KUSTOMIZE) build config/overlays/debug | $(HELMIFY) helm-charts/recycler-debug

@@ -18,13 +18,11 @@ After any change to `api/v1alpha1/` types or kubebuilder marker annotations, reg
 make generate manifests
 ```
 
-After any change to `config/` kustomize manifests (including `config/prometheus/`, RBAC, manager patches, etc.), regenerate the Helm chart:
+Always run `make build && make lint` after the above.
 
-```bash
-make helm
-```
+The Helm chart (`helm-charts/recycler/`) is **hand-maintained**. Do not run `make helm` as part of normal development — it overwrites the chart with helmify output and will clobber hand-crafted templates and values. `make helm` exists only as a reference bootstrap tool.
 
-Always run `make build && make lint` after either of the above.
+After any structural change to `config/` (new resource type, RBAC change, new deployment arg), manually mirror the equivalent change in `helm-charts/recycler/templates/` and `helm-charts/recycler/values.yaml`.
 
 ## What the Operator Does
 
