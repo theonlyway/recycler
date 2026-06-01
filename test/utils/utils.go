@@ -258,7 +258,7 @@ func ContainsString(s, substr string) bool {
 func FetchControllerMetrics(namespace string) (string, error) {
 	// Create a short-lived service account token.
 	tokenCmd := exec.Command("kubectl", "create", "token",
-		"recycler-controller-manager", "--namespace", namespace, "--duration=60s")
+		"recycler-controller-manager", "--namespace", namespace, "--duration=600s")
 	tokenBytes, err := Run(tokenCmd)
 	if err != nil {
 		return "", fmt.Errorf("failed to create service account token: %w", err)
