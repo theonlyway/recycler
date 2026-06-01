@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2] - 2026-06-01
+### :bug: Bug Fixes
+- [`588e58a`](https://github.com/theonlyway/recycler/commit/588e58a571700192bf297a3d2828f775a1a656bf) - **metrics**: update metric labels to use 'recycler_namespace' and 'recycler_pod' *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.10.1] - 2026-06-01
 ### :bug: Bug Fixes
 - [`8731cce`](https://github.com/theonlyway/recycler/commit/8731ccefb8f5966a0b2ec1488f527b0dabed0d6e) - **metrics**: add ServiceMonitor configuration for metrics monitoring *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -761,3 +766,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.40]: https://github.com/theonlyway/recycler/compare/1.9.39...1.9.40
 [1.10.0]: https://github.com/theonlyway/recycler/compare/1.9.40...1.10.0
 [1.10.1]: https://github.com/theonlyway/recycler/compare/1.10.0...1.10.1
+[1.10.2]: https://github.com/theonlyway/recycler/compare/1.10.1...1.10.2
