@@ -426,7 +426,7 @@ func handleThresholdBreach(ctx context.Context, r *MonitorReconciler, recycler *
 			return err
 		}
 
-		cpuBreachesTotal.WithLabelValues(pod.Namespace, recycler.Name, pod.Name).Inc()
+		cpuBreachesTotal.WithLabelValues(pod.Namespace, recycler.Name).Inc()
 
 		// Calculate termination time based on breach time and delay
 		delay := time.Duration(recycler.Spec.RecycleDelaySeconds) * time.Second

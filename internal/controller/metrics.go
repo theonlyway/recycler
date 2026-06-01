@@ -26,18 +26,18 @@ const labelPod = "pod"
 
 var (
 	// recycleTotal counts every pod deleted by the recycler controller.
-	// Labels: namespace, recycler (CR name), pod.
+	// Labels: namespace, recycler (CR name).
 	recycleTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "recycler_pod_recycles_total",
 			Help: "Total number of pods recycled by the recycler controller.",
 		},
-		[]string{labelNamespace, recyclerControllerName, labelPod},
+		[]string{labelNamespace, recyclerControllerName},
 	)
 
 	// cpuBreachDuration observes how long a pod spent above the CPU threshold
 	// before it was deleted (i.e. the elapsed time since the breach annotation).
-	// Labels: namespace, recycler (CR name), pod.
+	// Labels: namespace, recycler (CR name).
 	cpuBreachDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name: "recycler_cpu_breach_duration_seconds",
@@ -46,16 +46,28 @@ var (
 			// Default is 300s; buckets span 30s–1800s to capture most configurations.
 			Buckets: []float64{30, 60, 120, 180, 300, 600, 900, 1800},
 		},
-		[]string{labelNamespace, recyclerControllerName, labelPod},
+		[]string{labelNamespace, recyclerControllerName},
 	)
 
-	// cpuBreachesTotal counts the number of times a pod has had its CPU
-	// breach annotation set (i.e. crossed the threshold).
-	// Labels: namespace, recycler (CR name), pod.
+	// cpuBreachesTotal counts the number of times any pod has crossed the CPU threshold.
+	// Labels: namespace, recycler (CR name).
 	cpuBreachesTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "recycler_cpu_threshold_breaches_total",
 			Help: "Total number of CPU threshold breach events detected across monitored pods.",
+		},
+		[]string{labelNamespace, recyclerControllerName},
+	)
+
+	// podLastRecycleTime records the Unix timestamp at which each pod was most recently
+	// recycled. Query this gauge to build an audit history of which pods were terminated
+	// and when. Series persist in Prometheus until the retention window expires, giving
+	// a queryable log of past recycle events.
+	// Labels: namespace, recycler (CR name), pod.
+	podLastRecycleTime = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "recycler_pod_last_recycle_timestamp_seconds",
+			Help: "Unix timestamp of the most recent recycle event for each pod.",
 		},
 		[]string{labelNamespace, recyclerControllerName, labelPod},
 	)
@@ -79,6 +91,7 @@ func init() {
 		recycleTotal,
 		cpuBreachDuration,
 		cpuBreachesTotal,
+		podLastRecycleTime,
 		podCPUUtilization,
 	)
 }

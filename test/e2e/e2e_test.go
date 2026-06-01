@@ -212,6 +212,7 @@ var _ = Describe("controller", Ordered, func() {
 			const deploymentName = "cpu-stress"
 			const recyclerName = "cpu-stress-recycler"
 			const labelNamespace = "namespace"
+			const labelRecycler = "recycler"
 			var err error
 
 			By("creating test namespace")
@@ -589,13 +590,13 @@ var _ = Describe("controller", Ordered, func() {
 
 			By("verifying recycler_pod_recycles_total >= number of initial pods")
 			recyclesTotal := utils.SumMetricValues(metricsBody, "recycler_pod_recycles_total",
-				map[string]string{labelNamespace: testNamespace, "recycler": recyclerName})
+				map[string]string{labelNamespace: testNamespace, labelRecycler: recyclerName})
 			ExpectWithOffset(1, recyclesTotal).To(BeNumerically(">=", float64(len(initialPodNames))),
 				"expected at least %d recycles, got %.0f", len(initialPodNames), recyclesTotal)
 
 			By("verifying recycler_cpu_threshold_breaches_total >= number of initial pods")
 			breachesTotal := utils.SumMetricValues(metricsBody, "recycler_cpu_threshold_breaches_total",
-				map[string]string{labelNamespace: testNamespace, "recycler": recyclerName})
+				map[string]string{labelNamespace: testNamespace, labelRecycler: recyclerName})
 			ExpectWithOffset(1, breachesTotal).To(BeNumerically(">=", float64(len(initialPodNames))),
 				"expected at least %d breach events, got %.0f", len(initialPodNames), breachesTotal)
 
@@ -604,6 +605,16 @@ var _ = Describe("controller", Ordered, func() {
 				map[string]string{labelNamespace: testNamespace})
 			ExpectWithOffset(1, utilizationFound).To(BeTrue(),
 				"recycler_pod_cpu_utilization_percent not found in /metrics for namespace %s", testNamespace)
+
+			By("verifying recycler_pod_last_recycle_timestamp_seconds records each initial pod")
+			for _, podName := range initialPodNames {
+				ts, tsFound := utils.MetricValue(metricsBody, "recycler_pod_last_recycle_timestamp_seconds",
+					map[string]string{labelNamespace: testNamespace, labelRecycler: recyclerName, "pod": podName})
+				ExpectWithOffset(1, tsFound).To(BeTrue(),
+					"recycler_pod_last_recycle_timestamp_seconds not found for pod %s", podName)
+				ExpectWithOffset(1, ts).To(BeNumerically(">", 0),
+					"expected non-zero recycle timestamp for pod %s", podName)
+			}
 
 			By("cleaning up test resources")
 			cmd = exec.Command("kubectl", "delete", "recycler", recyclerName, "-n", testNamespace)
