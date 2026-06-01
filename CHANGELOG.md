@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1] - 2026-06-01
+### :bug: Bug Fixes
+- [`8731cce`](https://github.com/theonlyway/recycler/commit/8731ccefb8f5966a0b2ec1488f527b0dabed0d6e) - **metrics**: add ServiceMonitor configuration for metrics monitoring *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`d51887b`](https://github.com/theonlyway/recycler/commit/d51887b7eead98b62e2027d9394cecf7b8d6a2b8) - **metrics**: add Helm chart support for ServiceMonitor configuration *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`002151d`](https://github.com/theonlyway/recycler/commit/002151d7b65f2a4b2b804114bfbfe7cf557a5e18) - **metrics**: implement ServiceMonitor configuration for metrics monitoring *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`76bf01d`](https://github.com/theonlyway/recycler/commit/76bf01d7d5f419cf891cac19b3efac5fe08bcc3c) - **metrics**: update ServiceMonitor configuration to use prometheus values *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`7ac505a`](https://github.com/theonlyway/recycler/commit/7ac505a90c1ae9b6f56894da17e7630ddef294d3) - **manifests**: remove helm chart generation from workflow *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`e75b321`](https://github.com/theonlyway/recycler/commit/e75b32189e513f76135735c4ca59984410f92d7d) - **build**: update SBOM action to use new predicate parameters and version *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.10.0] - 2026-06-01
 ### :sparkles: New Features
 - [`5ea32a6`](https://github.com/theonlyway/recycler/commit/5ea32a6fa099f97c2eb4dcef6074947b42019632) - **metrics**: add custom Prometheus metrics for pod recycling and CPU utilization *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -748,3 +760,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.9.38]: https://github.com/theonlyway/recycler/compare/1.9.37...1.9.38
 [1.9.40]: https://github.com/theonlyway/recycler/compare/1.9.39...1.9.40
 [1.10.0]: https://github.com/theonlyway/recycler/compare/1.9.40...1.10.0
+[1.10.1]: https://github.com/theonlyway/recycler/compare/1.10.0...1.10.1
