@@ -1,4 +1,4 @@
-{{- if .Values.serviceMonitor.enabled }}
+{{- if .Values.prometheus.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -6,7 +6,7 @@ metadata:
     control-plane: controller-manager
     app.kubernetes.io/name: {{ include "recycler.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    {{- with .Values.serviceMonitor.additionalLabels }}
+    {{- with .Values.prometheus.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   name: {{ include "recycler.fullname" . }}-controller-manager-metrics-monitor

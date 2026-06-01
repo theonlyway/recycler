@@ -39,6 +39,7 @@ serviceAccount:
   automount: true
   create: true
   name: ""
-serviceMonitor:
-  enabled: false
-  additionalLabels: {}
+prometheus:
+  serviceMonitor:
+    enabled: false
+    additionalLabels: {}
