@@ -40,9 +40,11 @@ var (
 	// Labels: namespace, recycler (CR name), pod.
 	cpuBreachDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "recycler_cpu_breach_duration_seconds",
-			Help:    "Duration in seconds between CPU threshold breach annotation and pod deletion.",
-			Buckets: prometheus.DefBuckets,
+			Name: "recycler_cpu_breach_duration_seconds",
+			Help: "Duration in seconds between CPU threshold breach annotation and pod deletion.",
+			// Buckets cover the range of realistic recycle delays (spec.recycleDelaySeconds).
+			// Default is 300s; buckets span 30s–1800s to capture most configurations.
+			Buckets: []float64{30, 60, 120, 180, 300, 600, 900, 1800},
 		},
 		[]string{labelNamespace, recyclerControllerName, labelPod},
 	)
