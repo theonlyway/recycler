@@ -272,11 +272,12 @@ jobs:
                   subject-digest: ${{ steps.digest.outputs.digest }}
                   push-to-registry: true
             - name: Attest SBOM
-              uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4
+              uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
               with:
                   subject-name: ${{ env.GHCR_REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}
                   subject-digest: ${{ steps.digest.outputs.digest }}
-                  sbom-path: sbom-ghcr.spdx.json
+                  predicate-type: https://spdx.dev/Document/v2.3
+                  predicate-path: sbom-ghcr.spdx.json
                   push-to-registry: true
             - name: Upload SBOM artifacts
               uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -343,11 +344,12 @@ jobs:
                   subject-digest: ${{ steps.digest.outputs.digest }}
                   push-to-registry: false
             - name: Attest SBOM
-              uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4
+              uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
               with:
                   subject-name: ${{ env.DOCKERHUB_OWNER }}/${{ env.IMAGE_NAME }}
                   subject-digest: ${{ steps.digest.outputs.digest }}
-                  sbom-path: sbom-dockerhub.spdx.json
+                  predicate-type: https://spdx.dev/Document/v2.3
+                  predicate-path: sbom-dockerhub.spdx.json
                   push-to-registry: false
             - name: Upload SBOM artifacts
               uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
