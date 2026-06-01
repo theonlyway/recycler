@@ -10,6 +10,22 @@ make build        # fallback: go build ./...
 make lint         # fallback: ./bin/golangci-lint run ./...
 ```
 
+## Manifests & Helm (Required After API or Config Changes)
+
+After any change to `api/v1alpha1/` types or kubebuilder marker annotations, regenerate CRDs and deepcopy methods:
+
+```bash
+make generate manifests
+```
+
+After any change to `config/` kustomize manifests (including `config/prometheus/`, RBAC, manager patches, etc.), regenerate the Helm chart:
+
+```bash
+make helm
+```
+
+Always run `make build && make lint` after either of the above.
+
 ## What the Operator Does
 
 Recycler monitors CPU utilization of pods in a target Deployment and automatically terminates pods whose rolling-average CPU exceeds a configured threshold. It solves runaway pods that evade health checks and avoids unnecessary HPA scaling.
