@@ -256,6 +256,25 @@ func ContainsString(s, substr string) bool {
 // Prometheus text from /metrics. It handles token creation and TLS internally.
 // The caller is responsible for calling the returned cleanup function.
 func FetchControllerMetrics(namespace string) (string, error) {
+	// The metrics endpoint uses SubjectAccessReview to authorise requests, so the
+	// service account token we present must be bound to the recycler-metrics-reader
+	// ClusterRole (nonResourceURL /metrics get).  We create a temporary binding
+	// for the duration of the call and remove it in a deferred cleanup.
+	const bindingName = "recycler-e2e-metrics-reader"
+	bindCmd := exec.Command("kubectl", "create", "clusterrolebinding", bindingName,
+		"--clusterrole=recycler-metrics-reader",
+		"--serviceaccount="+namespace+":recycler-controller-manager",
+	)
+	if out, err := bindCmd.CombinedOutput(); err != nil {
+		// Tolerate "already exists" so re-runs don't fail.
+		if !strings.Contains(string(out), "already exists") {
+			return "", fmt.Errorf("failed to create metrics reader binding: %w — %s", err, string(out))
+		}
+	}
+	defer func() {
+		_ = exec.Command("kubectl", "delete", "clusterrolebinding", bindingName).Run()
+	}()
+
 	// Create a short-lived service account token.
 	tokenCmd := exec.Command("kubectl", "create", "token",
 		"recycler-controller-manager", "--namespace", namespace, "--duration=600s")
