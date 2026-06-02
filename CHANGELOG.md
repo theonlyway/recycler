@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.3] - 2026-06-02
+### :bug: Bug Fixes
+- [`1ed570d`](https://github.com/theonlyway/recycler/commit/1ed570df07efcfa6d2e4a991812a7090b0d89587) - **metrics**: specify type for metric label constants *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`54780da`](https://github.com/theonlyway/recycler/commit/54780da03c671b248ae0a2f43be99c7aa06d5608) - **metrics**: update metric label comments to reflect correct naming conventions [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.10.2] - 2026-06-01
 ### :bug: Bug Fixes
 - [`588e58a`](https://github.com/theonlyway/recycler/commit/588e58a571700192bf297a3d2828f775a1a656bf) - **metrics**: update metric labels to use 'recycler_namespace' and 'recycler_pod' *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -767,3 +773,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.10.0]: https://github.com/theonlyway/recycler/compare/1.9.40...1.10.0
 [1.10.1]: https://github.com/theonlyway/recycler/compare/1.10.0...1.10.1
 [1.10.2]: https://github.com/theonlyway/recycler/compare/1.10.1...1.10.2
+[1.10.3]: https://github.com/theonlyway/recycler/compare/1.10.2...1.10.3
