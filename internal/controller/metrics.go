@@ -26,7 +26,7 @@ const labelPod string = "recycler_pod"
 
 var (
 	// recycleTotal counts every pod deleted by the recycler controller.
-	// Labels: namespace, recycler (CR name).
+	// Labels: recycler_namespace, recycler (Recycler CR name).
 	recycleTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "recycler_pod_recycles_total",
@@ -37,7 +37,7 @@ var (
 
 	// cpuBreachDuration observes how long a pod spent above the CPU threshold
 	// before it was deleted (i.e. the elapsed time since the breach annotation).
-	// Labels: namespace, recycler (CR name).
+	// Labels: recycler_namespace, recycler (Recycler CR name).
 	cpuBreachDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name: "recycler_cpu_breach_duration_seconds",
@@ -50,7 +50,7 @@ var (
 	)
 
 	// cpuBreachesTotal counts the number of times any pod has crossed the CPU threshold.
-	// Labels: namespace, recycler (CR name).
+	// Labels: recycler_namespace, recycler (Recycler CR name).
 	cpuBreachesTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "recycler_cpu_threshold_breaches_total",
@@ -63,7 +63,7 @@ var (
 	// recycled. Query this gauge to build an audit history of which pods were terminated
 	// and when. Series persist in Prometheus until the retention window expires, giving
 	// a queryable log of past recycle events.
-	// Labels: namespace, recycler (CR name), pod.
+	// Labels: recycler_namespace, recycler (Recycler CR name), recycler_pod.
 	podLastRecycleTime = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "recycler_pod_last_recycle_timestamp_seconds",
@@ -74,7 +74,7 @@ var (
 
 	// podCPUUtilization tracks the current rolling-average CPU utilisation for
 	// each monitored pod, as computed from the metrics history window.
-	// Labels: namespace, pod.
+	// Labels: recycler_namespace, recycler_pod.
 	podCPUUtilization = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "recycler_pod_cpu_utilization_percent",
