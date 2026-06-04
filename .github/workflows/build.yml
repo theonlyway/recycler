@@ -33,7 +33,7 @@ jobs:
             next_version: ${{ steps.semver.outputs.nextStrict }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
             - name: Get Next Version
               id: semver
@@ -52,7 +52,7 @@ jobs:
             contents: write
         steps:
             - name: Clone the code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
             - name: Setup Go
               uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
               with:
@@ -70,7 +70,7 @@ jobs:
             contents: read
         steps:
             - name: Clone the code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
             - name: Setup Go
               uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
               with:
@@ -95,7 +95,7 @@ jobs:
             contents: read
         steps:
             - name: Clone the code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
             - name: Setup Go
               uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
               with:
@@ -116,7 +116,7 @@ jobs:
         needs: [semver]
         steps:
             - name: Checkout code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
             - name: Set up Helm
               uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5
@@ -150,7 +150,7 @@ jobs:
             contents: read
         steps:
             - name: Checkout code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
             - name: Setup Go
               uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
@@ -225,7 +225,7 @@ jobs:
             IMAGE_NAME: recycler
         steps:
             - name: Checkout code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
             - name: Set up Go
               uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
               with:
@@ -301,7 +301,7 @@ jobs:
             IMAGE_NAME: recycler
         steps:
             - name: Checkout code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
             - name: Set up Go
               uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
               with:
@@ -370,7 +370,7 @@ jobs:
             id-token: write
         steps:
             - name: Checkout code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
               with:
                   ref: main
             - name: Update Chart Version
@@ -465,7 +465,7 @@ jobs:
                   app-id: ${{ secrets.RECYCLER_BYPASS_APP_ID }}
                   private-key: ${{ secrets.RECYCLER_BYPASS_PRIVATE_KEY }}
             - name: Checkout Code
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
               with:
                   ref: main
                   token: ${{ steps.generate-token.outputs.token }}
