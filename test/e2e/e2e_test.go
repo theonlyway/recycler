@@ -327,6 +327,23 @@ var _ = Describe("controller", Ordered, func() {
 			}
 			EventuallyWithOffset(1, verifyRecyclerHealthy, 30*time.Second, 2*time.Second).Should(Succeed())
 
+			By("verifying recycler_pod_cpu_utilization_percent is present while pods are running")
+			verifyUtilizationMetric := func() error {
+				freshBody, err := utils.FetchControllerMetrics(namespace)
+				if err != nil {
+					return err
+				}
+				_, found := utils.MetricValue(freshBody, "recycler_pod_cpu_utilization_percent",
+					map[string]string{labelNamespace: testNamespace})
+				if !found {
+					return fmt.Errorf("recycler_pod_cpu_utilization_percent not found in /metrics for namespace %s", testNamespace)
+				}
+				return nil
+			}
+			// Wait up to the full metrics collection window for the first poll cycle to complete
+			EventuallyWithOffset(1, verifyUtilizationMetric,
+				time.Duration(pollingIntervalSeconds*podMetricsHistory)*time.Second+30*time.Second, time.Second).Should(Succeed())
+
 			By("Pod termination verification check for all pods")
 			verifyPodTerminated := func() error {
 				// Check each initial pod to see if it has been terminated
@@ -599,12 +616,6 @@ var _ = Describe("controller", Ordered, func() {
 				map[string]string{labelNamespace: testNamespace, labelRecycler: recyclerName})
 			ExpectWithOffset(1, breachesTotal).To(BeNumerically(">=", float64(len(initialPodNames))),
 				"expected at least %d breach events, got %.0f", len(initialPodNames), breachesTotal)
-
-			By("verifying recycler_pod_cpu_utilization_percent is present for the test namespace")
-			_, utilizationFound := utils.MetricValue(metricsBody, "recycler_pod_cpu_utilization_percent",
-				map[string]string{labelNamespace: testNamespace})
-			ExpectWithOffset(1, utilizationFound).To(BeTrue(),
-				"recycler_pod_cpu_utilization_percent not found in /metrics for namespace %s", testNamespace)
 
 			By("verifying recycler_pod_last_recycle_timestamp_seconds records each initial pod")
 			for _, podName := range initialPodNames {
