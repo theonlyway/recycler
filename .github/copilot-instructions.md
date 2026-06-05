@@ -120,12 +120,26 @@ All registered to `metrics.Registry` (controller-runtime's global registry — t
 
 | Metric | Type | Labels | Updated when |
 |--------|------|--------|-------------|
-| `recycler_pod_recycles_total` | CounterVec | namespace, recycler, pod | Pod successfully deleted in `terminatePods()` |
-| `recycler_cpu_breach_duration_seconds` | HistogramVec | namespace, recycler, pod | Same — observes `elapsed.Seconds()` |
-| `recycler_cpu_threshold_breaches_total` | CounterVec | namespace, recycler, pod | Breach annotation first written in `handleThresholdBreach()` |
-| `recycler_pod_cpu_utilization_percent` | GaugeVec | namespace, pod | Every reconcile in `checkPodMetricsAnnotation()` |
+| `recycler_pod_recycles_total` | CounterVec | `recycler_namespace`, `recycler` | Pod successfully deleted in `terminatePods()` |
+| `recycler_cpu_breach_duration_seconds` | HistogramVec | `recycler_namespace`, `recycler` | Same — observes `elapsed.Seconds()` |
+| `recycler_cpu_threshold_breaches_total` | CounterVec | `recycler_namespace`, `recycler` | Breach annotation first written in `handleThresholdBreach()` |
+| `recycler_pod_last_recycle_timestamp_seconds` | GaugeVec | `recycler_namespace`, `recycler`, `recycler_pod` | Pod successfully deleted in `terminatePods()` via `SetToCurrentTime()` |
+| `recycler_pod_cpu_utilization_percent` | GaugeVec | `recycler_namespace`, `recycler_pod` | Every reconcile in `checkPodMetricsAnnotation()` |
 
 Label name constants `labelNamespace`, `labelPod`, and `recyclerControllerName` are already defined — use them, don't re-declare.
+
+### Metric Series Cleanup
+
+Per-pod gauge series must be explicitly deleted when a pod is no longer relevant — Prometheus will otherwise retain stale series indefinitely.
+
+| Metric | When to delete | How |
+|--------|---------------|-----|
+| `recycler_pod_cpu_utilization_percent` | Immediately on pod deletion in `terminatePods()` | `podCPUUtilization.DeleteLabelValues(ns, pod)` |
+| `recycler_pod_last_recycle_timestamp_seconds` | 5 minutes after pod deletion (via `time.AfterFunc`) to allow at least one Prometheus scrape | `podLastRecycleTime.DeleteLabelValues(ns, recycler, pod)` |
+| `recycler_pod_cpu_utilization_percent` | Immediately in finalizer (`doFinalizerOperationsForRecycler`) when CR is deleted | `podCPUUtilization.DeleteLabelValues(ns, pod)` |
+| `recycler_pod_last_recycle_timestamp_seconds` | Immediately in finalizer when CR is deleted (value was already scraped long ago) | `podLastRecycleTime.DeleteLabelValues(ns, recycler, pod)` |
+
+Counter (`recycler_pod_recycles_total`, `recycler_cpu_threshold_breaches_total`) and histogram (`recycler_cpu_breach_duration_seconds`) series are keyed by namespace+recycler only — no per-pod label, no cleanup needed.
 
 ## Build & Make Targets
 

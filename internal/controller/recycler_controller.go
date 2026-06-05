@@ -253,6 +253,13 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				recycleTotal.WithLabelValues(pod.Namespace, recycler.Name).Inc()
 				cpuBreachDuration.WithLabelValues(pod.Namespace, recycler.Name).Observe(elapsed.Seconds())
 				podLastRecycleTime.WithLabelValues(pod.Namespace, recycler.Name, pod.Name).SetToCurrentTime()
+				// Remove the CPU utilization gauge series immediately — no longer meaningful for a terminated pod.
+				// Remove podLastRecycleTime after a delay so Prometheus has time to scrape the final value.
+				podCPUUtilization.DeleteLabelValues(pod.Namespace, pod.Name)
+				ns, podName, recyclerName := pod.Namespace, pod.Name, recycler.Name
+				time.AfterFunc(5*time.Minute, func() {
+					podLastRecycleTime.DeleteLabelValues(ns, recyclerName, podName)
+				})
 				// Check if in-memory storage is being used
 				if recycler.Spec.MetricStorageLocation == StorageMemory {
 					// Remove the pod's entry from in-memory storage
@@ -301,6 +308,13 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 		r.Recorder.Eventf(recycler, nil, "Warning", "FinalizerError", "Cleanup",
 			"Failed to list pods: %v", err)
 		return
+	}
+
+	// Clean up per-pod gauge series for all pods. The CR is being deleted so there is no
+	// value in retaining these series any further — remove them immediately.
+	for _, pod := range podList.Items {
+		podCPUUtilization.DeleteLabelValues(pod.Namespace, pod.Name)
+		podLastRecycleTime.DeleteLabelValues(pod.Namespace, recycler.Name, pod.Name)
 	}
 
 	// Handle cleanup based on MetricStorageLocation
