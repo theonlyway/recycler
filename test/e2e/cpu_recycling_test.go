@@ -267,8 +267,12 @@ func cpuRecyclingTest() {
 	}, 30*time.Second, 2*time.Second).Should(Succeed())
 
 	By("verifying recycler_pod_cpu_utilization_percent is present while pods are running")
+	metricsToken, metricsCleanup, err := utils.SetupMetricsAccess(namespace)
+	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "failed to set up metrics access")
+	defer metricsCleanup()
+
 	EventuallyWithOffset(1, func() error {
-		freshBody, err := utils.FetchControllerMetrics(namespace)
+		freshBody, err := utils.FetchControllerMetricsWithToken(namespace, metricsToken)
 		if err != nil {
 			return err
 		}
@@ -371,7 +375,7 @@ func cpuRecyclingTest() {
 	// Prometheus to scrape the final value — we do not assert its disappearance here.
 	By("verifying recycler_pod_cpu_utilization_percent no longer reports terminated pod names")
 	EventuallyWithOffset(1, func() error {
-		freshBody, err := utils.FetchControllerMetrics(namespace)
+		freshBody, err := utils.FetchControllerMetricsWithToken(namespace, metricsToken)
 		if err != nil {
 			return err
 		}
@@ -386,7 +390,7 @@ func cpuRecyclingTest() {
 	}, time.Duration(pollingIntervalSeconds)*time.Second+10*time.Second, time.Second).Should(Succeed())
 
 	By("verifying custom Prometheus metrics on the /metrics endpoint")
-	metricsBody, err := utils.FetchControllerMetrics(namespace)
+	metricsBody, err := utils.FetchControllerMetricsWithToken(namespace, metricsToken)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "failed to fetch /metrics from controller")
 	GinkgoWriter.Printf("\n=== /metrics excerpt (recycler_* lines) ===\n")
 	for _, line := range strings.Split(metricsBody, "\n") {

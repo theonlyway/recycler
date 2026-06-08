@@ -252,38 +252,41 @@ func ContainsString(s, substr string) bool {
 	return strings.Contains(s, substr)
 }
 
-// FetchControllerMetrics port-forwards the controller's metrics service and returns the raw
-// Prometheus text from /metrics. It handles token creation and TLS internally.
-// The caller is responsible for calling the returned cleanup function.
-func FetchControllerMetrics(namespace string) (string, error) {
-	// The metrics endpoint uses SubjectAccessReview to authorise requests, so the
-	// service account token we present must be bound to the recycler-metrics-reader
-	// ClusterRole (nonResourceURL /metrics get).  We create a temporary binding
-	// for the duration of the call and remove it in a deferred cleanup.
+// SetupMetricsAccess creates the ClusterRoleBinding and a short-lived service account token
+// needed to access the controller's /metrics endpoint. Call this once before a sequence of
+// metric fetches and reuse the returned token with FetchControllerMetricsWithToken. The
+// returned cleanup function removes the ClusterRoleBinding and should be deferred by the caller.
+func SetupMetricsAccess(namespace string) (token string, cleanup func(), err error) {
 	const bindingName = "recycler-e2e-metrics-reader"
 	bindCmd := exec.Command("kubectl", "create", "clusterrolebinding", bindingName,
 		"--clusterrole=recycler-metrics-reader",
 		"--serviceaccount="+namespace+":recycler-controller-manager",
 	)
-	if out, err := bindCmd.CombinedOutput(); err != nil {
+	if out, bindErr := bindCmd.CombinedOutput(); bindErr != nil {
 		// Tolerate "already exists" so re-runs don't fail.
 		if !strings.Contains(string(out), "already exists") {
-			return "", fmt.Errorf("failed to create metrics reader binding: %w — %s", err, string(out))
+			return "", func() {}, fmt.Errorf("failed to create metrics reader binding: %w — %s", bindErr, string(out))
 		}
 	}
-	defer func() {
+	cleanup = func() {
 		_ = exec.Command("kubectl", "delete", "clusterrolebinding", bindingName).Run()
-	}()
+	}
 
-	// Create a short-lived service account token.
 	tokenCmd := exec.Command("kubectl", "create", "token",
 		"recycler-controller-manager", "--namespace", namespace, "--duration=600s")
-	tokenBytes, err := Run(tokenCmd)
-	if err != nil {
-		return "", fmt.Errorf("failed to create service account token: %w", err)
+	tokenBytes, tokenErr := Run(tokenCmd)
+	if tokenErr != nil {
+		cleanup()
+		return "", func() {}, fmt.Errorf("failed to create service account token: %w", tokenErr)
 	}
-	token := strings.TrimSpace(string(tokenBytes))
+	return strings.TrimSpace(string(tokenBytes)), cleanup, nil
+}
 
+// FetchControllerMetricsWithToken port-forwards the controller's metrics service and returns
+// the raw Prometheus text from /metrics using the provided bearer token. For repeated calls
+// (e.g. inside an Eventually loop), obtain the token once via SetupMetricsAccess and pass it
+// here to avoid creating a new token on every retry.
+func FetchControllerMetricsWithToken(namespace, token string) (string, error) {
 	// Start port-forward in the background.
 	pfCmd := exec.Command("kubectl", "port-forward",
 		"svc/recycler-controller-manager-metrics-service",
@@ -317,8 +320,8 @@ func FetchControllerMetrics(namespace string) (string, error) {
 		return "", fmt.Errorf("metrics request failed: %w", err)
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "warning: failed to close metrics response body: %v\n", err)
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "warning: failed to close metrics response body: %v\n", closeErr)
 		}
 	}()
 
@@ -330,6 +333,18 @@ func FetchControllerMetrics(namespace string) (string, error) {
 		return "", fmt.Errorf("metrics endpoint returned HTTP %d: %s", resp.StatusCode, string(body))
 	}
 	return string(body), nil
+}
+
+// FetchControllerMetrics is a convenience wrapper for single ad-hoc metric fetches.
+// For repeated calls inside an Eventually loop, prefer SetupMetricsAccess +
+// FetchControllerMetricsWithToken to avoid creating a new token on every retry.
+func FetchControllerMetrics(namespace string) (string, error) {
+	token, cleanup, err := SetupMetricsAccess(namespace)
+	if err != nil {
+		return "", err
+	}
+	defer cleanup()
+	return FetchControllerMetricsWithToken(namespace, token)
 }
 
 // MetricValue searches raw Prometheus text for the first sample whose name and labels
