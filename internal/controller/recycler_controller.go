@@ -258,8 +258,9 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				time.AfterFunc(retention, func() {
 					podLastRecycleTime.DeleteLabelValues(ns, recyclerName, podName)
 				})
-				// Check if in-memory storage is being used
-				if recycler.Spec.MetricStorageLocation == StorageMemory {
+				// Check if in-memory storage is being used. Prometheus mode never stores per-pod
+				// history, so skip the cleanup (and its misleading log line) entirely.
+				if recycler.Spec.MetricsSource != MetricsSourcePrometheus && recycler.Spec.MetricStorageLocation == StorageMemory {
 					// Remove the pod's entry from in-memory storage
 					key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 					InMemoryMetricsStorage.Delete(key) // Access exported variable
@@ -313,6 +314,12 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 	for _, pod := range podList.Items {
 		podCPUUtilization.DeleteLabelValues(pod.Namespace, pod.Name)
 		podLastRecycleTime.DeleteLabelValues(pod.Namespace, recycler.Name, pod.Name)
+	}
+
+	// Prometheus mode never stores per-pod history (neither in memory nor as annotations),
+	// so there is no storage to clean up — skip the storage-location switch entirely.
+	if recycler.Spec.MetricsSource == MetricsSourcePrometheus {
+		return
 	}
 
 	// Handle cleanup based on MetricStorageLocation
