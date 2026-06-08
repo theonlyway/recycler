@@ -346,6 +346,7 @@ var _ = Describe("Prometheus metrics source", func() {
 					PollingIntervalSeconds:       45,
 					PodMetricsHistory:            5,
 					GracePeriodSeconds:           30,
+					MetricStorageLocation:        StorageMemory,
 					MetricsSource:                MetricsSourcePrometheus,
 					Prometheus: &recyclertheonlywayecomv1alpha1.PrometheusSpec{
 						ServerAddress: unreachablePromAddress,
