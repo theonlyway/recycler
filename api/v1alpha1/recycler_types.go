@@ -46,31 +46,49 @@ type RecyclerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// ScaleTargetRef from autoscalingv2 used by the horzontal pod autoscaler for consistency
+	// ScaleTargetRef identifies the Deployment to monitor and recycle pods for.
+	// Only Deployments are supported. The name must match an existing Deployment in the same namespace.
 	ScaleTargetRef CrossVersionObjectReference `json:"scaleTargetRef"`
-	// Average CPU utilization percent of the target resource
+	// AverageCpuUtilizationPercent is the rolling-average CPU usage threshold, expressed as a percentage
+	// of the pod's CPU request. When the rolling average across the configured history window exceeds
+	// this value, the pod is marked for recycling.
 	AverageCpuUtilizationPercent int32 `json:"averageCpuUtilizationPercent"`
-	// Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold
+	// RecycleDelaySeconds is how long to wait after a CPU breach is first detected before the pod is
+	// deleted. This gives transient spikes time to recover before a recycle is triggered.
 	// +optional
 	// +default=300
 	RecycleDelaySeconds int32 `json:"recycleDelaySeconds"`
-	// Polling duration in seonds between metric fetches
+	// PollingIntervalSeconds controls how frequently the controller polls the Kubernetes Metrics API
+	// to collect CPU usage for each pod. Lower values produce a more responsive rolling average but
+	// increase API server load.
 	// +optional
 	// +default=60
 	PollingIntervalSeconds int32 `json:"pollingIntervalSeconds"`
-	// Number of datapoints to keep in the pod metrics history
+	// PodMetricsHistory is the number of polling samples retained in the rolling window used to
+	// compute the average CPU utilization. A larger window smooths out short spikes; a smaller
+	// window reacts more quickly to sustained high usage.
 	// +optional
 	// +default=10
 	PodMetricsHistory int32 `json:"podMetricsHistory"`
-	// Termination grace period in seconds
+	// GracePeriodSeconds is the pod termination grace period passed to the Kubernetes delete call.
+	// The kubelet will send SIGTERM and wait this many seconds before sending SIGKILL.
 	// +optional
 	// +default=30
 	GracePeriodSeconds int32 `json:"gracePeriodSeconds"`
-	// Location to store metric data. Certain options are bad based on the number of datapoints and frequency
+	// MetricStorageLocation controls where per-pod CPU history is stored between reconcile cycles.
+	// "memory" stores data in-process (fast, zero API cost, lost on controller restart).
+	// "annotation" persists history as a pod annotation (survives restarts, incurs an etcd write per poll).
 	// +optional
 	// +kubebuilder:validation:Enum=memory;annotation
 	// +kubebuilder:default=memory
 	MetricStorageLocation string `json:"metricStorageLocation"`
+	// MetricsRetentionSeconds controls how long per-pod gauge series are retained in the /metrics
+	// endpoint after a pod is terminated. Series linger for this duration to allow at least one
+	// Prometheus scrape to capture the final value before they are removed. Set to 0 to delete
+	// series immediately upon pod termination.
+	// +optional
+	// +default=300
+	MetricsRetentionSeconds int32 `json:"metricsRetentionSeconds"`
 }
 
 // RecyclerStatus defines the observed state of Recycler
