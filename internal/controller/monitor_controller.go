@@ -102,6 +102,13 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	// The recycler-controller owns finalizer cleanup. Once deletion is triggered, skip all storage
+	// writes to avoid re-adding entries that the finalizer is concurrently clearing.
+	if recycler.GetDeletionTimestamp() != nil {
+		log.V(1).Info("Recycler is being deleted, skipping monitor reconcile", "controller", monitorControllerName)
+		return ctrl.Result{}, nil
+	}
+
 	// Fetch the resource type using ScaleTargetRef
 	switch kind := recycler.Spec.ScaleTargetRef.Kind; kind {
 	case kindDeployment:
