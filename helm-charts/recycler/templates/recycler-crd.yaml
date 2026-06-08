@@ -57,6 +57,14 @@ spec:
                 - memory
                 - annotation
                 type: string
+              metricsRetentionSeconds:
+                default: 300
+                description: How long in seconds per-pod gauge series are retained
+                  in the /metrics endpoint after a pod is terminated. Allows at least
+                  one Prometheus scrape to capture the final value. Set to 0 to delete
+                  series immediately upon pod termination.
+                format: int32
+                type: integer
               metricsSource:
                 default: kubernetes
                 description: Source used to obtain per-pod CPU utilization. "kubernetes"

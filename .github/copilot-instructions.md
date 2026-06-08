@@ -24,6 +24,8 @@ The Helm chart (`helm-charts/recycler/`) is **hand-maintained**. Do not run `mak
 
 After any structural change to `config/` (new resource type, RBAC change, new deployment arg), manually mirror the equivalent change in `helm-charts/recycler/templates/` and `helm-charts/recycler/values.yaml`.
 
+After any change to `api/v1alpha1/` types that adds, removes, or modifies a field (including doc comment changes that affect CRD descriptions), run `make generate manifests` and then manually mirror the updated field schema into **both** `helm-charts/recycler/templates/recycler-crd.yaml` and `helm-charts/recycler-debug/templates/recycler-crd.yaml`. The hand-maintained Helm CRDs are the only CRD copy that does **not** auto-update — omitting this step causes "unknown field" warnings in production when the Helm-installed CRD schema is missing fields that the controller or stored CRs already use.
+
 ## What the Operator Does
 
 Recycler monitors CPU utilization of pods in a target Deployment and automatically terminates pods whose rolling-average CPU exceeds a configured threshold. It solves runaway pods that evade health checks and avoids unnecessary HPA scaling.
