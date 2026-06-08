@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-06-08
+### :sparkles: New Features
+- [`9a1afbf`](https://github.com/theonlyway/recycler/commit/9a1afbf4f182018c16822dc96b201216c6e0e003) - **metrics**: add Prometheus metrics source configuration and querying support *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`ba15f49`](https://github.com/theonlyway/recycler/commit/ba15f4974dc49702c90391d396ff67b35692c3e4) - **tests**: add Prometheus-based CPU recycling test and related configurations *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`3c74135`](https://github.com/theonlyway/recycler/commit/3c74135ea001d199c755927101c03be50eeae5ca) - update metrics source configuration to support optional field *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`8103618`](https://github.com/theonlyway/recycler/commit/8103618e557d6f17db0ef0e1a08647cb581ddd86) - update Reconcile function documentation for Monitor and Recycler controllers [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`0a2ce39`](https://github.com/theonlyway/recycler/commit/0a2ce39fa4f93c9cd38c6966574429a1631b6f52) - enhance pod termination logic to skip cleanup in Prometheus mode *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a8690e9`](https://github.com/theonlyway/recycler/commit/a8690e9e8be700da120377c9752298e10238a2d2) - add support for Prometheus as a metrics source in Recycler configuration [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`4ed5750`](https://github.com/theonlyway/recycler/commit/4ed57504e587261b16bb8b78d1cd42d7b3f3ae8a) - **tests**: add unit tests for Prometheus metrics source functionality *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`335cd65`](https://github.com/theonlyway/recycler/commit/335cd657d0705f97a0161243ef3be704c0bb43d3) - update Prometheus query to dynamically calculate CPU limit and improve documentation *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`bc972e9`](https://github.com/theonlyway/recycler/commit/bc972e9d0f6230e9c419f24dfd3a47db5dc073e7) - add MetricStorageLocation configuration for Prometheus metrics source *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`53f52a8`](https://github.com/theonlyway/recycler/commit/53f52a8265bd4684c9bd84ebf40dcea57f604b5a) - enhance Recycler schema with detailed descriptions and Prometheus configuration validation *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`b43ed3f`](https://github.com/theonlyway/recycler/commit/b43ed3f65ddbeb52cb206cabb1d9daae72636b19) - update Prometheus integration to rely solely on cAdvisor metrics, removing kube-state-metrics dependency *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.11.0] - 2026-06-08
 ### :sparkles: New Features
 - [`a99a83e`](https://github.com/theonlyway/recycler/commit/a99a83eec75551480bf1b7d4dfe1a472550dba1b) - **metrics**: add metrics retention configuration and update descriptions in CRD and controller *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -802,3 +817,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.10.4]: https://github.com/theonlyway/recycler/compare/1.10.3...1.10.4
 [1.10.5]: https://github.com/theonlyway/recycler/compare/1.10.4...1.10.5
 [1.11.0]: https://github.com/theonlyway/recycler/compare/1.10.5...1.11.0
+[1.12.0]: https://github.com/theonlyway/recycler/compare/1.11.0...1.12.0
