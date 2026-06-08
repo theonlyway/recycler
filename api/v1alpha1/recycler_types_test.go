@@ -104,6 +104,73 @@ var _ = Describe("Recycler Types", func() {
 
 			Expect(spec.MetricStorageLocation).To(Equal("annotation"))
 		})
+
+		It("should default the metrics source to empty (kubernetes applied by the CRD)", func() {
+			spec := RecyclerSpec{
+				ScaleTargetRef: CrossVersionObjectReference{
+					Kind: kindDeployment,
+					Name: testName,
+				},
+				AverageCpuUtilizationPercent: 50,
+			}
+
+			// The Go zero value is empty; the CRD default ("kubernetes") is applied by the API
+			// server. MetricsSource uses omitempty so an unset value is omitted on marshal.
+			Expect(spec.MetricsSource).To(Equal(""))
+			Expect(spec.Prometheus).To(BeNil())
+		})
+
+		It("should hold a prometheus metrics source configuration", func() {
+			spec := RecyclerSpec{
+				ScaleTargetRef: CrossVersionObjectReference{
+					Kind: kindDeployment,
+					Name: testName,
+				},
+				AverageCpuUtilizationPercent: 80,
+				MetricsSource:                "prometheus",
+				Prometheus: &PrometheusSpec{
+					ServerAddress:      "http://prometheus-operated.monitoring.svc:9090",
+					Query:              "100 * rate(x[5m])",
+					InsecureSkipVerify: true,
+				},
+			}
+
+			Expect(spec.MetricsSource).To(Equal("prometheus"))
+			Expect(spec.Prometheus).NotTo(BeNil())
+			Expect(spec.Prometheus.ServerAddress).To(Equal("http://prometheus-operated.monitoring.svc:9090"))
+			Expect(spec.Prometheus.Query).To(Equal("100 * rate(x[5m])"))
+			Expect(spec.Prometheus.InsecureSkipVerify).To(BeTrue())
+		})
+	})
+
+	Context("PrometheusSpec", func() {
+		It("should default optional fields to their zero values", func() {
+			spec := PrometheusSpec{
+				ServerAddress: "http://prometheus:9090",
+			}
+
+			Expect(spec.ServerAddress).To(Equal("http://prometheus:9090"))
+			Expect(spec.Query).To(Equal(""))
+			Expect(spec.InsecureSkipVerify).To(BeFalse())
+		})
+
+		It("should deep copy all fields", func() {
+			original := &PrometheusSpec{
+				ServerAddress:      "http://prometheus:9090",
+				Query:              "up",
+				InsecureSkipVerify: true,
+			}
+
+			copied := original.DeepCopy()
+			Expect(copied).NotTo(BeIdenticalTo(original))
+			Expect(copied.ServerAddress).To(Equal(original.ServerAddress))
+			Expect(copied.Query).To(Equal(original.Query))
+			Expect(copied.InsecureSkipVerify).To(Equal(original.InsecureSkipVerify))
+
+			// Mutating the copy must not affect the original.
+			copied.ServerAddress = "http://other:9090"
+			Expect(original.ServerAddress).To(Equal("http://prometheus:9090"))
+		})
 	})
 
 	Context("RecyclerStatus", func() {
