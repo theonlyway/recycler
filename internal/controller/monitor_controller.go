@@ -164,7 +164,24 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
 		}
 
+		// Build a set of terminating pod names. The Metrics API can return data for pods that
+		// have a DeletionTimestamp; storing that data would re-add a stale in-memory entry
+		// immediately after the recycler controller removed it in terminatePods().
+		terminatingPods := make(map[string]struct{}, len(podList.Items))
+		for _, pod := range podList.Items {
+			if pod.DeletionTimestamp != nil {
+				terminatingPods[pod.Name] = struct{}{}
+			}
+		}
+
 		for _, podCPU := range podMetricsList {
+			if _, terminating := terminatingPods[podCPU.PodName]; terminating {
+				// Evict any leftover entry and skip storage to avoid stale history.
+				key := fmt.Sprintf("%s/%s", deployment.Namespace, podCPU.PodName)
+				InMemoryMetricsStorage.Delete(key)
+				log.V(1).Info("Skipping metrics update for terminating pod", "podName", podCPU.PodName, "key", key)
+				continue
+			}
 			// Update the pod's metrics history based on storage location
 			if err := updatePodMetricsHistory(ctx, r, podCPU.PodName, deployment.Namespace, podCPU, recycler.Spec.PodMetricsHistory, log, recycler.Spec.MetricStorageLocation); err != nil {
 				log.Error(err, "Failed to update pod metrics history", "podName", podCPU.PodName)

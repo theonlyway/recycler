@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -353,12 +354,24 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 			}
 		}
 	case StorageMemory:
-		// Clear in-memory metrics storage for each pod
+		// Clear in-memory metrics storage for each pod currently in the deployment.
 		for _, pod := range podList.Items {
 			key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 			InMemoryMetricsStorage.Delete(key)
 			r.Log.V(1).Info("Cleared in-memory metrics storage for pod", "podName", pod.Name, "key", key)
 		}
+		// Also sweep for pods that were already fully deleted before the finalizer ran
+		// (e.g. pods terminated by the recycler whose entries were re-added by the monitor
+		// and are no longer visible in the pod list). Keys are "namespace/podname", so we
+		// scan all keys for this namespace prefix and delete any remaining entries.
+		prefix := recycler.Namespace + "/"
+		InMemoryMetricsStorage.Range(func(k, _ any) bool {
+			if key, ok := k.(string); ok && strings.HasPrefix(key, prefix) {
+				InMemoryMetricsStorage.Delete(k)
+				r.Log.V(1).Info("Cleared stale in-memory metrics storage entry", "key", key)
+			}
+			return true
+		})
 	default:
 		r.Log.Error(fmt.Errorf("unsupported storage location"), "Invalid MetricStorageLocation", "MetricStorageLocation", recycler.Spec.MetricStorageLocation)
 	}
