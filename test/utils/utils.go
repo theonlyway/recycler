@@ -18,9 +18,11 @@ package utils
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	neturl "net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -418,4 +420,63 @@ func SumMetricValues(body, metricName string, labels map[string]string) float64 
 		total += val
 	}
 	return total
+}
+
+// QueryPrometheus port-forwards the operator-managed "prometheus-operated" service in the given
+// namespace and executes an instant PromQL query against the Prometheus HTTP API, returning the
+// raw JSON response body. Intended for e2e tests that need to confirm Prometheus has scraped the
+// expected series before relying on it.
+func QueryPrometheus(namespace, query string) ([]byte, error) {
+	pfCmd := exec.Command("kubectl", "port-forward",
+		"svc/prometheus-operated",
+		"--namespace", namespace,
+		"19090:9090")
+	if err := pfCmd.Start(); err != nil {
+		return nil, fmt.Errorf("failed to start prometheus port-forward: %w", err)
+	}
+	defer func() { _ = pfCmd.Process.Kill() }()
+
+	// Give the tunnel a moment to be established.
+	time.Sleep(2 * time.Second)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	endpoint := "http://localhost:19090/api/v1/query?query=" + neturl.QueryEscape(query)
+	resp, err := client.Get(endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("prometheus query request failed: %w", err)
+	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			_, _ = fmt.Fprintf(ginkgo.GinkgoWriter, "warning: failed to close prometheus response body: %v\n", closeErr)
+		}
+	}()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read prometheus response: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("prometheus query returned HTTP %d: %s", resp.StatusCode, string(body))
+	}
+	return body, nil
+}
+
+// PrometheusResultCount parses a Prometheus instant-query JSON response and returns the number of
+// samples in the result vector. A non-success status field is treated as an error.
+func PrometheusResultCount(body []byte) (int, error) {
+	var parsed struct {
+		Status string `json:"status"`
+		Data   struct {
+			ResultType string            `json:"resultType"`
+			Result     []json.RawMessage `json:"result"`
+		} `json:"data"`
+		Error string `json:"error"`
+	}
+	if err := json.Unmarshal(body, &parsed); err != nil {
+		return 0, fmt.Errorf("failed to parse prometheus response: %w", err)
+	}
+	if parsed.Status != "success" {
+		return 0, fmt.Errorf("prometheus query unsuccessful: %s", parsed.Error)
+	}
+	return len(parsed.Data.Result), nil
 }

@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=../../../.vscode/recycler-schema.json
+apiVersion: recycler.theonlywaye.com/v1alpha1
+kind: Recycler
+metadata:
+  name: cpu-stress-recycler
+  namespace: cpu-test
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: cpu-stress
+    apiVersion: apps/v1
+  averageCpuUtilizationPercent: 50
+  recycleDelaySeconds: 60
+  pollingIntervalSeconds: 10
+  podMetricsHistory: 5
+  gracePeriodSeconds: 5
+  metricsSource: prometheus
+  prometheus:
+    serverAddress: http://prometheus-operated.cpu-test.svc:9090
+    # cAdvisor-only query: utilization as a percentage of the pod's 200m (0.2 core) CPU limit.
+    # Avoids a dependency on kube-state-metrics for the e2e test.
+    query: |-
+      100 * sum by (pod) (
+        rate(container_cpu_usage_seconds_total{namespace="cpu-test", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])
+      ) / 0.2

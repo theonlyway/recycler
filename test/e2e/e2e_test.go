@@ -32,6 +32,12 @@ var cpuStressDeploymentYAML string
 //go:embed testdata/cpu-stress-recycler.yaml
 var cpuStressRecyclerYAML string
 
+//go:embed testdata/cpu-stress-recycler-prometheus.yaml
+var cpuStressRecyclerPrometheusYAML string
+
+//go:embed testdata/prometheus-stack.yaml
+var prometheusStackYAML string
+
 const namespace = "recycler-system"
 const podStatusRunning = "Running"
 
@@ -71,5 +77,6 @@ var _ = Describe("controller", Ordered, func() {
 	Context("Operator", func() {
 		It("should run successfully", operatorStartupTest)
 		It("should terminate pod when CPU threshold is exceeded", cpuRecyclingTest)
+		It("should terminate pod when CPU threshold is exceeded via Prometheus", prometheusCpuRecyclingTest)
 	})
 })

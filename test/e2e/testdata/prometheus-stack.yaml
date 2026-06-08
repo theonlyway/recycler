@@ -1,0 +1,85 @@
+# Operator-managed Prometheus used by the e2e Prometheus metrics-source test.
+# It scrapes the kubelet cAdvisor endpoint (via the API server proxy) so that
+# container_cpu_usage_seconds_total is available for the cpu-stress pods, which the
+# Recycler then queries instead of polling the Kubernetes Metrics API.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: cpu-test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: recycler-e2e-prometheus
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: recycler-e2e-prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: recycler-e2e-prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: cpu-test
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: additional-scrape-configs
+  namespace: cpu-test
+stringData:
+  prometheus-additional.yaml: |
+    - job_name: kubernetes-cadvisor
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kubernetes_sd_configs:
+        - role: node
+      relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: e2e
+  namespace: cpu-test
+spec:
+  replicas: 1
+  serviceAccountName: prometheus
+  scrapeInterval: 10s
+  additionalScrapeConfigs:
+    name: additional-scrape-configs
+    key: prometheus-additional.yaml
+  # The Recycler only relies on the additional cAdvisor scrape config, but the operator
+  # requires these selectors to be set explicitly; empty selectors match nothing extra.
+  serviceMonitorSelector: {}
+  podMonitorSelector: {}
+  probeSelector: {}
+  scrapeConfigSelector: {}
+  resources:
+    requests:
+      memory: 200Mi
