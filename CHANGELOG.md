@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-06-08
+### :sparkles: New Features
+- [`a99a83e`](https://github.com/theonlyway/recycler/commit/a99a83eec75551480bf1b7d4dfe1a472550dba1b) - **metrics**: add metrics retention configuration and update descriptions in CRD and controller *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :bug: Bug Fixes
+- [`ed2de4e`](https://github.com/theonlyway/recycler/commit/ed2de4e048e138ea62013f532fd1ddd24aa5dc5d) - **metrics**: clean up per-pod gauge series for terminated pods *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`66b836b`](https://github.com/theonlyway/recycler/commit/66b836b44c5cd275dfe20dc4d53834f1f28ee57a) - **metrics**: add verification for recycler_pod_cpu_utilization_percent during pod runtime *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5bec2fc`](https://github.com/theonlyway/recycler/commit/5bec2fc21471b64fc1dc086f8d225fb002c5c571) - **tests**: split out tests *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`37875ac`](https://github.com/theonlyway/recycler/commit/37875ac3e2674a0d6da9131431b88750f59740df) - **tests**: enhance CPU recycling tests with verification functions for pod termination and events *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`5e81561`](https://github.com/theonlyway/recycler/commit/5e81561b2b061471e80722578a320012b034f04b) - **tests**: update CPU recycling tests to use token-based metrics access *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+### :wrench: Chores
+- [`06751e5`](https://github.com/theonlyway/recycler/commit/06751e5ec8fa5a64d51ca15b9f424876afddfd2e) - **deps**: update actions/checkout digest to df4cb1c *(PR [#151](https://github.com/theonlyway/recycler/pull/151) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.10.5] - 2026-06-03
 ### :wrench: Chores
 - [`3d79bd6`](https://github.com/theonlyway/recycler/commit/3d79bd6bafd0bc024e97e53bb2985a93797c71ab) - **deps**: update go dependencies to v1.26.4 *(PR [#149](https://github.com/theonlyway/recycler/pull/149) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -786,3 +801,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.10.3]: https://github.com/theonlyway/recycler/compare/1.10.2...1.10.3
 [1.10.4]: https://github.com/theonlyway/recycler/compare/1.10.3...1.10.4
 [1.10.5]: https://github.com/theonlyway/recycler/compare/1.10.4...1.10.5
+[1.11.0]: https://github.com/theonlyway/recycler/compare/1.10.5...1.11.0
