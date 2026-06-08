@@ -62,15 +62,12 @@ type RecyclerReconciler struct {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;delete;watch
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Recycler object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
+// Reconcile watches Recycler resources and their target pods. It manages the recycler finalizer,
+// reports Available/Unavailable status, and deletes pods that have been annotated with a CPU breach
+// timestamp once recycleDelaySeconds has elapsed, respecting gracePeriodSeconds.
 //
 // For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.24.1/pkg/reconcile
 func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("recycler", req.NamespacedName)
 	log.V(1).Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
