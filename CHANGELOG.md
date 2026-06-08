@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-06-08
+### :sparkles: New Features
+- [`ee56374`](https://github.com/theonlyway/recycler/commit/ee56374bb3c06ddee1abeb17c7ade9b766de6953) - add metricsRetentionSeconds field to Recycler CRD for improved metrics retention *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.12.0] - 2026-06-08
 ### :sparkles: New Features
 - [`9a1afbf`](https://github.com/theonlyway/recycler/commit/9a1afbf4f182018c16822dc96b201216c6e0e003) - **metrics**: add Prometheus metrics source configuration and querying support *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -818,3 +823,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.10.5]: https://github.com/theonlyway/recycler/compare/1.10.4...1.10.5
 [1.11.0]: https://github.com/theonlyway/recycler/compare/1.10.5...1.11.0
 [1.12.0]: https://github.com/theonlyway/recycler/compare/1.11.0...1.12.0
+[1.13.0]: https://github.com/theonlyway/recycler/compare/1.12.0...1.13.0
