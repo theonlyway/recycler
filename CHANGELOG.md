@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.2] - 2026-06-08
+### :bug: Bug Fixes
+- [`e495804`](https://github.com/theonlyway/recycler/commit/e495804d0778cedd7facbe636e4d2077539babec) - skip monitor reconcile during recycler deletion to prevent storage write conflicts *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.13.1] - 2026-06-08
 ### :bug: Bug Fixes
 - [`4c190b5`](https://github.com/theonlyway/recycler/commit/4c190b5e0a2b722181223ea8d2ccf141860ba297) - enhance metrics storage management by handling terminating pods and clearing stale entries *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -830,3 +835,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.12.0]: https://github.com/theonlyway/recycler/compare/1.11.0...1.12.0
 [1.13.0]: https://github.com/theonlyway/recycler/compare/1.12.0...1.13.0
 [1.13.1]: https://github.com/theonlyway/recycler/compare/1.13.0...1.13.1
+[1.13.2]: https://github.com/theonlyway/recycler/compare/1.13.1...1.13.2
