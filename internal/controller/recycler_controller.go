@@ -62,15 +62,12 @@ type RecyclerReconciler struct {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;update;patch;delete;watch
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Recycler object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
+// Reconcile watches Recycler resources and their target pods. It manages the recycler finalizer,
+// reports Available/Unavailable status, and deletes pods that have been annotated with a CPU breach
+// timestamp once recycleDelaySeconds has elapsed, respecting gracePeriodSeconds.
 //
 // For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.0/pkg/reconcile
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.24.1/pkg/reconcile
 func (r *RecyclerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("recycler", req.NamespacedName)
 	log.V(1).Info("Starting Recycler reconciliation", "controller", recyclerControllerName)
@@ -261,8 +258,9 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				time.AfterFunc(retention, func() {
 					podLastRecycleTime.DeleteLabelValues(ns, recyclerName, podName)
 				})
-				// Check if in-memory storage is being used
-				if recycler.Spec.MetricStorageLocation == StorageMemory {
+				// Check if in-memory storage is being used. Prometheus mode never stores per-pod
+				// history, so skip the cleanup (and its misleading log line) entirely.
+				if recycler.Spec.MetricsSource != MetricsSourcePrometheus && recycler.Spec.MetricStorageLocation == StorageMemory {
 					// Remove the pod's entry from in-memory storage
 					key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
 					InMemoryMetricsStorage.Delete(key) // Access exported variable
@@ -316,6 +314,12 @@ func (r *RecyclerReconciler) doFinalizerOperationsForRecycler(ctx context.Contex
 	for _, pod := range podList.Items {
 		podCPUUtilization.DeleteLabelValues(pod.Namespace, pod.Name)
 		podLastRecycleTime.DeleteLabelValues(pod.Namespace, recycler.Name, pod.Name)
+	}
+
+	// Prometheus mode never stores per-pod history (neither in memory nor as annotations),
+	// so there is no storage to clean up — skip the storage-location switch entirely.
+	if recycler.Spec.MetricsSource == MetricsSourcePrometheus {
+		return
 	}
 
 	// Handle cleanup based on MetricStorageLocation

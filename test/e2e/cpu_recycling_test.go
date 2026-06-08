@@ -164,6 +164,21 @@ func verifyNewPodsRunning(testNamespace string, initialPodNames []string) error 
 }
 
 func cpuRecyclingTest() {
+	runCpuRecyclingTest(cpuStressRecyclerYAML, false)
+}
+
+// prometheusCpuRecyclingTest runs the same recycling scenario but configures the Recycler to source
+// CPU utilization from an operator-managed Prometheus instead of the Kubernetes Metrics API.
+func prometheusCpuRecyclingTest() {
+	runCpuRecyclingTest(cpuStressRecyclerPrometheusYAML, true)
+}
+
+// runCpuRecyclingTest drives the end-to-end CPU recycling scenario. When usePrometheus is true an
+// operator-managed Prometheus scraping cAdvisor is deployed first and the supplied Recycler is
+// expected to query it (metricsSource: prometheus); otherwise the Kubernetes Metrics API path is
+// exercised. All event and /metrics assertions are identical because the controller emits the same
+// events and Prometheus metrics regardless of the metrics source.
+func runCpuRecyclingTest(recyclerYAML string, usePrometheus bool) {
 	const testNamespace = "cpu-test"
 	const deploymentName = "cpu-stress"
 	const recyclerName = "cpu-stress-recycler"
@@ -220,9 +235,13 @@ func cpuRecyclingTest() {
 	ExpectWithOffset(1, initialPodNames).ShouldNot(BeEmpty(), "Expected at least one pod")
 	GinkgoWriter.Printf("Initial pods to monitor: %v\n", initialPodNames)
 
+	if usePrometheus {
+		setupPrometheusStack(testNamespace, initialPodNames)
+	}
+
 	By("applying the Recycler CR")
 	cmd = exec.Command("kubectl", "apply", "-f", "-")
-	cmd.Stdin = utils.StringReader(cpuStressRecyclerYAML)
+	cmd.Stdin = utils.StringReader(recyclerYAML)
 	_, err = utils.Run(cmd)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
@@ -426,6 +445,63 @@ func cpuRecyclingTest() {
 	_, _ = utils.Run(cmd)
 	cmd = exec.Command("kubectl", "delete", "deployment", deploymentName, "-n", testNamespace)
 	_, _ = utils.Run(cmd)
+	if usePrometheus {
+		teardownPrometheusStack()
+	}
 	cmd = exec.Command("kubectl", "delete", "ns", testNamespace)
+	_, _ = utils.Run(cmd)
+}
+
+// setupPrometheusStack deploys an operator-managed Prometheus that scrapes cAdvisor and waits until
+// it has CPU samples for the supplied stress pods, so the Recycler's Prometheus query returns data.
+func setupPrometheusStack(testNamespace string, initialPodNames []string) {
+	By("deploying an operator-managed Prometheus with a cAdvisor scrape config")
+	cmd := exec.Command("kubectl", "apply", "-f", "-")
+	cmd.Stdin = utils.StringReader(prometheusStackYAML)
+	_, err := utils.Run(cmd)
+	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+	By("waiting for the Prometheus StatefulSet to be created by the operator")
+	EventuallyWithOffset(1, func() error {
+		cmd := exec.Command("kubectl", "get", "statefulset", "prometheus-e2e", "-n", testNamespace)
+		_, err := utils.Run(cmd)
+		return err
+	}, 2*time.Minute, 5*time.Second).Should(Succeed())
+
+	By("waiting for the Prometheus pod to roll out")
+	cmd = exec.Command("kubectl", "rollout", "status", "statefulset/prometheus-e2e",
+		"-n", testNamespace, "--timeout=3m")
+	_, err = utils.Run(cmd)
+	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+	By("waiting until Prometheus has scraped cAdvisor CPU samples for the stress pods")
+	podRegex := strings.Join(initialPodNames, "|")
+	query := fmt.Sprintf(
+		`count(rate(container_cpu_usage_seconds_total{namespace="%s",pod=~"%s",container!="",container!="POD"}[1m]) > 0)`,
+		testNamespace, podRegex)
+	EventuallyWithOffset(1, func() error {
+		body, err := utils.QueryPrometheus(testNamespace, query)
+		if err != nil {
+			return err
+		}
+		count, err := utils.PrometheusResultCount(body)
+		if err != nil {
+			return err
+		}
+		if count == 0 {
+			return fmt.Errorf("no cAdvisor CPU samples in Prometheus yet for stress pods")
+		}
+		GinkgoWriter.Printf("Prometheus has CPU samples for the stress pods\n")
+		return nil
+	}, 3*time.Minute, 5*time.Second).Should(Succeed())
+}
+
+// teardownPrometheusStack removes the Prometheus instance and its cluster-scoped RBAC. Namespaced
+// resources are also removed when the test namespace is deleted, but the ClusterRole and
+// ClusterRoleBinding are cluster-scoped and must be cleaned up explicitly.
+func teardownPrometheusStack() {
+	By("tearing down the Prometheus stack")
+	cmd := exec.Command("kubectl", "delete", "-f", "-", "--ignore-not-found")
+	cmd.Stdin = utils.StringReader(prometheusStackYAML)
 	_, _ = utils.Run(cmd)
 }

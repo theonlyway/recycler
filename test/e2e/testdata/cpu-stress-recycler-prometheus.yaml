@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../../../.vscode/recycler-schema.json
+apiVersion: recycler.theonlywaye.com/v1alpha1
+kind: Recycler
+metadata:
+  name: cpu-stress-recycler
+  namespace: cpu-test
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: cpu-stress
+    apiVersion: apps/v1
+  averageCpuUtilizationPercent: 50
+  recycleDelaySeconds: 60
+  pollingIntervalSeconds: 10
+  podMetricsHistory: 5
+  gracePeriodSeconds: 5
+  metricsSource: prometheus
+  prometheus:
+    serverAddress: http://prometheus-operated.cpu-test.svc:9090
+    # No custom query: the controller's default cAdvisor-only query is used. It derives the
+    # CPU limit dynamically from the cgroup quota/period series, so it needs only cAdvisor
+    # (scraped via the API-server proxy) and no kube-state-metrics in the test stack.

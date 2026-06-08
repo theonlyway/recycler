@@ -100,7 +100,67 @@ spec:
   recycleDelaySeconds: 3600 # This is how long to wait before terminating the pod once it's breached the average CPU utilization threshold
   gracePeriodSeconds: 60 # Configuraable time to wait when terminating the pod before it's forcefully terminated
   metricStorageLocation: memory # Where to store the metrics data. Either in memory or as an annotation on the pod. There are implications to both
+  metricsSource: kubernetes # Where CPU utilisation comes from: "kubernetes" (default, Metrics API) or "prometheus"
 ```
+
+## Metrics source
+
+The Recycler can determine per-pod CPU utilisation from one of two sources, selected with `spec.metricsSource`:
+
+| `metricsSource` | How it works | Requirements |
+|-----------------|--------------|--------------|
+| `kubernetes` (default) | Polls the Kubernetes Metrics API every `pollingIntervalSeconds`, stores a rolling history of `podMetricsHistory` samples per pod, and compares the in-process rolling average against `averageCpuUtilizationPercent`. | `metrics-server` (or equivalent Metrics API provider) installed. |
+| `prometheus` | Queries an external Prometheus server each reconcile. The averaging is done by the PromQL query itself, so no per-pod history is stored by the controller (`metricStorageLocation` is ignored). | A reachable Prometheus already scraping pod CPU metrics. The default query needs only cAdvisor (always exposed by the kubelet); kube-state-metrics is not required. |
+
+> Both sources produce identical behaviour, events, and `/metrics` output — only the measurement source differs. The `recycleDelaySeconds` delay, breach/recovery detection, and pod termination logic are the same.
+
+### Using Prometheus
+
+Set `metricsSource: prometheus` and provide a `prometheus` block. This is useful when Prometheus is already monitoring CPU and you'd rather reuse it than poll the Metrics API.
+
+```yaml
+apiVersion: recycler.theonlywaye.com/v1alpha1
+kind: Recycler
+metadata:
+  name: name-of-recycler
+  namespace: namespace-of-recycler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: name-of-deployment
+  pollingIntervalSeconds: 30
+  podMetricsHistory: 5 # Used only to size the averaging window: podMetricsHistory * pollingIntervalSeconds
+  averageCpuUtilizationPercent: 80
+  recycleDelaySeconds: 3600
+  gracePeriodSeconds: 60
+  metricsSource: prometheus
+  prometheus:
+    serverAddress: http://prometheus-operated.monitoring.svc:9090 # Base URL of the Prometheus server (required)
+    insecureSkipVerify: false # Optional: disable TLS verification for an HTTPS serverAddress
+    # query is optional. When omitted, a default cAdvisor-only query is used (it does not
+    # require kube-state-metrics; the CPU limit is derived from the cgroup quota/period series).
+    # It must return an instant vector where each sample has a "pod" label and a CPU
+    # utilisation percentage value. The query is rendered as a Go text/template with:
+    #   {{.Namespace}}      - namespace of the target Deployment
+    #   {{.Deployment}}     - name of the target Deployment
+    #   {{.PodRegex}}       - regex alternation of the current pod names (pod1|pod2|...)
+    #   {{.WindowSeconds}}  - podMetricsHistory * pollingIntervalSeconds, the averaging window
+    query: |-
+      100 * sum by (pod) (
+        rate(container_cpu_usage_seconds_total{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])
+      ) / sum by (pod) (
+        container_spec_cpu_quota{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}
+        /
+        container_spec_cpu_period{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}
+      )
+```
+
+Notes:
+- `spec.prometheus` is **required** when `metricsSource: prometheus` (enforced by a CEL validation on the CRD) and ignored otherwise.
+- The default query expresses CPU usage as a percentage of each pod's CPU **limit**, derived purely from cAdvisor's cgroup series (`container_spec_cpu_quota / container_spec_cpu_period` == limit in cores). This deliberately avoids assuming kube-state-metrics is installed. Pods without a CPU limit have no quota series and are skipped — supply a custom `query` (e.g. one using `kube_pod_container_resource_limits`) if you measure against requests or a different source.
+- Each reconcile issues a **single** Prometheus query containing all current pod names, not one query per pod.
+
 
 ## Prometheus Metrics
 
@@ -125,7 +185,7 @@ helm install recycler oci://ghcr.io/theonlyway/charts/recycler \
 | `recycler_cpu_threshold_breaches_total` | Counter | `recycler_namespace`, `recycler` | Total number of CPU threshold breach events detected. Increments when a pod first crosses the threshold and the breach annotation is written. |
 | `recycler_cpu_breach_duration_seconds` | Histogram | `recycler_namespace`, `recycler` | Time in seconds between when the breach annotation was written and when the pod was actually deleted (i.e. how long the pod spent above threshold before recycling). Buckets: `30, 60, 120, 180, 300, 600, 900, 1800`. |
 | `recycler_pod_last_recycle_timestamp_seconds` | Gauge | `recycler_namespace`, `recycler`, `recycler_pod` | Unix timestamp of the most recent recycle event for a specific pod. Useful for building an audit history of which pods were terminated and when. |
-| `recycler_pod_cpu_utilization_percent` | Gauge | `recycler_namespace`, `recycler_pod` | Current rolling-average CPU utilisation percentage for each monitored pod, calculated over the `podMetricsHistory` window. |
+| `recycler_pod_cpu_utilization_percent` | Gauge | `recycler_namespace`, `recycler_pod` | Current CPU utilisation percentage for each monitored pod. For `metricsSource: kubernetes` this is the rolling average over the `podMetricsHistory` window; for `metricsSource: prometheus` it is the value returned by the configured PromQL query. |
 
 ### Example queries
 

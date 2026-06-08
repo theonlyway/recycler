@@ -17,45 +17,83 @@
       "description": "RecyclerSpec defines the desired state of Recycler",
       "properties": {
         "averageCpuUtilizationPercent": {
-          "description": "Average CPU utilization percent of the target resource",
+          "description": "AverageCpuUtilizationPercent is the rolling-average CPU usage threshold, expressed as a percentage\nof the pod's CPU request. When the rolling average across the configured history window exceeds\nthis value, the pod is marked for recycling.",
           "format": "int32",
           "type": "integer"
         },
         "gracePeriodSeconds": {
           "default": 30,
-          "description": "Termination grace period in seconds",
+          "description": "GracePeriodSeconds is the pod termination grace period passed to the Kubernetes delete call.\nThe kubelet will send SIGTERM and wait this many seconds before sending SIGKILL.",
           "format": "int32",
           "type": "integer"
         },
         "metricStorageLocation": {
           "default": "memory",
-          "description": "Location to store metric data. Certain options are bad based on the number of datapoints and frequency",
+          "description": "MetricStorageLocation controls where per-pod CPU history is stored between reconcile cycles.\n\"memory\" stores data in-process (fast, zero API cost, lost on controller restart).\n\"annotation\" persists history as a pod annotation (survives restarts, incurs an etcd write per poll).",
           "enum": [
             "memory",
             "annotation"
           ],
           "type": "string"
         },
+        "metricsRetentionSeconds": {
+          "default": 300,
+          "description": "MetricsRetentionSeconds controls how long per-pod gauge series are retained in the /metrics\nendpoint after a pod is terminated. Series linger for this duration to allow at least one\nPrometheus scrape to capture the final value before they are removed. Set to 0 to delete\nseries immediately upon pod termination.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "metricsSource": {
+          "default": "kubernetes",
+          "description": "MetricsSource selects how per-pod CPU utilization is obtained.\n\"kubernetes\" (default) polls the Kubernetes Metrics API on pollingIntervalSeconds and\ncomputes a rolling average across podMetricsHistory samples stored per metricStorageLocation.\n\"prometheus\" queries an external Prometheus server (see the prometheus field) so the averaging\nis performed by Prometheus and no per-pod history is stored by the controller.",
+          "enum": [
+            "kubernetes",
+            "prometheus"
+          ],
+          "type": "string"
+        },
         "podMetricsHistory": {
           "default": 10,
-          "description": "Number of datapoints to keep in the pod metrics history",
+          "description": "PodMetricsHistory is the number of polling samples retained in the rolling window used to\ncompute the average CPU utilization. A larger window smooths out short spikes; a smaller\nwindow reacts more quickly to sustained high usage.",
           "format": "int32",
           "type": "integer"
         },
         "pollingIntervalSeconds": {
           "default": 60,
-          "description": "Polling duration in seonds between metric fetches",
+          "description": "PollingIntervalSeconds controls how frequently the controller polls the Kubernetes Metrics API\nto collect CPU usage for each pod. Lower values produce a more responsive rolling average but\nincrease API server load.",
           "format": "int32",
           "type": "integer"
         },
+        "prometheus": {
+          "description": "Prometheus configures the external Prometheus server to query when metricsSource is \"prometheus\".\nIt is required when metricsSource is \"prometheus\" and ignored otherwise.",
+          "properties": {
+            "insecureSkipVerify": {
+              "default": false,
+              "description": "InsecureSkipVerify disables TLS certificate verification when the ServerAddress uses HTTPS.",
+              "type": "boolean"
+            },
+            "query": {
+              "description": "Query is the PromQL query used to evaluate per-pod CPU utilization. It must return an\ninstant vector where each sample carries a \"pod\" label and a value representing the\nCPU utilization percentage to compare against averageCpuUtilizationPercent.\n\nThe query is rendered as a Go text/template with the following fields available:\n  {{.Namespace}}      - the namespace of the target Deployment\n  {{.Deployment}}     - the name of the target Deployment\n  {{.PodRegex}}       - a regex alternation of the current pod names (pod1|pod2|...)\n  {{.WindowSeconds}}  - podMetricsHistory * pollingIntervalSeconds, the averaging window\n\nWhen omitted, a default query based on cAdvisor (container_cpu_usage_seconds_total) and\nkube-state-metrics (kube_pod_container_resource_limits) is used.",
+              "type": "string"
+            },
+            "serverAddress": {
+              "description": "ServerAddress is the base URL of the Prometheus server to query,\ne.g. \"http://prometheus-operated.monitoring.svc:9090\".",
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "serverAddress"
+          ],
+          "type": "object"
+        },
         "recycleDelaySeconds": {
           "default": 300,
-          "description": "Duration in seconds to wait before recycling the pod once it's exceeded the average CPU utilization threshold",
+          "description": "RecycleDelaySeconds is how long to wait after a CPU breach is first detected before the pod is\ndeleted. This gives transient spikes time to recover before a recycle is triggered.",
           "format": "int32",
           "type": "integer"
         },
         "scaleTargetRef": {
-          "description": "ScaleTargetRef from autoscalingv2 used by the horzontal pod autoscaler for consistency",
+          "description": "ScaleTargetRef identifies the Deployment to monitor and recycle pods for.\nOnly Deployments are supported. The name must match an existing Deployment in the same namespace.",
           "properties": {
             "apiVersion": {
               "default": "apps/v1",
@@ -85,7 +123,13 @@
         "averageCpuUtilizationPercent",
         "scaleTargetRef"
       ],
-      "type": "object"
+      "type": "object",
+      "x-kubernetes-validations": [
+        {
+          "message": "prometheus configuration is required when metricsSource is 'prometheus'",
+          "rule": "self.metricsSource != 'prometheus' || has(self.prometheus)"
+        }
+      ]
     },
     "status": {
       "description": "RecyclerStatus defines the observed state of Recycler",

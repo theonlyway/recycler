@@ -119,7 +119,7 @@ type RecyclerSpec struct {
 	// +optional
 	// +kubebuilder:validation:Enum=kubernetes;prometheus
 	// +kubebuilder:default=kubernetes
-	MetricsSource string `json:"metricsSource"`
+	MetricsSource string `json:"metricsSource,omitempty"`
 	// Prometheus configures the external Prometheus server to query when metricsSource is "prometheus".
 	// It is required when metricsSource is "prometheus" and ignored otherwise.
 	// +optional
