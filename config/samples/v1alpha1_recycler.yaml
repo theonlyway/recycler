@@ -6,4 +6,31 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: recycler-sample
 spec:
-  # TODO(user): Add fields here
+  scaleTargetRef:
+    kind: Deployment
+    name: my-deployment
+    apiVersion: apps/v1
+  averageCpuUtilizationPercent: 80
+  recycleDelaySeconds: 300
+  pollingIntervalSeconds: 60
+  podMetricsHistory: 10
+  gracePeriodSeconds: 30
+  # metricsSource selects how per-pod CPU utilization is obtained.
+  # "kubernetes" (default) polls the Metrics API and computes a rolling average in-process.
+  # "prometheus" queries an external Prometheus server instead.
+  metricsSource: kubernetes
+  # Required only when metricsSource is "prometheus":
+  # metricsSource: prometheus
+  # prometheus:
+  #   serverAddress: "http://prometheus-operated.monitoring.svc:9090"
+  #   insecureSkipVerify: false
+  #   # Optional. When omitted, a cAdvisor + kube-state-metrics default query is used.
+  #   # The query must return an instant vector with a "pod" label and a CPU utilization
+  #   # percentage value. Available template fields: {{.Namespace}}, {{.Deployment}},
+  #   # {{.PodRegex}}, {{.WindowSeconds}}.
+  #   query: |-
+  #     100 * sum by (pod) (
+  #       rate(container_cpu_usage_seconds_total{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])
+  #     ) / sum by (pod) (
+  #       kube_pod_container_resource_limits{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", resource="cpu"}
+  #     )

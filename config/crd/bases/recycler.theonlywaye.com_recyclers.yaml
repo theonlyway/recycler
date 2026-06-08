@@ -72,6 +72,18 @@ spec:
                   series immediately upon pod termination.
                 format: int32
                 type: integer
+              metricsSource:
+                default: kubernetes
+                description: |-
+                  MetricsSource selects how per-pod CPU utilization is obtained.
+                  "kubernetes" (default) polls the Kubernetes Metrics API on pollingIntervalSeconds and
+                  computes a rolling average across podMetricsHistory samples stored per metricStorageLocation.
+                  "prometheus" queries an external Prometheus server (see the prometheus field) so the averaging
+                  is performed by Prometheus and no per-pod history is stored by the controller.
+                enum:
+                - kubernetes
+                - prometheus
+                type: string
               podMetricsHistory:
                 default: 10
                 description: |-
@@ -88,6 +100,40 @@ spec:
                   increase API server load.
                 format: int32
                 type: integer
+              prometheus:
+                description: |-
+                  Prometheus configures the external Prometheus server to query when metricsSource is "prometheus".
+                  It is required when metricsSource is "prometheus" and ignored otherwise.
+                properties:
+                  insecureSkipVerify:
+                    default: false
+                    description: InsecureSkipVerify disables TLS certificate verification
+                      when the ServerAddress uses HTTPS.
+                    type: boolean
+                  query:
+                    description: |-
+                      Query is the PromQL query used to evaluate per-pod CPU utilization. It must return an
+                      instant vector where each sample carries a "pod" label and a value representing the
+                      CPU utilization percentage to compare against averageCpuUtilizationPercent.
+
+                      The query is rendered as a Go text/template with the following fields available:
+                        {{.Namespace}}      - the namespace of the target Deployment
+                        {{.Deployment}}     - the name of the target Deployment
+                        {{.PodRegex}}       - a regex alternation of the current pod names (pod1|pod2|...)
+                        {{.WindowSeconds}}  - podMetricsHistory * pollingIntervalSeconds, the averaging window
+
+                      When omitted, a default query based on cAdvisor (container_cpu_usage_seconds_total) and
+                      kube-state-metrics (kube_pod_container_resource_limits) is used.
+                    type: string
+                  serverAddress:
+                    description: |-
+                      ServerAddress is the base URL of the Prometheus server to query,
+                      e.g. "http://prometheus-operated.monitoring.svc:9090".
+                    minLength: 1
+                    type: string
+                required:
+                - serverAddress
+                type: object
               recycleDelaySeconds:
                 default: 300
                 description: |-
@@ -120,6 +166,10 @@ spec:
             - averageCpuUtilizationPercent
             - scaleTargetRef
             type: object
+            x-kubernetes-validations:
+            - message: prometheus configuration is required when metricsSource is
+                'prometheus'
+              rule: self.metricsSource != 'prometheus' || has(self.prometheus)
           status:
             description: RecyclerStatus defines the observed state of Recycler
             properties:

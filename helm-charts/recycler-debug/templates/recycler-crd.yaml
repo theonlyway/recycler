@@ -57,6 +57,15 @@ spec:
                 - memory
                 - annotation
                 type: string
+              metricsSource:
+                default: kubernetes
+                description: Source used to obtain per-pod CPU utilization. "kubernetes"
+                  polls the Metrics API and computes a rolling average; "prometheus"
+                  queries an external Prometheus server.
+                enum:
+                - kubernetes
+                - prometheus
+                type: string
               podMetricsHistory:
                 default: 10
                 description: Number of datapoints to keep in the pod metrics history
@@ -67,6 +76,32 @@ spec:
                 description: Polling duration in seonds between metric fetches
                 format: int32
                 type: integer
+              prometheus:
+                description: Configuration for the external Prometheus server to query
+                  when metricsSource is "prometheus". Required when metricsSource is
+                  "prometheus" and ignored otherwise.
+                properties:
+                  insecureSkipVerify:
+                    default: false
+                    description: Disables TLS certificate verification when the ServerAddress
+                      uses HTTPS.
+                    type: boolean
+                  query:
+                    description: PromQL query used to evaluate per-pod CPU utilization.
+                      Must return an instant vector where each sample carries a "pod"
+                      label and a value representing the CPU utilization percentage.
+                      Rendered as a Go text/template with {{.Namespace}}, {{.Deployment}},
+                      {{.PodRegex}} and {{.WindowSeconds}}. A cAdvisor/kube-state-metrics
+                      default is used when omitted.
+                    type: string
+                  serverAddress:
+                    description: Base URL of the Prometheus server to query, e.g.
+                      "http://prometheus-operated.monitoring.svc:9090".
+                    minLength: 1
+                    type: string
+                required:
+                - serverAddress
+                type: object
               recycleDelaySeconds:
                 default: 300
                 description: Duration in seconds to wait before recycling the pod once
@@ -97,6 +132,10 @@ spec:
             - averageCpuUtilizationPercent
             - scaleTargetRef
             type: object
+            x-kubernetes-validations:
+            - message: prometheus configuration is required when metricsSource is
+                'prometheus'
+              rule: self.metricsSource != 'prometheus' || has(self.prometheus)
           status:
             description: RecyclerStatus defines the observed state of Recycler
             properties:

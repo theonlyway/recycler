@@ -49,6 +49,9 @@ const (
 	StorageMemory     string = "memory"
 	StorageAnnotation string = "annotation"
 	kindDeployment    string = "Deployment"
+
+	MetricsSourceKubernetes string = "kubernetes"
+	MetricsSourcePrometheus string = "prometheus"
 )
 
 // Exported thread-safe in-memory storage for metrics
@@ -125,6 +128,17 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			log.Error(err, "Failed to list pods in target deployment", "controller", monitorControllerName, "deployment", deploymentKey)
 			return ctrl.Result{}, err
 		}
+
+		// When the Prometheus metrics source is configured, delegate utilization calculation to
+		// Prometheus instead of polling the Kubernetes Metrics API and storing per-pod history.
+		if recycler.Spec.MetricsSource == MetricsSourcePrometheus {
+			if err := reconcilePrometheusMetrics(ctx, r, recycler, deployment, podList, log); err != nil {
+				log.Error(err, "Failed to evaluate pod CPU utilization from Prometheus", "controller", monitorControllerName, "deployment", deploymentKey)
+				return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
+			}
+			break
+		}
+
 		// Fetch the metrics for the pods in the deployment
 		metricsClient := resourceclient.NewForConfigOrDie(r.Config).PodMetricses(deployment.Namespace)
 		podMetricsList, err := fetchPodMetrics(ctx, metricsClient, deployment.Namespace, deployment.Spec.Selector.MatchLabels, deployment.Spec.Template, log)
@@ -380,6 +394,13 @@ func fetchPodMetricsHistory(ctx context.Context, r *MonitorReconciler, pod *core
 
 func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, metricsHistory []PodCPUUsage, threshold int32, log logr.Logger) error {
 	averageCPU := calculateAverageCPU(metricsHistory, log, pod.Name)
+	return evaluatePodThreshold(ctx, r, recycler, pod, averageCPU, threshold, log)
+}
+
+// evaluatePodThreshold records the pod's CPU utilization gauge and applies the breach or recovery
+// logic based on the supplied utilization percentage. It is shared by the Kubernetes metrics path
+// (rolling average) and the Prometheus path (value computed by Prometheus).
+func evaluatePodThreshold(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, pod *corev1.Pod, averageCPU float64, threshold int32, log logr.Logger) error {
 	podCPUUtilization.WithLabelValues(pod.Namespace, pod.Name).Set(averageCPU)
 
 	if err := r.Get(ctx, client.ObjectKeyFromObject(pod), pod); err != nil {
@@ -392,6 +413,36 @@ func checkPodMetricsAnnotation(ctx context.Context, r *MonitorReconciler, recycl
 	}
 
 	return handleThresholdRecovery(ctx, r, recycler, pod, averageCPU, log)
+}
+
+// reconcilePrometheusMetrics queries the configured Prometheus server for per-pod CPU utilization
+// and applies the breach/recovery logic to each pod in the target deployment. Unlike the Kubernetes
+// metrics path, no per-pod history is stored by the controller; the averaging is performed by the
+// PromQL query itself.
+func reconcilePrometheusMetrics(ctx context.Context, r *MonitorReconciler, recycler *recyclertheonlywayecomv1alpha1.Recycler, deployment *appsv1.Deployment, podList *corev1.PodList, log logr.Logger) error {
+	podNames := make([]string, 0, len(podList.Items))
+	for i := range podList.Items {
+		podNames = append(podNames, podList.Items[i].Name)
+	}
+
+	utilization, err := queryPrometheusCPUUtilization(ctx, recycler, deployment.Namespace, deployment.Name, podNames, log)
+	if err != nil {
+		return err
+	}
+
+	for i := range podList.Items {
+		pod := &podList.Items[i]
+		cpuPercentage, ok := utilization[pod.Name]
+		if !ok {
+			log.V(1).Info("No Prometheus CPU utilization sample for pod, skipping", "controller", monitorControllerName, "podName", pod.Name)
+			continue
+		}
+		if err := evaluatePodThreshold(ctx, r, recycler, pod, cpuPercentage, recycler.Spec.AverageCpuUtilizationPercent, log); err != nil {
+			log.Error(err, "Failed to check threshold and annotate pod", "podName", pod.Name)
+		}
+	}
+
+	return nil
 }
 
 func calculateAverageCPU(metricsHistory []PodCPUUsage, log logr.Logger, podName string) float64 {
