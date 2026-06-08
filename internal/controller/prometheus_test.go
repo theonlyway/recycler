@@ -86,6 +86,11 @@ var _ = Describe("Prometheus metrics source", func() {
 			Expect(rendered).To(ContainSubstring(`pod=~"web-1|web-2"`))
 			// WindowSeconds = PodMetricsHistory (5) * PollingIntervalSeconds (30) = 150
 			Expect(rendered).To(ContainSubstring("[150s]"))
+			// The default must derive the limit from cAdvisor cgroup series only, with no
+			// dependency on kube-state-metrics.
+			Expect(rendered).To(ContainSubstring("container_spec_cpu_quota"))
+			Expect(rendered).To(ContainSubstring("container_spec_cpu_period"))
+			Expect(rendered).NotTo(ContainSubstring("kube_pod_container_resource_limits"))
 		})
 
 		It("should render a custom query template with all template fields", func() {

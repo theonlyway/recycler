@@ -17,15 +17,6 @@ spec:
   metricsSource: prometheus
   prometheus:
     serverAddress: http://prometheus-operated.cpu-test.svc:9090
-    # cAdvisor-only query: utilization as a percentage of the pod's actual CPU limit.
-    # The limit (in cores) is derived dynamically from the cgroup quota/period series that
-    # cAdvisor already exposes (quota / period == limit cores), so this tracks whatever limit
-    # is configured on the pod without depending on kube-state-metrics.
-    query: |-
-      100 * sum by (pod) (
-        rate(container_cpu_usage_seconds_total{namespace="cpu-test", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])
-      ) / sum by (pod) (
-        container_spec_cpu_quota{namespace="cpu-test", pod=~"{{.PodRegex}}", container!="", container!="POD"}
-        /
-        container_spec_cpu_period{namespace="cpu-test", pod=~"{{.PodRegex}}", container!="", container!="POD"}
-      )
+    # No custom query: the controller's default cAdvisor-only query is used. It derives the
+    # CPU limit dynamically from the cgroup quota/period series, so it needs only cAdvisor
+    # (scraped via the API-server proxy) and no kube-state-metrics in the test stack.

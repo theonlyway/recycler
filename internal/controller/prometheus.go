@@ -35,12 +35,17 @@ import (
 )
 
 // defaultPrometheusQuery computes per-pod CPU utilization as a percentage of the pod's CPU limit,
-// averaged over the configured window. It relies on cAdvisor (container_cpu_usage_seconds_total)
-// and kube-state-metrics (kube_pod_container_resource_limits) being scraped by Prometheus.
+// averaged over the configured window. It depends only on cAdvisor metrics (exposed by every
+// kubelet), so it does not assume kube-state-metrics is present: usage comes from
+// container_cpu_usage_seconds_total and the limit (in cores) is derived from the cgroup
+// quota/period series (container_spec_cpu_quota / container_spec_cpu_period). Pods without a CPU
+// limit produce no quota series and are skipped.
 const defaultPrometheusQuery = `100 * sum by (pod) (` +
 	`rate(container_cpu_usage_seconds_total{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])` +
 	`) / sum by (pod) (` +
-	`kube_pod_container_resource_limits{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", resource="cpu"}` +
+	`container_spec_cpu_quota{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}` +
+	` / ` +
+	`container_spec_cpu_period{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}` +
 	`)`
 
 // promQueryData holds the fields exposed to the PromQL query template.

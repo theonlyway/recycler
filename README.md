@@ -110,7 +110,7 @@ The Recycler can determine per-pod CPU utilisation from one of two sources, sele
 | `metricsSource` | How it works | Requirements |
 |-----------------|--------------|--------------|
 | `kubernetes` (default) | Polls the Kubernetes Metrics API every `pollingIntervalSeconds`, stores a rolling history of `podMetricsHistory` samples per pod, and compares the in-process rolling average against `averageCpuUtilizationPercent`. | `metrics-server` (or equivalent Metrics API provider) installed. |
-| `prometheus` | Queries an external Prometheus server each reconcile. The averaging is done by the PromQL query itself, so no per-pod history is stored by the controller (`metricStorageLocation` is ignored). | A reachable Prometheus already scraping pod CPU metrics (e.g. cAdvisor + kube-state-metrics). |
+| `prometheus` | Queries an external Prometheus server each reconcile. The averaging is done by the PromQL query itself, so no per-pod history is stored by the controller (`metricStorageLocation` is ignored). | A reachable Prometheus already scraping pod CPU metrics. The default query needs only cAdvisor (always exposed by the kubelet); kube-state-metrics is not required. |
 
 > Both sources produce identical behaviour, events, and `/metrics` output — only the measurement source differs. The `recycleDelaySeconds` delay, breach/recovery detection, and pod termination logic are the same.
 
@@ -138,7 +138,8 @@ spec:
   prometheus:
     serverAddress: http://prometheus-operated.monitoring.svc:9090 # Base URL of the Prometheus server (required)
     insecureSkipVerify: false # Optional: disable TLS verification for an HTTPS serverAddress
-    # query is optional. When omitted, a default cAdvisor + kube-state-metrics query is used.
+    # query is optional. When omitted, a default cAdvisor-only query is used (it does not
+    # require kube-state-metrics; the CPU limit is derived from the cgroup quota/period series).
     # It must return an instant vector where each sample has a "pod" label and a CPU
     # utilisation percentage value. The query is rendered as a Go text/template with:
     #   {{.Namespace}}      - namespace of the target Deployment
@@ -149,13 +150,15 @@ spec:
       100 * sum by (pod) (
         rate(container_cpu_usage_seconds_total{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])
       ) / sum by (pod) (
-        kube_pod_container_resource_limits{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", resource="cpu"}
+        container_spec_cpu_quota{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}
+        /
+        container_spec_cpu_period{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}
       )
 ```
 
 Notes:
 - `spec.prometheus` is **required** when `metricsSource: prometheus` (enforced by a CEL validation on the CRD) and ignored otherwise.
-- The default query expresses CPU usage as a percentage of each pod's CPU **limit** (via `kube_pod_container_resource_limits`). Pods without a CPU limit return `NaN` and are skipped — supply a custom `query` if you measure against requests or use a different metric source.
+- The default query expresses CPU usage as a percentage of each pod's CPU **limit**, derived purely from cAdvisor's cgroup series (`container_spec_cpu_quota / container_spec_cpu_period` == limit in cores). This deliberately avoids assuming kube-state-metrics is installed. Pods without a CPU limit have no quota series and are skipped — supply a custom `query` (e.g. one using `kube_pod_container_resource_limits`) if you measure against requests or a different source.
 - Each reconcile issues a **single** Prometheus query containing all current pod names, not one query per pod.
 
 
