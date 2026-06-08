@@ -365,6 +365,26 @@ func cpuRecyclingTest() {
 		return verifyNewPodsRunning(testNamespace, initialPodNames)
 	}, 2*time.Minute, 5*time.Second).Should(Succeed())
 
+	// recycler_pod_cpu_utilization_percent is deleted immediately when a pod is terminated,
+	// so the old pod names should no longer appear in /metrics.
+	// recycler_pod_last_recycle_timestamp_seconds intentionally lingers for 5 minutes to allow
+	// Prometheus to scrape the final value — we do not assert its disappearance here.
+	By("verifying recycler_pod_cpu_utilization_percent no longer reports terminated pod names")
+	EventuallyWithOffset(1, func() error {
+		freshBody, err := utils.FetchControllerMetrics(namespace)
+		if err != nil {
+			return err
+		}
+		for _, podName := range initialPodNames {
+			_, found := utils.MetricValue(freshBody, "recycler_pod_cpu_utilization_percent",
+				map[string]string{labelNamespace: testNamespace, "recycler_pod": podName})
+			if found {
+				return fmt.Errorf("recycler_pod_cpu_utilization_percent still present for terminated pod %s", podName)
+			}
+		}
+		return nil
+	}, time.Duration(pollingIntervalSeconds)*time.Second+10*time.Second, time.Second).Should(Succeed())
+
 	By("verifying custom Prometheus metrics on the /metrics endpoint")
 	metricsBody, err := utils.FetchControllerMetrics(namespace)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "failed to fetch /metrics from controller")

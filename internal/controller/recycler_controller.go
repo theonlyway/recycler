@@ -254,10 +254,11 @@ func terminatePods(ctx context.Context, r *RecyclerReconciler, recycler *recycle
 				cpuBreachDuration.WithLabelValues(pod.Namespace, recycler.Name).Observe(elapsed.Seconds())
 				podLastRecycleTime.WithLabelValues(pod.Namespace, recycler.Name, pod.Name).SetToCurrentTime()
 				// Remove the CPU utilization gauge series immediately — no longer meaningful for a terminated pod.
-				// Remove podLastRecycleTime after a delay so Prometheus has time to scrape the final value.
+				// Remove podLastRecycleTime after a configurable delay so Prometheus has time to scrape the final value.
 				podCPUUtilization.DeleteLabelValues(pod.Namespace, pod.Name)
 				ns, podName, recyclerName := pod.Namespace, pod.Name, recycler.Name
-				time.AfterFunc(5*time.Minute, func() {
+				retention := time.Duration(recycler.Spec.MetricsRetentionSeconds) * time.Second
+				time.AfterFunc(retention, func() {
 					podLastRecycleTime.DeleteLabelValues(ns, recyclerName, podName)
 				})
 				// Check if in-memory storage is being used
