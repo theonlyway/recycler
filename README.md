@@ -153,14 +153,6 @@ spec:
   prometheus:
     serverAddress: http://prometheus-operated.monitoring.svc:9090 # Base URL of the Prometheus server (required)
     insecureSkipVerify: false # Optional: disable TLS verification for an HTTPS serverAddress
-    # query is optional. When omitted, a default cAdvisor-only query is used (it does not
-    # require kube-state-metrics; the CPU limit is derived from the cgroup quota/period series).
-    # It must return an instant vector where each sample has a "pod" label and a CPU
-    # utilisation percentage value. The query is rendered as a Go text/template with:
-    #   {{.Namespace}}      - namespace of the target Deployment
-    #   {{.Deployment}}     - name of the target Deployment
-    #   {{.PodRegex}}       - regex alternation of the current pod names (pod1|pod2|...)
-    #   {{.WindowSeconds}}  - podMetricsHistory * pollingIntervalSeconds, the averaging window
     query: |-
       100 * sum by (pod) (
         rate(container_cpu_usage_seconds_total{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}[{{.WindowSeconds}}s])
@@ -170,6 +162,15 @@ spec:
         container_spec_cpu_period{namespace="{{.Namespace}}", pod=~"{{.PodRegex}}", container!="", container!="POD"}
       )
 ```
+
+The `query` field is rendered as a [Go `text/template`](https://pkg.go.dev/text/template) before being sent to Prometheus. Use `{{.FieldName}}` syntax to interpolate any of the following fields:
+
+| Template variable | Example value | Description |
+|-------------------|---------------|-------------|
+| `{{.Namespace}}` | `my-namespace` | Namespace of the target Deployment. |
+| `{{.Deployment}}` | `my-app` | Name of the target Deployment. |
+| `{{.PodRegex}}` | `my-app-6b4d9f-abc\|my-app-6b4d9f-xyz` | Regex alternation of the current live pod names, with each name regex-escaped. Used with Prometheus's `=~` label matcher (`pod=~"{{.PodRegex}}"`) to scope the query to exactly the pods the controller is currently monitoring. The list is rebuilt every reconcile. |
+| `{{.WindowSeconds}}` | `150` | Averaging window in seconds, computed as `podMetricsHistory × pollingIntervalSeconds`. Use this as the range selector in `rate()`/`increase()` expressions so the Prometheus window matches the rolling window the controller would use with the Kubernetes Metrics API. |
 
 Notes:
 - `spec.prometheus` is **required** when `metricsSource: prometheus` (enforced by a CEL validation on the CRD) and ignored otherwise.
