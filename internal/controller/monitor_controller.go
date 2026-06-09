@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 
@@ -214,6 +215,11 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 				log.Error(err, "Failed to check threshold and annotate pod", "podName", pod.Name)
 			}
 		}
+
+		// Prune stale in-memory entries for pods that no longer exist (e.g. removed by HPA).
+		if recycler.Spec.MetricStorageLocation == StorageMemory {
+			pruneStaleInMemoryMetrics(deployment.Namespace, podList, log)
+		}
 	default:
 		log.Info("Unsupported resource type", "controller", monitorControllerName, "kind", kind)
 	}
@@ -222,6 +228,29 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	logInMemoryMetrics(r.Log)
 
 	return ctrl.Result{RequeueAfter: time.Duration(recycler.Spec.PollingIntervalSeconds) * time.Second}, nil
+}
+
+// pruneStaleInMemoryMetrics removes entries from InMemoryMetricsStorage for pods in the given
+// namespace that are no longer present in podList. This handles pods deleted externally (e.g. by
+// the HPA) that the recycler controller never had a chance to clean up itself.
+func pruneStaleInMemoryMetrics(namespace string, podList *corev1.PodList, log logr.Logger) {
+	livePods := make(map[string]struct{}, len(podList.Items))
+	for _, pod := range podList.Items {
+		livePods[fmt.Sprintf("%s/%s", namespace, pod.Name)] = struct{}{}
+	}
+
+	prefix := namespace + "/"
+	InMemoryMetricsStorage.Range(func(key, _ any) bool {
+		k := key.(string)
+		if !strings.HasPrefix(k, prefix) {
+			return true
+		}
+		if _, alive := livePods[k]; !alive {
+			InMemoryMetricsStorage.Delete(k)
+			log.V(1).Info("Pruned stale in-memory metrics for gone pod", "key", k)
+		}
+		return true
+	})
 }
 
 func logInMemoryMetrics(log logr.Logger) {
