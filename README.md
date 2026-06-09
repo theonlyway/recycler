@@ -87,21 +87,36 @@ These are the configurable values for the Recycler custom resource. View the ope
 apiVersion: recycler.theonlywaye.com/v1alpha1
 kind: Recycler
 metadata:
-  name: name-of-recycler # Should be unique but can be anything you want
-  namespace: namespace-of-recycler # Should be the same as the namespace of the deployment, replicaset, or statefulset
+  name: name-of-recycler
+  namespace: namespace-of-recycler
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: name-of-deployment # Should be the same as the name of the deployment, replicaset, or statefulset
-  pollingIntervalSeconds: 30 # This is how long between polling for metrics from the metrics api
-  podMetricsHistory: 5 # This is how many historical metrics to keep which is used to calculate the average CPU averageCpuUtilizationPercent
-  averageCpuUtilizationPercent: 80 # This is the threshold for when to terminate the pod
-  recycleDelaySeconds: 3600 # This is how long to wait before terminating the pod once it's breached the average CPU utilization threshold
-  gracePeriodSeconds: 60 # Configuraable time to wait when terminating the pod before it's forcefully terminated
-  metricStorageLocation: memory # Where to store the metrics data. Either in memory or as an annotation on the pod. There are implications to both
-  metricsSource: kubernetes # Where CPU utilisation comes from: "kubernetes" (default, Metrics API) or "prometheus"
+    name: name-of-deployment
+  pollingIntervalSeconds: 30
+  podMetricsHistory: 5
+  averageCpuUtilizationPercent: 80
+  recycleDelaySeconds: 3600
+  gracePeriodSeconds: 60
+  metricStorageLocation: memory
+  metricsSource: kubernetes
+  metricsRetentionSeconds: 300
 ```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `scaleTargetRef.apiVersion` | `apps/v1` | API version of the target resource. |
+| `scaleTargetRef.kind` | `Deployment` | Kind of the target resource. Only `Deployment` is supported. |
+| `scaleTargetRef.name` | — | Name of the target Deployment to monitor. Must exist in the same namespace as the Recycler CR. |
+| `averageCpuUtilizationPercent` | — | Rolling-average CPU utilization threshold as a percentage of the pod's CPU limit. Pods whose rolling average exceeds this value are marked for recycling. |
+| `pollingIntervalSeconds` | `60` | How frequently (in seconds) the controller polls for CPU metrics. Lower values are more responsive but increase API server load. |
+| `podMetricsHistory` | `10` | Number of polling samples kept in the rolling window used to compute average CPU utilization. Larger values smooth out short spikes; smaller values react more quickly to sustained high usage. |
+| `recycleDelaySeconds` | `300` | Seconds to wait after a breach is first detected before the pod is deleted. Allows transient spikes time to recover before a recycle is triggered. |
+| `gracePeriodSeconds` | `30` | Pod termination grace period in seconds. The kubelet sends SIGTERM and waits this long before sending SIGKILL. |
+| `metricStorageLocation` | `memory` | Where per-pod CPU history is stored between reconcile cycles. `memory`: fast, zero API cost, lost on controller restart. `annotation`: persisted as a pod annotation, survives restarts, incurs an etcd write per poll. Only applies when `metricsSource: kubernetes`. |
+| `metricsSource` | `kubernetes` | Source for per-pod CPU utilization. `kubernetes` polls the Kubernetes Metrics API; `prometheus` queries an external Prometheus server (see [Using Prometheus](#using-prometheus)) and ignores `metricStorageLocation`. |
+| `metricsRetentionSeconds` | `300` | How long per-pod gauge series are retained on the `/metrics` endpoint after pod termination, allowing at least one Prometheus scrape to capture the final value. Set to `0` to remove series immediately. |
 
 ## Metrics source
 
