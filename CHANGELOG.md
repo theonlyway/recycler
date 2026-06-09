@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.4] - 2026-06-09
+### :bug: Bug Fixes
+- [`bd45833`](https://github.com/theonlyway/recycler/commit/bd458332a38d4469a2e708f5a958b2099e0bd360) - prune stale in-memory metrics for deleted pods in monitor reconciler *(commit by [@theonlyway](https://github.com/theonlyway))*
+
+
 ## [1.13.3] - 2026-06-08
 ### :bug: Bug Fixes
 - [`c4df744`](https://github.com/theonlyway/recycler/commit/c4df7449dd466e622be32bfd9ecb3bbb30a1c9ba) - **deps**: update go dependencies to v0.68.1 *(PR [#153](https://github.com/theonlyway/recycler/pull/153) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -842,3 +847,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.1]: https://github.com/theonlyway/recycler/compare/1.13.0...1.13.1
 [1.13.2]: https://github.com/theonlyway/recycler/compare/1.13.1...1.13.2
 [1.13.3]: https://github.com/theonlyway/recycler/compare/1.13.2...1.13.3
+[1.13.4]: https://github.com/theonlyway/recycler/compare/1.13.3...1.13.4
