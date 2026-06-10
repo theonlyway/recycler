@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.5] - 2026-06-10
+### :wrench: Chores
+- [`1f9157f`](https://github.com/theonlyway/recycler/commit/1f9157ff0eec61237ee545547d8b4d887af3e086) - add metricsRetentionSeconds field and update documentation for Recycler CR [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
+- [`a4c7c95`](https://github.com/theonlyway/recycler/commit/a4c7c9570b6abe63bf7afd6da56d0cda6e098c08) - **deps**: update golang:1.26 docker digest to 11fd8f7 *(PR [#155](https://github.com/theonlyway/recycler/pull/155) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.4] - 2026-06-09
 ### :bug: Bug Fixes
 - [`bd45833`](https://github.com/theonlyway/recycler/commit/bd458332a38d4469a2e708f5a958b2099e0bd360) - prune stale in-memory metrics for deleted pods in monitor reconciler *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -848,3 +854,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.2]: https://github.com/theonlyway/recycler/compare/1.13.1...1.13.2
 [1.13.3]: https://github.com/theonlyway/recycler/compare/1.13.2...1.13.3
 [1.13.4]: https://github.com/theonlyway/recycler/compare/1.13.3...1.13.4
+[1.13.5]: https://github.com/theonlyway/recycler/compare/1.13.4...1.13.5
