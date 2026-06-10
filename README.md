@@ -104,22 +104,24 @@ spec:
   metricsRetentionSeconds: 300
 ```
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `scaleTargetRef.apiVersion` | `apps/v1` | API version of the target resource. |
-| `scaleTargetRef.kind` | `Deployment` | Kind of the target resource. Only `Deployment` is supported. |
-| `scaleTargetRef.name` | — | Name of the target Deployment to monitor. Must exist in the same namespace as the Recycler CR. |
-| `averageCpuUtilizationPercent` | — | Rolling-average CPU utilization threshold as a percentage of the pod's CPU limit. Pods whose rolling average exceeds this value are marked for recycling. |
-| `pollingIntervalSeconds` | `60` | How frequently (in seconds) the controller polls for CPU metrics. Lower values are more responsive but increase API server load. |
-| `podMetricsHistory` | `10` | Number of polling samples kept in the rolling window used to compute average CPU utilization. Larger values smooth out short spikes; smaller values react more quickly to sustained high usage. |
-| `recycleDelaySeconds` | `300` | Seconds to wait after a breach is first detected before the pod is deleted. Allows transient spikes time to recover before a recycle is triggered. |
-| `gracePeriodSeconds` | `30` | Pod termination grace period in seconds. The kubelet sends SIGTERM and waits this long before sending SIGKILL. |
-| `metricStorageLocation` | `memory` | Where per-pod CPU history is stored between reconcile cycles. `memory`: fast, zero API cost, lost on controller restart. `annotation`: persisted as a pod annotation, survives restarts, incurs an etcd write per poll. Only applies when `metricsSource: kubernetes`. |
-| `metricsSource` | `kubernetes` | Source for per-pod CPU utilization. `kubernetes` polls the Kubernetes Metrics API; `prometheus` queries an external Prometheus server (see [Using Prometheus](#using-prometheus)) and ignores `metricStorageLocation`. |
-| `metricsRetentionSeconds` | `300` | How long per-pod gauge series are retained on the `/metrics` endpoint after pod termination, allowing at least one Prometheus scrape to capture the final value. Set to `0` to remove series immediately. |
-| `prometheus.serverAddress` | — | Base URL of the Prometheus server, e.g. `http://prometheus-operated.monitoring.svc:9090`. Required when `metricsSource: prometheus`. |
-| `prometheus.query` | default cAdvisor query | PromQL query used to evaluate per-pod CPU utilization. Must return an instant vector with a `pod` label and a CPU percentage value. Supports Go `text/template` variables — see [Using Prometheus](#using-prometheus). When omitted, a built-in cAdvisor-only query is used. |
-| `prometheus.insecureSkipVerify` | `false` | Disable TLS certificate verification when `serverAddress` uses HTTPS. |
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `scaleTargetRef.apiVersion` | No | `apps/v1` | API version of the target resource. |
+| `scaleTargetRef.kind` | No | `Deployment` | Kind of the target resource. Only `Deployment` is supported. |
+| `scaleTargetRef.name` | **Yes** | — | Name of the target Deployment to monitor. Must exist in the same namespace as the Recycler CR. |
+| `averageCpuUtilizationPercent` | **Yes** | — | Rolling-average CPU utilization threshold as a percentage of the pod's CPU limit. Pods whose rolling average exceeds this value are marked for recycling. |
+| `pollingIntervalSeconds` | No | `60` | How frequently (in seconds) the controller polls for CPU metrics. Lower values are more responsive but increase API server load. |
+| `podMetricsHistory` | No | `10` | Number of polling samples kept in the rolling window used to compute average CPU utilization. Larger values smooth out short spikes; smaller values react more quickly to sustained high usage. |
+| `recycleDelaySeconds` | No | `300` | Seconds to wait after a breach is first detected before the pod is deleted. Allows transient spikes time to recover before a recycle is triggered. |
+| `gracePeriodSeconds` | No | `30` | Pod termination grace period in seconds. The kubelet sends SIGTERM and waits this long before sending SIGKILL. |
+| `metricStorageLocation` | No | `memory` | Where per-pod CPU history is stored between reconcile cycles. `memory`: fast, zero API cost, lost on controller restart. `annotation`: persisted as a pod annotation, survives restarts, incurs an etcd write per poll. Only applies when `metricsSource: kubernetes`. |
+| `metricsSource` | No | `kubernetes` | Source for per-pod CPU utilization. `kubernetes` polls the Kubernetes Metrics API; `prometheus` queries an external Prometheus server (see [Using Prometheus](#using-prometheus)) and ignores `metricStorageLocation`. |
+| `metricsRetentionSeconds` | No | `300` | How long per-pod gauge series are retained on the `/metrics` endpoint after pod termination, allowing at least one Prometheus scrape to capture the final value. Set to `0` to remove series immediately. |
+| `prometheus.serverAddress` | **Yes**\* | — | Base URL of the Prometheus server, e.g. `http://prometheus-operated.monitoring.svc:9090`. Required when `metricsSource: prometheus`. |
+| `prometheus.query` | No | default cAdvisor query | PromQL query used to evaluate per-pod CPU utilization. Must return an instant vector with a `pod` label and a CPU percentage value. Supports Go `text/template` variables — see [Using Prometheus](#using-prometheus). When omitted, a built-in cAdvisor-only query is used. |
+| `prometheus.insecureSkipVerify` | No | `false` | Disable TLS certificate verification when `serverAddress` uses HTTPS. |
+
+\* `prometheus` block is required only when `metricsSource: prometheus`; it is ignored otherwise.
 
 ## Metrics source
 
