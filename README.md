@@ -345,11 +345,60 @@ Four SBOM files are attached to each release:
 Use **SPDX** for attestation verification and compliance. Use **CycloneDX** with security scanning tools like [Grype](https://github.com/anchore/grype), [Trivy](https://github.com/aquasecurity/trivy), or [Dependency-Track](https://dependencytrack.org/).
 
 ## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
 
-**NOTE:** Run `make help` for more information on all potential `make` targets
+### Prerequisites
 
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
+- Go v1.26.3+
+- Docker (with BuildKit enabled)
+- `kubectl` v1.36.0+
+- [Kind](https://kind.sigs.k8s.io/) (for e2e tests)
+
+### Development workflow
+
+1. Fork and clone the repository.
+2. Make your changes.
+3. If you modified `api/v1alpha1/` types or kubebuilder marker annotations, regenerate CRDs and deepcopy methods:
+   ```sh
+   make generate manifests
+   ```
+4. Build and lint — both must pass before submitting:
+   ```sh
+   make build
+   make lint
+   ```
+5. Run unit tests:
+   ```sh
+   make test
+   ```
+6. Run e2e tests (creates a temporary Kind cluster, runs the full suite, then tears it down):
+   ```sh
+   make test-e2e
+   ```
+   To manage the Kind cluster separately:
+   ```sh
+   make setup-test-e2e   # create the cluster
+   make cleanup-test-e2e # delete the cluster
+   ```
+
+### CI checks on pull requests
+
+All of the following checks run automatically on every pull request and must pass:
+
+| Workflow | What it does |
+|----------|-------------|
+| **Lint** | Runs `go fmt` (auto-commits formatting fixes) and `golangci-lint`. |
+| **Tests** | Runs `make test` (unit + integration tests using envtest) and uploads an HTML coverage report as an artifact. |
+| **E2E Tests** | Spins up a Kind cluster and runs `make test-e2e`. |
+| **Manifests** | Runs `make manifests` and fails if the output differs from what was committed — ensures CRDs are always in sync with the API types. |
+| **Helm Chart CI** | Runs on changes to `helm-charts/`. Lints and templates the chart with Helm, then validates the output with Kubeconform against Kubernetes 1.31 schemas. Also installs the chart on a Kind cluster. |
+
+The **Release** workflow runs on merge to `main` and handles automatic semver tagging, multi-arch image builds (linux/amd64, linux/arm64), pushing to GHCR and Docker Hub, Helm chart publishing, and generating signed SBOM attestations.
+
+### Helm chart
+
+The Helm chart at `helm-charts/recycler/` is **hand-maintained**. Do not run `make helm` as part of normal development — it overwrites the chart with helmify output and will clobber hand-crafted templates. After any structural change to `config/` (new resource type, RBAC change, new deployment arg), manually mirror the equivalent change in `helm-charts/recycler/templates/` and `helm-charts/recycler/values.yaml`.
+
+Run `make help` for a full list of available targets.
 
 ## License
 
