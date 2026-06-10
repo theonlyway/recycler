@@ -117,6 +117,9 @@ spec:
 | `metricStorageLocation` | `memory` | Where per-pod CPU history is stored between reconcile cycles. `memory`: fast, zero API cost, lost on controller restart. `annotation`: persisted as a pod annotation, survives restarts, incurs an etcd write per poll. Only applies when `metricsSource: kubernetes`. |
 | `metricsSource` | `kubernetes` | Source for per-pod CPU utilization. `kubernetes` polls the Kubernetes Metrics API; `prometheus` queries an external Prometheus server (see [Using Prometheus](#using-prometheus)) and ignores `metricStorageLocation`. |
 | `metricsRetentionSeconds` | `300` | How long per-pod gauge series are retained on the `/metrics` endpoint after pod termination, allowing at least one Prometheus scrape to capture the final value. Set to `0` to remove series immediately. |
+| `prometheus.serverAddress` | — | Base URL of the Prometheus server, e.g. `http://prometheus-operated.monitoring.svc:9090`. Required when `metricsSource: prometheus`. |
+| `prometheus.query` | default cAdvisor query | PromQL query used to evaluate per-pod CPU utilization. Must return an instant vector with a `pod` label and a CPU percentage value. Supports Go `text/template` variables — see [Using Prometheus](#using-prometheus). When omitted, a built-in cAdvisor-only query is used. |
+| `prometheus.insecureSkipVerify` | `false` | Disable TLS certificate verification when `serverAddress` uses HTTPS. |
 
 ## Metrics source
 

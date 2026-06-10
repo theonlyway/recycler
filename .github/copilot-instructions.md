@@ -10,6 +10,19 @@ make build        # fallback: go build ./...
 make lint         # fallback: ./bin/golangci-lint run ./...
 ```
 
+## README (Required After Relevant Changes)
+
+`README.md` documents the CRD fields, Prometheus metrics, metrics source behaviour, and contributing workflow. After any change that touches something the README references, update the README to match **before** finishing:
+
+| Change made | README section(s) to update |
+|-------------|----------------------------|
+| Add/remove/rename a field in `api/v1alpha1/recycler_types.go` | **Custom Resource Definition** table; YAML example if the field should appear there |
+| Change a field default or validation | **Custom Resource Definition** table |
+| Add/remove/modify a custom Prometheus metric in `metrics.go` | **Prometheus Metrics** table |
+| Change PromQL template variables or default query in `prometheus.go` | **Using Prometheus** — template variable table and/or example query |
+| Change `metricsSource` behaviour or storage modes | **Metrics source** section |
+| Add/remove a `make` target or GitHub Actions workflow | **Contributing** section |
+
 ## Manifests & Helm (Required After API or Config Changes)
 
 After any change to `api/v1alpha1/` types or kubebuilder marker annotations, regenerate CRDs and deepcopy methods:
