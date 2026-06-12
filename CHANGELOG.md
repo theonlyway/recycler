@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.6] - 2026-06-12
+### :wrench: Chores
+- [`261611e`](https://github.com/theonlyway/recycler/commit/261611e876656052639f114df8be0499e89f97fa) - **deps**: update golang:1.26 docker digest to 87a41d2 *(PR [#156](https://github.com/theonlyway/recycler/pull/156) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.5] - 2026-06-10
 ### :wrench: Chores
 - [`1f9157f`](https://github.com/theonlyway/recycler/commit/1f9157ff0eec61237ee545547d8b4d887af3e086) - add metricsRetentionSeconds field and update documentation for Recycler CR [skip ci] *(commit by [@theonlyway](https://github.com/theonlyway))*
@@ -855,3 +860,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.3]: https://github.com/theonlyway/recycler/compare/1.13.2...1.13.3
 [1.13.4]: https://github.com/theonlyway/recycler/compare/1.13.3...1.13.4
 [1.13.5]: https://github.com/theonlyway/recycler/compare/1.13.4...1.13.5
+[1.13.6]: https://github.com/theonlyway/recycler/compare/1.13.5...1.13.6
