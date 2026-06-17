@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.9] - 2026-06-17
+### :bug: Bug Fixes
+- [`807716b`](https://github.com/theonlyway/recycler/commit/807716bce5431ee737351644ff303feaf386cfa4) - **deps**: update go dependencies *(PR [#158](https://github.com/theonlyway/recycler/pull/158) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`6422913`](https://github.com/theonlyway/recycler/commit/64229138d262da98c6490d515945c7e7c2f293df) - **deps**: update mcr.microsoft.com/devcontainers/go:2.1-1.25-bookworm docker digest to 50f86fc *(PR [#160](https://github.com/theonlyway/recycler/pull/160) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.8] - 2026-06-16
 ### :wrench: Chores
 - [`2864664`](https://github.com/theonlyway/recycler/commit/28646640cf2bb3358ce7a8432dfd5f46f15dd268) - **deps**: update golang:1.26 docker digest to 792443b *(PR [#159](https://github.com/theonlyway/recycler/pull/159) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -873,3 +881,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.6]: https://github.com/theonlyway/recycler/compare/1.13.5...1.13.6
 [1.13.7]: https://github.com/theonlyway/recycler/compare/1.13.6...1.13.7
 [1.13.8]: https://github.com/theonlyway/recycler/compare/1.13.7...1.13.8
+[1.13.9]: https://github.com/theonlyway/recycler/compare/1.13.8...1.13.9
