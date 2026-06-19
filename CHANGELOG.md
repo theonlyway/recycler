@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.10] - 2026-06-19
+### :bug: Bug Fixes
+- [`32e194b`](https://github.com/theonlyway/recycler/commit/32e194bfe6d29609b2a9af53dfdb8ffdf86f64e6) - **deps**: update go dependencies to v0.69.0 *(PR [#161](https://github.com/theonlyway/recycler/pull/161) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`e494ba9`](https://github.com/theonlyway/recycler/commit/e494ba9204645b37011ed78f0dc9c66a28287d6e) - **deps**: update actions/checkout action to v7 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.9] - 2026-06-17
 ### :bug: Bug Fixes
 - [`807716b`](https://github.com/theonlyway/recycler/commit/807716bce5431ee737351644ff303feaf386cfa4) - **deps**: update go dependencies *(PR [#158](https://github.com/theonlyway/recycler/pull/158) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -882,3 +890,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.7]: https://github.com/theonlyway/recycler/compare/1.13.6...1.13.7
 [1.13.8]: https://github.com/theonlyway/recycler/compare/1.13.7...1.13.8
 [1.13.9]: https://github.com/theonlyway/recycler/compare/1.13.8...1.13.9
+[1.13.10]: https://github.com/theonlyway/recycler/compare/1.13.9...1.13.10
