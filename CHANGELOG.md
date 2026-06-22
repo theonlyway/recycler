@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.11] - 2026-06-22
+### :bug: Bug Fixes
+- [`7574d0f`](https://github.com/theonlyway/recycler/commit/7574d0f65b66cfc6de7cc8143cf1af3d201cf339) - **deps**: update go dependencies *(PR [#164](https://github.com/theonlyway/recycler/pull/164) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`adaf476`](https://github.com/theonlyway/recycler/commit/adaf4760e348dd0213128dd1a339113ad8df9557) - **deps**: update softprops/action-gh-release digest to 718ea10 *(PR [#163](https://github.com/theonlyway/recycler/pull/163) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.10] - 2026-06-19
 ### :bug: Bug Fixes
 - [`32e194b`](https://github.com/theonlyway/recycler/commit/32e194bfe6d29609b2a9af53dfdb8ffdf86f64e6) - **deps**: update go dependencies to v0.69.0 *(PR [#161](https://github.com/theonlyway/recycler/pull/161) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -891,3 +899,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.8]: https://github.com/theonlyway/recycler/compare/1.13.7...1.13.8
 [1.13.9]: https://github.com/theonlyway/recycler/compare/1.13.8...1.13.9
 [1.13.10]: https://github.com/theonlyway/recycler/compare/1.13.9...1.13.10
+[1.13.11]: https://github.com/theonlyway/recycler/compare/1.13.10...1.13.11
