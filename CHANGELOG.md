@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.12] - 2026-06-24
+### :bug: Bug Fixes
+- [`d5b0491`](https://github.com/theonlyway/recycler/commit/d5b0491e230eeda5d07e0b283134824a1ecaafb6) - **deps**: update go dependencies *(PR [#165](https://github.com/theonlyway/recycler/pull/165) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`137e119`](https://github.com/theonlyway/recycler/commit/137e11916fabc46eb8419e59c193f69f1da10623) - **deps**: update azure/setup-helm digest to 9bc31f4 *(PR [#166](https://github.com/theonlyway/recycler/pull/166) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.11] - 2026-06-22
 ### :bug: Bug Fixes
 - [`7574d0f`](https://github.com/theonlyway/recycler/commit/7574d0f65b66cfc6de7cc8143cf1af3d201cf339) - **deps**: update go dependencies *(PR [#164](https://github.com/theonlyway/recycler/pull/164) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -900,3 +908,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.9]: https://github.com/theonlyway/recycler/compare/1.13.8...1.13.9
 [1.13.10]: https://github.com/theonlyway/recycler/compare/1.13.9...1.13.10
 [1.13.11]: https://github.com/theonlyway/recycler/compare/1.13.10...1.13.11
+[1.13.12]: https://github.com/theonlyway/recycler/compare/1.13.11...1.13.12
