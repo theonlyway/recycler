@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.14] - 2026-06-30
+### :wrench: Chores
+- [`cb5278a`](https://github.com/theonlyway/recycler/commit/cb5278a11f17a82409def40a545d78dc69c79a7e) - **deps**: update ghcr.io/devcontainers/features/docker-in-docker docker tag to v4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`7e9cdfc`](https://github.com/theonlyway/recycler/commit/7e9cdfc2941953c24259c7a37bbbda59a2dd4ab7) - **deps**: update actions/attest action to v4.1.1 *(PR [#170](https://github.com/theonlyway/recycler/pull/170) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1dad275`](https://github.com/theonlyway/recycler/commit/1dad2756ea00af8f469c1b29f9feef5debc3d99e) - **deps**: update actions/attest-build-provenance digest to 0f67c3f *(PR [#171](https://github.com/theonlyway/recycler/pull/171) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`122be3f`](https://github.com/theonlyway/recycler/commit/122be3fba259b61924f8823c7dca189c67eababf) - **deps**: update stefanzweifel/git-auto-commit-action digest to 4a55954 *(PR [#172](https://github.com/theonlyway/recycler/pull/172) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`893c65f`](https://github.com/theonlyway/recycler/commit/893c65f4fdd27769eb231524fa38661d8f3ed829) - **deps**: update golang:1.26 docker digest to f96cc55 *(PR [#174](https://github.com/theonlyway/recycler/pull/174) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.13] - 2026-06-24
 ### :wrench: Chores
 - [`051efad`](https://github.com/theonlyway/recycler/commit/051efad818650b79b278da82a38bad96743a3f4e) - **deps**: update actions/setup-go digest to 924ae3a *(PR [#167](https://github.com/theonlyway/recycler/pull/167) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -916,3 +925,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.11]: https://github.com/theonlyway/recycler/compare/1.13.10...1.13.11
 [1.13.12]: https://github.com/theonlyway/recycler/compare/1.13.11...1.13.12
 [1.13.13]: https://github.com/theonlyway/recycler/compare/1.13.12...1.13.13
+[1.13.14]: https://github.com/theonlyway/recycler/compare/1.13.13...1.13.14
