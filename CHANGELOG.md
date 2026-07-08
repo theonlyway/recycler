@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.15] - 2026-07-08
+### :wrench: Chores
+- [`509bfc4`](https://github.com/theonlyway/recycler/commit/509bfc41d6abd7fc39fb80887962b5c3bb469615) - **deps**: update golangci/golangci-lint-action digest to ba0d7d2 *(PR [#173](https://github.com/theonlyway/recycler/pull/173) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`394dce2`](https://github.com/theonlyway/recycler/commit/394dce270eb780c38dbeedb7c8706f4e0ba6638a) - **deps**: update mcr.microsoft.com/devcontainers/go:2.1-1.25-bookworm docker digest to f8f841c *(PR [#175](https://github.com/theonlyway/recycler/pull/175) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`71011f7`](https://github.com/theonlyway/recycler/commit/71011f70613726aa49b5f7d1a77700fc6aa6b67e) - **deps**: update docker/login-action digest to c99871d *(PR [#176](https://github.com/theonlyway/recycler/pull/176) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`bf72538`](https://github.com/theonlyway/recycler/commit/bf725381d6a36c104c5c4462ba317ba2bc8bf674) - **deps**: update docker/login-action digest to af1e73f *(PR [#177](https://github.com/theonlyway/recycler/pull/177) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`c058357`](https://github.com/theonlyway/recycler/commit/c0583576ae0e812b89da32a9799d71a7e2c7a6af) - **deps**: update golang:1.26 docker digest to b900de9 *(PR [#179](https://github.com/theonlyway/recycler/pull/179) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.14] - 2026-06-30
 ### :wrench: Chores
 - [`cb5278a`](https://github.com/theonlyway/recycler/commit/cb5278a11f17a82409def40a545d78dc69c79a7e) - **deps**: update ghcr.io/devcontainers/features/docker-in-docker docker tag to v4 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -926,3 +935,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.12]: https://github.com/theonlyway/recycler/compare/1.13.11...1.13.12
 [1.13.13]: https://github.com/theonlyway/recycler/compare/1.13.12...1.13.13
 [1.13.14]: https://github.com/theonlyway/recycler/compare/1.13.13...1.13.14
+[1.13.15]: https://github.com/theonlyway/recycler/compare/1.13.14...1.13.15
