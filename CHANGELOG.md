@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.16] - 2026-07-08
+### :wrench: Chores
+- [`a18bd9e`](https://github.com/theonlyway/recycler/commit/a18bd9e3262cd8a59aa25c06fcb5acb8d53cce05) - **deps**: update go module directive to v1.26.5 *(PR [#178](https://github.com/theonlyway/recycler/pull/178) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.15] - 2026-07-08
 ### :wrench: Chores
 - [`509bfc4`](https://github.com/theonlyway/recycler/commit/509bfc41d6abd7fc39fb80887962b5c3bb469615) - **deps**: update golangci/golangci-lint-action digest to ba0d7d2 *(PR [#173](https://github.com/theonlyway/recycler/pull/173) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -936,3 +941,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.13]: https://github.com/theonlyway/recycler/compare/1.13.12...1.13.13
 [1.13.14]: https://github.com/theonlyway/recycler/compare/1.13.13...1.13.14
 [1.13.15]: https://github.com/theonlyway/recycler/compare/1.13.14...1.13.15
+[1.13.16]: https://github.com/theonlyway/recycler/compare/1.13.15...1.13.16
