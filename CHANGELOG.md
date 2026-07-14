@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.20] - 2026-07-14
+### :wrench: Chores
+- [`b80e724`](https://github.com/theonlyway/recycler/commit/b80e724687d2f46f237a84af59901150e40bf8cf) - **deps**: update softprops/action-gh-release digest to 3d0d988 *(PR [#183](https://github.com/theonlyway/recycler/pull/183) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`755d875`](https://github.com/theonlyway/recycler/commit/755d87588e1aae35a80fd77fac462e45e363c820) - **deps**: update gcr.io/distroless/static:nonroot docker digest to f7f8f72 *(PR [#185](https://github.com/theonlyway/recycler/pull/185) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.19] - 2026-07-10
 ### :bug: Bug Fixes
 - [`a10aed6`](https://github.com/theonlyway/recycler/commit/a10aed674ad7637b622edb4a4c2898691d787fc6) - **deps**: update module github.com/prometheus/common to v0.70.0 *(PR [#182](https://github.com/theonlyway/recycler/pull/182) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -960,3 +966,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.17]: https://github.com/theonlyway/recycler/compare/1.13.16...1.13.17
 [1.13.18]: https://github.com/theonlyway/recycler/compare/1.13.17...1.13.18
 [1.13.19]: https://github.com/theonlyway/recycler/compare/1.13.18...1.13.19
+[1.13.20]: https://github.com/theonlyway/recycler/compare/1.13.19...1.13.20
