@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.22] - 2026-07-21
+### :bug: Bug Fixes
+- [`caa52f6`](https://github.com/theonlyway/recycler/commit/caa52f625da42dcf10553b5c9823d665321d42d7) - **deps**: update go dependencies *(PR [#191](https://github.com/theonlyway/recycler/pull/191) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`b268bac`](https://github.com/theonlyway/recycler/commit/b268baccec922da86c09d7238e3fb33489fd7276) - **deps**: update actions/attest action to v4.2.0 *(PR [#188](https://github.com/theonlyway/recycler/pull/188) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`18ece8c`](https://github.com/theonlyway/recycler/commit/18ece8c2ba1957b19fd055b63df202b86211f43e) - **deps**: update actions/checkout digest to 3d3c42e *(PR [#189](https://github.com/theonlyway/recycler/pull/189) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.21] - 2026-07-16
 ### :wrench: Chores
 - [`760f1bc`](https://github.com/theonlyway/recycler/commit/760f1bc99763e90fc5b7fec44f0eb30e56e3e131) - **deps**: update golang:1.26 docker digest to d52df9c *(PR [#184](https://github.com/theonlyway/recycler/pull/184) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -974,3 +983,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.19]: https://github.com/theonlyway/recycler/compare/1.13.18...1.13.19
 [1.13.20]: https://github.com/theonlyway/recycler/compare/1.13.19...1.13.20
 [1.13.21]: https://github.com/theonlyway/recycler/compare/1.13.20...1.13.21
+[1.13.22]: https://github.com/theonlyway/recycler/compare/1.13.21...1.13.22
