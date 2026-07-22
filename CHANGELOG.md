@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.23] - 2026-07-22
+### :bug: Bug Fixes
+- [`5bb7bf8`](https://github.com/theonlyway/recycler/commit/5bb7bf884c0fe0070d908c3f10631407c2d17f2d) - **deps**: update module github.com/prometheus/common to v0.70.1 *(PR [#192](https://github.com/theonlyway/recycler/pull/192) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`912d948`](https://github.com/theonlyway/recycler/commit/912d9489b792e81a27b24094c4adbea92322b3e6) - **deps**: update golang:1.26 docker digest to 3aff665 *(PR [#190](https://github.com/theonlyway/recycler/pull/190) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.22] - 2026-07-21
 ### :bug: Bug Fixes
 - [`caa52f6`](https://github.com/theonlyway/recycler/commit/caa52f625da42dcf10553b5c9823d665321d42d7) - **deps**: update go dependencies *(PR [#191](https://github.com/theonlyway/recycler/pull/191) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -984,3 +992,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.20]: https://github.com/theonlyway/recycler/compare/1.13.19...1.13.20
 [1.13.21]: https://github.com/theonlyway/recycler/compare/1.13.20...1.13.21
 [1.13.22]: https://github.com/theonlyway/recycler/compare/1.13.21...1.13.22
+[1.13.23]: https://github.com/theonlyway/recycler/compare/1.13.22...1.13.23
