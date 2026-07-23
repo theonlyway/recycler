@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.24] - 2026-07-23
+### :bug: Bug Fixes
+- [`3b8e135`](https://github.com/theonlyway/recycler/commit/3b8e135bf948562c51758374e03e3a7a960f17b2) - **deps**: update go dependencies to v0.36.3 *(PR [#193](https://github.com/theonlyway/recycler/pull/193) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.23] - 2026-07-22
 ### :bug: Bug Fixes
 - [`5bb7bf8`](https://github.com/theonlyway/recycler/commit/5bb7bf884c0fe0070d908c3f10631407c2d17f2d) - **deps**: update module github.com/prometheus/common to v0.70.1 *(PR [#192](https://github.com/theonlyway/recycler/pull/192) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -993,3 +998,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.21]: https://github.com/theonlyway/recycler/compare/1.13.20...1.13.21
 [1.13.22]: https://github.com/theonlyway/recycler/compare/1.13.21...1.13.22
 [1.13.23]: https://github.com/theonlyway/recycler/compare/1.13.22...1.13.23
+[1.13.24]: https://github.com/theonlyway/recycler/compare/1.13.23...1.13.24
