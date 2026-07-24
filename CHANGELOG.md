@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.25] - 2026-07-24
+### :bug: Bug Fixes
+- [`f732f88`](https://github.com/theonlyway/recycler/commit/f732f88e3fd3780735935c6eaeb67947216812fd) - **deps**: update module github.com/prometheus/client_golang to v1.24.1 *(PR [#195](https://github.com/theonlyway/recycler/pull/195) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`bf0ad8c`](https://github.com/theonlyway/recycler/commit/bf0ad8c5579ed58196cb4d6a7011db1deb8b14c9) - **deps**: update docker/login-action digest to 06fb636 *(PR [#194](https://github.com/theonlyway/recycler/pull/194) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.24] - 2026-07-23
 ### :bug: Bug Fixes
 - [`3b8e135`](https://github.com/theonlyway/recycler/commit/3b8e135bf948562c51758374e03e3a7a960f17b2) - **deps**: update go dependencies to v0.36.3 *(PR [#193](https://github.com/theonlyway/recycler/pull/193) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -999,3 +1007,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.22]: https://github.com/theonlyway/recycler/compare/1.13.21...1.13.22
 [1.13.23]: https://github.com/theonlyway/recycler/compare/1.13.22...1.13.23
 [1.13.24]: https://github.com/theonlyway/recycler/compare/1.13.23...1.13.24
+[1.13.25]: https://github.com/theonlyway/recycler/compare/1.13.24...1.13.25
