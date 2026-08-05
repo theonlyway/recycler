@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.26] - 2026-08-05
+### :wrench: Chores
+- [`d3d88cc`](https://github.com/theonlyway/recycler/commit/d3d88cc3689b4cb15ffc2fa8d02a49a997c3e5d7) - **deps**: update actions/setup-go action to v7 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`e841de9`](https://github.com/theonlyway/recycler/commit/e841de938c14a15e4df8a57e69a6c58e1a2ad5be) - **deps**: update docker/login-action digest to abd2ef4 *(PR [#196](https://github.com/theonlyway/recycler/pull/196) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`bb223fd`](https://github.com/theonlyway/recycler/commit/bb223fd555c204f101e42be0590e61b68a513d28) - **deps**: update actions/attest action to v4.2.1 *(PR [#198](https://github.com/theonlyway/recycler/pull/198) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`1354748`](https://github.com/theonlyway/recycler/commit/13547485251e3f728d8121928db9366dc29d7bd0) - **deps**: update docker/login-action digest to dbcb813 *(PR [#197](https://github.com/theonlyway/recycler/pull/197) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`de6e0dd`](https://github.com/theonlyway/recycler/commit/de6e0dd0eda625c88d7b1e7b20193d63f187fd03) - **deps**: update mcr.microsoft.com/devcontainers/go:2.1-1.25-bookworm docker digest to 30cbde1 *(PR [#199](https://github.com/theonlyway/recycler/pull/199) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`3e87068`](https://github.com/theonlyway/recycler/commit/3e87068c2a3e31d3a448890c943e268d445827fa) - **deps**: update golang:1.26 docker digest to 2005724 *(PR [#201](https://github.com/theonlyway/recycler/pull/201) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.25] - 2026-07-24
 ### :bug: Bug Fixes
 - [`f732f88`](https://github.com/theonlyway/recycler/commit/f732f88e3fd3780735935c6eaeb67947216812fd) - **deps**: update module github.com/prometheus/client_golang to v1.24.1 *(PR [#195](https://github.com/theonlyway/recycler/pull/195) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1008,3 +1018,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.23]: https://github.com/theonlyway/recycler/compare/1.13.22...1.13.23
 [1.13.24]: https://github.com/theonlyway/recycler/compare/1.13.23...1.13.24
 [1.13.25]: https://github.com/theonlyway/recycler/compare/1.13.24...1.13.25
+[1.13.26]: https://github.com/theonlyway/recycler/compare/1.13.25...1.13.26
