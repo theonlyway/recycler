@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.27] - 2026-08-11
+### :bug: Bug Fixes
+- [`0a4ef37`](https://github.com/theonlyway/recycler/commit/0a4ef37af242b69e842eb056b902b5118cb49380) - **deps**: update module github.com/onsi/ginkgo/v2 to v2.32.1 *(PR [#203](https://github.com/theonlyway/recycler/pull/203) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`1fc8464`](https://github.com/theonlyway/recycler/commit/1fc846400055ece1f1d9374eafb84909b55ef97c) - **deps**: update actions/attest action to v4.2.2 *(PR [#200](https://github.com/theonlyway/recycler/pull/200) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.26] - 2026-08-05
 ### :wrench: Chores
 - [`d3d88cc`](https://github.com/theonlyway/recycler/commit/d3d88cc3689b4cb15ffc2fa8d02a49a997c3e5d7) - **deps**: update actions/setup-go action to v7 *(commit by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1019,3 +1027,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.24]: https://github.com/theonlyway/recycler/compare/1.13.23...1.13.24
 [1.13.25]: https://github.com/theonlyway/recycler/compare/1.13.24...1.13.25
 [1.13.26]: https://github.com/theonlyway/recycler/compare/1.13.25...1.13.26
+[1.13.27]: https://github.com/theonlyway/recycler/compare/1.13.26...1.13.27
