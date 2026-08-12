@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.28] - 2026-08-12
+### :wrench: Chores
+- [`974d552`](https://github.com/theonlyway/recycler/commit/974d5522a41692f30e4133b3a3a2054767f44f55) - **deps**: update actions/attest-build-provenance digest to 4d10147 *(PR [#202](https://github.com/theonlyway/recycler/pull/202) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`d58113c`](https://github.com/theonlyway/recycler/commit/d58113c9eba4e087aa9136ca00056ade0f878eee) - **deps**: update golang:1.26 docker digest to 7caba52 *(PR [#204](https://github.com/theonlyway/recycler/pull/204) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.27] - 2026-08-11
 ### :bug: Bug Fixes
 - [`0a4ef37`](https://github.com/theonlyway/recycler/commit/0a4ef37af242b69e842eb056b902b5118cb49380) - **deps**: update module github.com/onsi/ginkgo/v2 to v2.32.1 *(PR [#203](https://github.com/theonlyway/recycler/pull/203) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1028,3 +1034,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.25]: https://github.com/theonlyway/recycler/compare/1.13.24...1.13.25
 [1.13.26]: https://github.com/theonlyway/recycler/compare/1.13.25...1.13.26
 [1.13.27]: https://github.com/theonlyway/recycler/compare/1.13.26...1.13.27
+[1.13.28]: https://github.com/theonlyway/recycler/compare/1.13.27...1.13.28
