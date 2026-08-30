@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.38] - 2026-08-30
+### :bug: Bug Fixes
+- [`9a07afe`](https://github.com/theonlyway/recycler/commit/9a07afe7e4c311901e06225d58bc50965745517d) - **deps**: update go dependencies *(PR [#216](https://github.com/theonlyway/recycler/pull/216) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+### :wrench: Chores
+- [`8872f58`](https://github.com/theonlyway/recycler/commit/8872f588614281880c012d0d7925b38d5c83bc2a) - **deps**: update golang:1.27 docker digest to 0ecdc2a *(PR [#214](https://github.com/theonlyway/recycler/pull/214) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`e99eb71`](https://github.com/theonlyway/recycler/commit/e99eb714229654e804475425c7999ce9013a5531) - **deps**: update mcr.microsoft.com/devcontainers/go docker tag to v2.2 *(PR [#215](https://github.com/theonlyway/recycler/pull/215) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`11ab5b0`](https://github.com/theonlyway/recycler/commit/11ab5b01004697cfd4817669a222db5dd09b937c) - **deps**: update mcr.microsoft.com/devcontainers/go:2.2-1.25-bookworm docker digest to eb89cbc *(PR [#217](https://github.com/theonlyway/recycler/pull/217) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`a81068a`](https://github.com/theonlyway/recycler/commit/a81068afa99aa39f2b976894f9d96f489dd77d2e) - **deps**: update softprops/action-gh-release digest to efb3536 *(PR [#218](https://github.com/theonlyway/recycler/pull/218) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`e09596b`](https://github.com/theonlyway/recycler/commit/e09596b510182bcf508f6c31449330b7d9174349) - **deps**: update golang:1.27 docker digest to 4013ae0 *(PR [#219](https://github.com/theonlyway/recycler/pull/219) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.37] - 2026-08-22
 ### :bug: Bug Fixes
 - [`6e363b7`](https://github.com/theonlyway/recycler/commit/6e363b77a33e1adbce057d2def9985e96493b724) - **deps**: update go dependencies *(PR [#210](https://github.com/theonlyway/recycler/pull/210) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1089,3 +1101,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.35]: https://github.com/theonlyway/recycler/compare/1.13.34...1.13.35
 [1.13.36]: https://github.com/theonlyway/recycler/compare/1.13.35...1.13.36
 [1.13.37]: https://github.com/theonlyway/recycler/compare/1.13.36...1.13.37
+[1.13.38]: https://github.com/theonlyway/recycler/compare/1.13.37...1.13.38
