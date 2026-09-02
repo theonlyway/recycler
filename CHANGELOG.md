@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.40] - 2026-09-02
+### :wrench: Chores
+- [`522d015`](https://github.com/theonlyway/recycler/commit/522d0153f86888cec61d917d554d5faed8cb4ca0) - **deps**: update golang:1.27 docker digest to 7543a96 *(PR [#222](https://github.com/theonlyway/recycler/pull/222) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.39] - 2026-08-31
 ### :bug: Bug Fixes
 - [`71f8d67`](https://github.com/theonlyway/recycler/commit/71f8d67adb55f08587c920314c28ed789bdfcd8d) - **deps**: update module github.com/prometheus/common to v0.71.0 *(PR [#220](https://github.com/theonlyway/recycler/pull/220) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1108,3 +1113,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.37]: https://github.com/theonlyway/recycler/compare/1.13.36...1.13.37
 [1.13.38]: https://github.com/theonlyway/recycler/compare/1.13.37...1.13.38
 [1.13.39]: https://github.com/theonlyway/recycler/compare/1.13.38...1.13.39
+[1.13.40]: https://github.com/theonlyway/recycler/compare/1.13.39...1.13.40
