@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.55] - 2026-10-28
+### :wrench: Chores
+- [`1cd1bbf`](https://github.com/theonlyway/recycler/commit/1cd1bbf6765003168a0f1ba31ae9956388d7824b) - **deps**: update docker/login-action digest to 81c6f93 *(PR [#244](https://github.com/theonlyway/recycler/pull/244) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`b3d3cf1`](https://github.com/theonlyway/recycler/commit/b3d3cf1f35b2ded39ccf9089071c3047551cb82f) - **deps**: update golang:1.27 docker digest to 921f611 *(PR [#246](https://github.com/theonlyway/recycler/pull/246) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.54] - 2026-10-24
 ### :wrench: Chores
 - [`b97053d`](https://github.com/theonlyway/recycler/commit/b97053d0989b8088eefbebe507a80d2a53b6985e) - **deps**: update stefanzweifel/git-auto-commit-action digest to d0b0110 *(PR [#243](https://github.com/theonlyway/recycler/pull/243) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1206,3 +1212,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.52]: https://github.com/theonlyway/recycler/compare/1.13.51...1.13.52
 [1.13.53]: https://github.com/theonlyway/recycler/compare/1.13.52...1.13.53
 [1.13.54]: https://github.com/theonlyway/recycler/compare/1.13.53...1.13.54
+[1.13.55]: https://github.com/theonlyway/recycler/compare/1.13.54...1.13.55
