@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.56] - 2026-10-29
+### :wrench: Chores
+- [`2ae19f0`](https://github.com/theonlyway/recycler/commit/2ae19f0e7b61e0ef6fb28e8687781c9d902a2857) - **deps**: update golang:1.27 docker digest to 2920bb1 *(PR [#247](https://github.com/theonlyway/recycler/pull/247) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.55] - 2026-10-28
 ### :wrench: Chores
 - [`1cd1bbf`](https://github.com/theonlyway/recycler/commit/1cd1bbf6765003168a0f1ba31ae9956388d7824b) - **deps**: update docker/login-action digest to 81c6f93 *(PR [#244](https://github.com/theonlyway/recycler/pull/244) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1213,3 +1218,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.53]: https://github.com/theonlyway/recycler/compare/1.13.52...1.13.53
 [1.13.54]: https://github.com/theonlyway/recycler/compare/1.13.53...1.13.54
 [1.13.55]: https://github.com/theonlyway/recycler/compare/1.13.54...1.13.55
+[1.13.56]: https://github.com/theonlyway/recycler/compare/1.13.55...1.13.56
