@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.60] - 2026-11-11
+### :wrench: Chores
+- [`35c72d3`](https://github.com/theonlyway/recycler/commit/35c72d34a5b97c352ec6fcbab7ab9687288871b8) - **deps**: update requarks/changelog-action digest to 7ce6be4 *(PR [#254](https://github.com/theonlyway/recycler/pull/254) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`761ff2c`](https://github.com/theonlyway/recycler/commit/761ff2c2f91a78c194cd91aa8472aef7f2a44e03) - **deps**: update softprops/action-gh-release digest to 8a0cd65 *(PR [#255](https://github.com/theonlyway/recycler/pull/255) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`bf1d888`](https://github.com/theonlyway/recycler/commit/bf1d88866031eb8f1512b663e2dea85eda2fc53e) - **deps**: update azure/setup-helm digest to 2f5e7bc *(PR [#256](https://github.com/theonlyway/recycler/pull/256) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`e3f910a`](https://github.com/theonlyway/recycler/commit/e3f910afd533a97dce5877aa429e6f9db9f52a55) - **deps**: update golang:1.27 docker digest to 01aa404 *(PR [#257](https://github.com/theonlyway/recycler/pull/257) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.59] - 2026-11-06
 ### :wrench: Chores
 - [`4c3c623`](https://github.com/theonlyway/recycler/commit/4c3c623ad012fca07f939688ec21a8be413bd484) - **deps**: update ietf-tools/semver-action digest to 46feaa2 *(PR [#251](https://github.com/theonlyway/recycler/pull/251) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1240,3 +1248,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.57]: https://github.com/theonlyway/recycler/compare/1.13.56...1.13.57
 [1.13.58]: https://github.com/theonlyway/recycler/compare/1.13.57...1.13.58
 [1.13.59]: https://github.com/theonlyway/recycler/compare/1.13.58...1.13.59
+[1.13.60]: https://github.com/theonlyway/recycler/compare/1.13.59...1.13.60
