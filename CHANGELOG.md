@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.63] - 2026-11-16
+### :wrench: Chores
+- [`73fffb8`](https://github.com/theonlyway/recycler/commit/73fffb81dcd2fb6e2ab672551428449c1757ed13) - **deps**: update mcr.microsoft.com/devcontainers/go:2.3-1.25-bookworm docker digest to 328e54b *(PR [#260](https://github.com/theonlyway/recycler/pull/260) by [@renovate[bot]](https://github.com/apps/renovate))*
+- [`4298400`](https://github.com/theonlyway/recycler/commit/4298400e41b5b8a95db9ab81264a67658c3739fe) - **deps**: update golang:1.27 docker digest to fe517ac *(PR [#261](https://github.com/theonlyway/recycler/pull/261) by [@renovate[bot]](https://github.com/apps/renovate))*
+
+
 ## [1.13.62] - 2026-11-13
 ### :wrench: Chores
 - [`f1dd153`](https://github.com/theonlyway/recycler/commit/f1dd1538c492be9da456c914d02ed576fdc6323c) - **deps**: update gcr.io/distroless/static:nonroot docker digest to aafe993 *(PR [#259](https://github.com/theonlyway/recycler/pull/259) by [@renovate[bot]](https://github.com/apps/renovate))*
@@ -1261,3 +1267,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.13.60]: https://github.com/theonlyway/recycler/compare/1.13.59...1.13.60
 [1.13.61]: https://github.com/theonlyway/recycler/compare/1.13.60...1.13.61
 [1.13.62]: https://github.com/theonlyway/recycler/compare/1.13.61...1.13.62
+[1.13.63]: https://github.com/theonlyway/recycler/compare/1.13.62...1.13.63
