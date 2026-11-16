@@ -14,7 +14,9 @@
   "postUpdateOptions": [
     "gomodTidy"
   ],
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "description": "Automatically merge non-major updates",
